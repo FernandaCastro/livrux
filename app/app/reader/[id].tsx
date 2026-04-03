@@ -67,7 +67,7 @@ export default function ReaderDashboardScreen() {
           style: 'destructive',
           onPress: async () => {
             await deleteReader(reader.id);
-            router.replace('/');
+            router.replace('/app');
           },
         },
       ]

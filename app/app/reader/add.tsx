@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -52,10 +52,21 @@ export default function AddReaderScreen() {
   const [isUploading, setIsUploading] = useState(false);
 
   const schema = useReaderSchema();
-  const { control, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { control, handleSubmit, setValue, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { name: '' },
   });
+
+  // Reset form and avatar when the screen gains focus in add mode.
+  // Needed because this is a Tab screen (cached) so it never unmounts.
+  useFocusEffect(
+    useCallback(() => {
+      if (!isEditing) {
+        reset({ name: '' });
+        setAvatarUri(null);
+      }
+    }, [isEditing])
+  );
 
   // Pre-fill the form when editing.
   useEffect(() => {

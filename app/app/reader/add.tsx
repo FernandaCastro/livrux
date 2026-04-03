@@ -93,20 +93,21 @@ export default function AddReaderScreen() {
     setIsUploading(true);
 
     try {
-      let finalAvatarUrl: string | null = isEditing
-        ? selectedReader?.avatar_url ?? null
-        : null;
-
-      // Only upload if the user picked a new local image (starts with "file://").
-      if (avatarUri && avatarUri.startsWith('file')) {
-        const entityId = editId ?? `tmp-${Date.now()}`;
-        finalAvatarUrl = await uploadImage('avatars', user.id, entityId, avatarUri);
-      }
-
       if (isEditing && editId) {
+        // Keep existing avatar unless the user picked a new one.
+        let finalAvatarUrl = selectedReader?.avatar_url ?? null;
+        if (avatarUri && avatarUri.startsWith('file')) {
+          finalAvatarUrl = await uploadImage('avatars', user.id, editId, avatarUri);
+        }
         await updateReader(editId, { name: data.name, avatar_url: finalAvatarUrl });
       } else {
-        await createReader(data.name, finalAvatarUrl ?? undefined);
+        // Create the reader first to obtain its ID, then upload the avatar using
+        // that ID so the storage path is always {userId}/{readerId}.jpg.
+        const created = await createReader(data.name);
+        if (avatarUri && avatarUri.startsWith('file')) {
+          const avatarUrl = await uploadImage('avatars', user.id, created.id, avatarUri);
+          await updateReader(created.id, { avatar_url: avatarUrl });
+        }
       }
 
       router.back();

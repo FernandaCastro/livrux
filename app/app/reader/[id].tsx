@@ -84,12 +84,20 @@ export default function ReaderDashboardScreen() {
         >
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.editText}>{t('common.edit')}</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.editText}>{t('common.edit')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleDelete}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.deleteText}>{t('common.delete')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Reader hero */}
@@ -187,10 +195,20 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.secondary,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.lg,
+  },
   editText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.md,
     color: Colors.secondary,
+  },
+  deleteText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.md,
+    color: Colors.error,
   },
   hero: {
     alignItems: 'center',

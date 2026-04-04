@@ -199,7 +199,7 @@ export default function AddBookScreen() {
             <Text style={styles.previewLabel}>{t('book.willEarn')}</Text>
             <View style={styles.previewRow}>
               <Text style={styles.previewCoin}>🪙</Text>
-              <Text style={styles.previewAmount}>{previewCoins}</Text>
+              <Text style={styles.previewAmount}>{previewCoins.toFixed(2)}</Text>
               <Text style={styles.previewCurrency}>Livrux</Text>
             </View>
           </View>

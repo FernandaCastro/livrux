@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { deleteBookRpc } from './useLivrux';
 import type { Book } from '../types';
 
 interface UseBooksResult {
@@ -42,12 +43,7 @@ export function useBooks(readerId: string | null): UseBooksResult {
   useEffect(() => { fetch(); }, [fetch]);
 
   const deleteBook = async (bookId: string): Promise<void> => {
-    const { error: dbError } = await supabase
-      .from('books')
-      .delete()
-      .eq('id', bookId);
-
-    if (dbError) throw dbError;
+    await deleteBookRpc(bookId);
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
   };
 

@@ -119,7 +119,7 @@ export default function ReaderDashboardScreen() {
           <View style={styles.balanceRow}>
             <Text style={styles.balanceCoin}>🪙</Text>
             <Text style={styles.balanceAmount}>
-              {reader.livrux_balance.toFixed(0)}
+              {reader.livrux_balance.toFixed(2)}
             </Text>
             <Text style={styles.balanceCurrency}>Livrux</Text>
           </View>

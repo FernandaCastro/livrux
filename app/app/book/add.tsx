@@ -24,6 +24,8 @@ import { uploadImage } from '../../../src/lib/storage';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
+import { BookSearchBar } from '../../../src/components/book/BookSearchBar';
+import type { GoogleBookResult } from '../../../src/lib/googleBooks';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 function useBookSchema() {
@@ -55,7 +57,7 @@ export default function AddBookScreen() {
   const activeFormula = formula ?? getDefaultFormula();
   const schema = useBookSchema();
 
-  const { control, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { control, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { title: '', author: '', totalPages: '', notes: '' },
   });
@@ -66,6 +68,13 @@ export default function AddBookScreen() {
   const previewCoins = previewPages > 0
     ? calculateLivrux(previewPages, activeFormula)
     : 0;
+
+  const handleBookSelected = (book: GoogleBookResult) => {
+    setValue('title', book.title, { shouldValidate: true });
+    if (book.author) setValue('author', book.author);
+    if (book.totalPages) setValue('totalPages', String(book.totalPages), { shouldValidate: true });
+    if (book.coverUrl) setCoverUri(book.coverUrl);
+  };
 
   const pickCover = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -89,8 +98,13 @@ export default function AddBookScreen() {
 
       let coverUrl: string | null = null;
       if (coverUri) {
-        const tempId = `tmp-${Date.now()}`;
-        coverUrl = await uploadImage('book-covers', user.id, tempId, coverUri);
+        // Remote covers from Google Books are already hosted — upload only local files.
+        if (coverUri.startsWith('http')) {
+          coverUrl = coverUri;
+        } else {
+          const tempId = `tmp-${Date.now()}`;
+          coverUrl = await uploadImage('book-covers', user.id, tempId, coverUri);
+        }
       }
 
       await logBookRpc({
@@ -133,6 +147,15 @@ export default function AddBookScreen() {
           </TouchableOpacity>
           <Text style={styles.screenTitle}>{t('book.logBook')}</Text>
           <View style={{ width: 24 }} />
+        </View>
+
+        {/* Search bar — type or scan to auto-fill */}
+        <BookSearchBar onSelect={handleBookSelected} />
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>{t('common.or')} {t('book.fillManually')}</Text>
+          <View style={styles.dividerLine} />
         </View>
 
         {/* Cover picker */}
@@ -239,6 +262,22 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.heading,
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.divider,
+  },
+  dividerText: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
   },
   coverButton: {
     alignSelf: 'center',

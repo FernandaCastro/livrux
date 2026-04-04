@@ -78,6 +78,10 @@ const de = {
     livruxCoins: '{{count}} Livrux',
     deleteBook: 'Buch löschen',
     deleteConfirm: '"{{title}}" löschen? Die verdienten Livrux werden entfernt.',
+    searchPlaceholder: 'Nach Titel oder Autor suchen…',
+    fillManually: 'manuell ausfüllen',
+    pagesCount: '{{count}} Seiten',
+    scanHint: 'Auf den Buchbarcode zeigen',
     errors: {
       titleRequired: 'Titel ist erforderlich.',
       pagesRequired: 'Seitenanzahl ist erforderlich.',

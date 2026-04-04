@@ -33,6 +33,12 @@
       "expo-router",
       "expo-font",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Livrux to use your camera to scan book barcodes."
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "Allow Livrux to access your photos to set profile and book cover images.",

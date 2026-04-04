@@ -78,6 +78,10 @@ const pt = {
     livruxCoins: '{{count}} Livrux',
     deleteBook: 'Excluir livro',
     deleteConfirm: 'Excluir "{{title}}"? Os Livrux ganhos serão removidos.',
+    searchPlaceholder: 'Buscar por título ou autor…',
+    fillManually: 'preencher manualmente',
+    pagesCount: '{{count}} páginas',
+    scanHint: 'Aponte para o código de barras do livro',
     errors: {
       titleRequired: 'O título é obrigatório.',
       pagesRequired: 'O total de páginas é obrigatório.',

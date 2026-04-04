@@ -62,6 +62,7 @@ export async function logBookRpc(params: {
   livruxEarned: number;
   dateCompleted: string;
   notes: string | null;
+  isForeignLanguage: boolean;
 }): Promise<string> {
   const { data, error } = await supabase.rpc('log_book', {
     p_reader_id: params.readerId,
@@ -72,6 +73,7 @@ export async function logBookRpc(params: {
     p_livrux_earned: params.livruxEarned,
     p_date_completed: params.dateCompleted,
     p_notes: params.notes,
+    p_is_foreign_language: params.isForeignLanguage,
   });
 
   if (error) throw error;

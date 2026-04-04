@@ -82,6 +82,7 @@ const pt = {
     fillManually: 'preencher manualmente',
     pagesCount: '{{count}} páginas',
     scanHint: 'Aponte para o código de barras do livro',
+    foreignLanguage: 'Livro em língua estrangeira',
     errors: {
       titleRequired: 'O título é obrigatório.',
       pagesRequired: 'O total de páginas é obrigatório.',
@@ -129,6 +130,11 @@ const pt = {
     deleteAccount: 'Excluir conta',
     deleteAccountConfirm: 'Isso excluirá permanentemente sua conta e todos os dados.',
     signOut: 'Sair',
+    bonusRules: 'Regras de bônus',
+    minPagesBonus: 'Bônus por páginas mínimas',
+    pageThreshold: 'Mínimo de páginas',
+    foreignLanguageBonus: 'Bônus por língua estrangeira',
+    bonusAmount: 'Bônus (Livrux)',
   },
   languages: {
     en: 'Inglês',

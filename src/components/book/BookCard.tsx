@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import type { Book } from '../../types';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
 
@@ -10,6 +11,7 @@ interface BookCardProps {
 }
 
 export function BookCard({ book, onPress }: BookCardProps) {
+  const { t } = useTranslation();
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.card}>
       {/* Cover thumbnail */}
@@ -30,6 +32,9 @@ export function BookCard({ book, onPress }: BookCardProps) {
           <Text style={styles.author} numberOfLines={1}>{book.author}</Text>
         )}
         <Text style={styles.pages}>{book.total_pages} p.</Text>
+        {book.is_foreign_language && (
+          <Text style={styles.foreignTag}>🌍 {t('book.foreignLanguage')}</Text>
+        )}
         <View style={styles.badge}>
           <Text style={styles.badgeCoin}>🪙</Text>
           <Text style={styles.badgeAmount}>+{book.livrux_earned}</Text>
@@ -86,6 +91,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   pages: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textDisabled,
+    marginBottom: Spacing.xs,
+  },
+  foreignTag: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
     color: Colors.textDisabled,

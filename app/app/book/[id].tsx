@@ -87,8 +87,8 @@ export default function BookDetailScreen() {
         <Text style={styles.title}>{book.title}</Text>
         {book.author && <Text style={styles.author}>{book.author}</Text>}
 
-        {/* Details row */}
-        <View style={styles.detailsRow}>
+        {/* Details row: pages + date */}
+        <View style={[styles.detailsRow, !book.is_foreign_language && styles.detailsRowLast]}>
           <View style={styles.detailChip}>
             <Text style={styles.detailIcon}>📄</Text>
             <Text style={styles.detailText}>{book.total_pages} p.</Text>
@@ -100,6 +100,16 @@ export default function BookDetailScreen() {
             </Text>
           </View>
         </View>
+
+        {/* Foreign language row — second line, only when applicable */}
+        {book.is_foreign_language && (
+          <View style={styles.detailsForeignRow}>
+            <View style={styles.detailChip}>
+              <Text style={styles.detailIcon}>🌍</Text>
+              <Text style={styles.detailText}>{t('book.foreignLanguage')}</Text>
+            </View>
+          </View>
+        )}
 
         {/* Livrux earned card */}
         <View style={styles.earnedCard}>
@@ -182,6 +192,13 @@ const styles = StyleSheet.create({
   detailsRow: {
     flexDirection: 'row',
     gap: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  detailsRowLast: {
+    marginBottom: Spacing.xl,
+  },
+  detailsForeignRow: {
+    flexDirection: 'row',
     marginBottom: Spacing.xl,
   },
   detailChip: {

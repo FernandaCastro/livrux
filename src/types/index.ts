@@ -18,8 +18,8 @@ export interface RewardFormula {
 }
 
 export interface BonusRule {
-  type: 'min_pages' | 'genre';
-  threshold: number;
+  type: 'min_pages' | 'foreign_language';
+  threshold?: number; // only used by min_pages
   bonus_amount: number;
   label: string;
 }
@@ -45,6 +45,7 @@ export interface Book {
   livrux_earned: number;
   date_completed: string;
   notes: string | null;
+  is_foreign_language: boolean;
   created_at: string;
 }
 

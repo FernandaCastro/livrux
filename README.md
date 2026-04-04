@@ -10,8 +10,9 @@ Livrux is a cross-platform mobile app (iOS & Android) that gamifies reading for 
 
 - **Multiple readers per account** — manage all your kids from a single login
 - **Custom reward formula** — set a base reward + a per-page rate; Livrux calculates coins automatically
+- **Smart book entry** — search by title/author via Google Books API or scan the ISBN barcode with the camera; title, author, pages, and cover are filled automatically
 - **Live coin preview** — as you type the page count when logging a book, the earned coins update in real time
-- **Book library** — each book stores title, author, page count, cover photo, and date completed
+- **Book library** — each book stores title, author, page count, cover (from Google Books API), and date completed
 - **Virtual wallet** — full transaction history with earned/spent coin tracking per reader
 - **Profile photos** — readers and books have photo support via device camera or gallery
 - **Secure authentication** — email/password sign-up with Supabase Auth (Google & Apple OAuth ready)
@@ -39,7 +40,8 @@ Livrux is a cross-platform mobile app (iOS & Android) that gamifies reading for 
 | **State management** | [Zustand](https://zustand-demo.pmnd.rs) | Lightweight stores for auth session and selected reader context |
 | **Forms & validation** | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) | Type-safe form validation with minimal re-renders |
 | **Internationalization** | [i18next](https://www.i18next.com) + [expo-localization](https://docs.expo.dev/versions/latest/sdk/localization/) | Device locale auto-detection; runtime language switching |
-| **Image handling** | expo-image-picker + expo-image-manipulator | Pick from gallery or camera; resize & compress before upload |
+| **Book search** | [Google Books API](https://developers.google.com/books) | Auto-fill title, author, cover, and page count by text search or ISBN barcode |
+| **Image handling** | expo-image-picker + expo-image-manipulator + expo-camera | Reader avatar: pick from gallery or camera, resize & compress before upload; ISBN barcode scanning via camera |
 | **Typography** | Fredoka One (headings) + Nunito (body) | Rounded, friendly, and highly legible — designed for kids and parents |
 
 ---
@@ -73,7 +75,7 @@ livrux/
 │   ├── components/
 │   │   ├── ui/                 # Button, TextInput — reusable primitives
 │   │   ├── reader/             # ReaderCard
-│   │   └── book/               # BookCard
+│   │   └── book/               # BookCard, BookSearchBar
 │   ├── hooks/
 │   │   ├── useReaders.ts       # CRUD for reader profiles
 │   │   ├── useBooks.ts         # CRUD for book logs
@@ -81,6 +83,7 @@ livrux/
 │   ├── lib/
 │   │   ├── supabase.ts         # Supabase client singleton
 │   │   ├── formula.ts          # Livrux calculation engine (pure function)
+│   │   ├── googleBooks.ts      # Google Books API — text search + ISBN lookup
 │   │   └── storage.ts          # Image upload/delete helpers
 │   ├── stores/
 │   │   ├── authStore.ts        # Zustand: session, user profile, formula
@@ -180,9 +183,8 @@ supabase/migrations/0001_initial_schema.sql
 
 This creates all tables, RLS policies, the `log_book` RPC, and the sign-up trigger.
 
-Also create two **Storage buckets** in the Supabase dashboard:
+Also create one **Storage bucket** in the Supabase dashboard:
 - `avatars` — for reader profile photos
-- `book-covers` — for book cover images
 
 ### 4. Start the app
 
@@ -209,7 +211,7 @@ To add a new language:
 
 - [ ] Spending / redeeming Livrux coins (reward shop)
 - [ ] Milestone celebrations (confetti animation on balance thresholds)
-- [ ] Book search via ISBN / Google Books API (auto-fill title, author, cover)
+- [x] Book search via ISBN / Google Books API (auto-fill title, author, cover, pages)
 - [ ] Reading streaks and badges
 - [ ] Dark mode
 - [ ] Push notifications for reading reminders

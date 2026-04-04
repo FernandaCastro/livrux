@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,22 +8,22 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { logBookRpc } from '../../../src/hooks/useLivrux';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useReaderStore } from '../../../src/stores/readerStore';
-import { uploadImage } from '../../../src/lib/storage';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
+import { BookSearchBar } from '../../../src/components/book/BookSearchBar';
+import type { GoogleBookResult } from '../../../src/lib/googleBooks';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 function useBookSchema() {
@@ -50,15 +50,25 @@ export default function AddBookScreen() {
   const { updateBalance } = useReaderStore();
 
   const [coverUri, setCoverUri] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [searchKey, setSearchKey] = useState(0);
 
   const activeFormula = formula ?? getDefaultFormula();
   const schema = useBookSchema();
 
-  const { control, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { control, handleSubmit, watch, setValue, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { title: '', author: '', totalPages: '', notes: '' },
   });
+
+  // Reset all form state every time the screen comes into focus so that
+  // a second (or third) book entry starts with a clean slate.
+  useFocusEffect(
+    useCallback(() => {
+      reset({ title: '', author: '', totalPages: '', notes: '' });
+      setCoverUri(null);
+      setSearchKey(k => k + 1);
+    }, [reset])
+  );
 
   // Watch pages to show the live Livrux preview.
   const pagesValue = watch('totalPages');
@@ -67,38 +77,26 @@ export default function AddBookScreen() {
     ? calculateLivrux(previewPages, activeFormula)
     : 0;
 
-  const pickCover = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [2, 3],
-      quality: 1,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setCoverUri(result.assets[0].uri);
-    }
+  const handleBookSelected = (book: GoogleBookResult) => {
+    setValue('title', book.title, { shouldValidate: true });
+    if (book.author) setValue('author', book.author);
+    if (book.totalPages) setValue('totalPages', String(book.totalPages), { shouldValidate: true });
+    if (book.coverUrl) setCoverUri(book.coverUrl);
   };
 
   const onSubmit = async (data: FormData) => {
     if (!user || !readerId) return;
-    setIsUploading(true);
 
     try {
       const pages = Number(data.totalPages);
       const livruxEarned = calculateLivrux(pages, activeFormula);
-
-      let coverUrl: string | null = null;
-      if (coverUri) {
-        const tempId = `tmp-${Date.now()}`;
-        coverUrl = await uploadImage('book-covers', user.id, tempId, coverUri);
-      }
 
       await logBookRpc({
         readerId,
         title: data.title,
         author: data.author || null,
         totalPages: pages,
-        coverUrl,
+        coverUrl: coverUri,
         livruxEarned,
         dateCompleted: format(new Date(), 'yyyy-MM-dd'),
         notes: data.notes || null,
@@ -114,8 +112,6 @@ export default function AddBookScreen() {
       router.back();
     } catch (err) {
       Alert.alert(t('common.error'), t('common.error'));
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -135,17 +131,21 @@ export default function AddBookScreen() {
           <View style={{ width: 24 }} />
         </View>
 
-        {/* Cover picker */}
-        <TouchableOpacity onPress={pickCover} activeOpacity={0.8} style={styles.coverButton}>
-          {coverUri ? (
+        {/* Search bar — type or scan to auto-fill */}
+        <BookSearchBar key={searchKey} onSelect={handleBookSelected} />
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>{t('common.or')} {t('book.fillManually')}</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        {/* Cover — displayed only when auto-filled by Google Books */}
+        {coverUri && (
+          <View style={styles.coverButton}>
             <Image source={{ uri: coverUri }} style={styles.coverImage} resizeMode="cover" />
-          ) : (
-            <View style={styles.coverPlaceholder}>
-              <Text style={styles.coverIcon}>📕</Text>
-              <Text style={styles.coverHint}>{t('book.addCover')}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+          </View>
+        )}
 
         {/* Form fields */}
         <Controller
@@ -208,7 +208,7 @@ export default function AddBookScreen() {
         <Button
           label={t('book.logBook')}
           onPress={handleSubmit(onSubmit)}
-          loading={isSubmitting || isUploading}
+          loading={isSubmitting}
           fullWidth
           style={styles.saveButton}
         />
@@ -240,6 +240,22 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
   },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.divider,
+  },
+  dividerText: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+  },
   coverButton: {
     alignSelf: 'center',
     marginBottom: Spacing.xl,
@@ -249,23 +265,6 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: Radius.md,
     ...Shadows.md,
-  },
-  coverPlaceholder: {
-    width: 120,
-    height: 180,
-    borderRadius: Radius.md,
-    backgroundColor: Colors.surfaceVariant,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.border,
-    borderStyle: 'dashed',
-  },
-  coverIcon: { fontSize: 36, marginBottom: Spacing.xs },
-  coverHint: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.xs,
-    color: Colors.secondary,
   },
   previewCard: {
     backgroundColor: Colors.primary,

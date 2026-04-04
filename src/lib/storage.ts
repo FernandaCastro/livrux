@@ -1,8 +1,8 @@
 import * as ImageManipulator from 'expo-image-manipulator';
 import { supabase } from './supabase';
-import { AVATAR_SIZE, IMAGE_MAX_HEIGHT, IMAGE_MAX_WIDTH, IMAGE_QUALITY } from '../constants/config';
+import { AVATAR_SIZE, IMAGE_QUALITY } from '../constants/config';
 
-type ImageBucket = 'avatars' | 'book-covers';
+type ImageBucket = 'avatars';
 
 // Resizes and compresses an image before upload, returning base64-encoded data.
 async function resizeImage(
@@ -38,12 +38,7 @@ export async function uploadImage(
   entityId: string,
   localUri: string
 ): Promise<string> {
-  const isAvatar = bucket === 'avatars';
-  const base64 = await resizeImage(
-    localUri,
-    isAvatar ? AVATAR_SIZE : IMAGE_MAX_WIDTH,
-    isAvatar ? AVATAR_SIZE : IMAGE_MAX_HEIGHT
-  );
+  const base64 = await resizeImage(localUri, AVATAR_SIZE, AVATAR_SIZE);
 
   const arrayBuffer = base64ToArrayBuffer(base64);
   const path = `${userId}/${entityId}.jpg`;

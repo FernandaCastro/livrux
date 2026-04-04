@@ -5,12 +5,16 @@ import { DEFAULT_FORMULA } from '../constants/config';
 // Formula: coins = base_reward + (pages * per_page_rate) + applicable bonuses
 export function calculateLivrux(
   pages: number,
-  formula: Pick<RewardFormula, 'base_reward' | 'per_page_rate' | 'bonus_rules'>
+  formula: Pick<RewardFormula, 'base_reward' | 'per_page_rate' | 'bonus_rules'>,
+  options?: { isForeignLanguage?: boolean }
 ): number {
   let coins = formula.base_reward + pages * formula.per_page_rate;
 
   for (const rule of formula.bonus_rules) {
-    if (rule.type === 'min_pages' && pages >= rule.threshold) {
+    if (rule.type === 'min_pages' && rule.threshold != null && pages >= rule.threshold) {
+      coins += rule.bonus_amount;
+    }
+    if (rule.type === 'foreign_language' && options?.isForeignLanguage) {
       coins += rule.bonus_amount;
     }
   }

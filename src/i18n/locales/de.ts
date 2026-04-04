@@ -82,6 +82,7 @@ const de = {
     fillManually: 'manuell ausfüllen',
     pagesCount: '{{count}} Seiten',
     scanHint: 'Auf den Buchbarcode zeigen',
+    foreignLanguage: 'Buch in Fremdsprache',
     errors: {
       titleRequired: 'Titel ist erforderlich.',
       pagesRequired: 'Seitenanzahl ist erforderlich.',
@@ -129,6 +130,11 @@ const de = {
     deleteAccount: 'Konto löschen',
     deleteAccountConfirm: 'Dadurch werden dein Konto und alle Daten dauerhaft gelöscht.',
     signOut: 'Abmelden',
+    bonusRules: 'Bonusregeln',
+    minPagesBonus: 'Bonus für Mindestseiten',
+    pageThreshold: 'Mindestseiten',
+    foreignLanguageBonus: 'Bonus für Fremdsprache',
+    bonusAmount: 'Bonus (Livrux)',
   },
   languages: {
     en: 'Englisch',

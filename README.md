@@ -11,7 +11,7 @@ Children spend their Livrux coins in real life (a treat, a trip, an activity) an
 ## ✨ Features
 
 - **Multiple readers per account** — manage all your kids from a single login
-- **Custom reward formula** — set a base reward + a per-page rate; Livrux calculates coins automatically
+- **Custom reward formula** — set a base reward + a per-page rate; configure bonus rules (min pages, foreign language) — Livrux calculates coins automatically
 - **Smart book entry** — search by title/author via Google Books API or scan the ISBN barcode with the camera; title, author, pages, and cover are filled automatically
 - **Live coin preview** — as you type the page count when logging a book, the earned coins update in real time
 - **Book library** — each book stores title, author, page count, cover (from Google Books API), and date completed
@@ -117,7 +117,7 @@ auth.users              ← managed by Supabase Auth
 user_profiles           ← display name, avatar
 reward_formulas         ← base_reward + per_page_rate + bonus_rules (JSON)
 readers                 ← name, avatar_url, livrux_balance
-books                   ← title, author, total_pages, cover_url, livrux_earned, date_completed
+books                   ← title, author, total_pages, cover_url, livrux_earned, date_completed, is_foreign_language
 livrux_transactions     ← immutable audit log of every coin credit/debit
 ```
 
@@ -130,6 +130,13 @@ Livrux earned = base_reward + (total_pages × per_page_rate) + bonuses
 ```
 
 Each account has its own formula. The default is `5 + (pages × 0.1)` — a 200-page book earns **25 Livrux**.
+
+Bonus rules are stored as a JSON array in `reward_formulas.bonus_rules` and evaluated at book-log time:
+
+| Rule type | Condition | Config |
+|---|---|---|
+| `min_pages` | `total_pages >= threshold` | threshold (pages), bonus amount |
+| `foreign_language` | book marked as foreign language at log time | bonus amount |
 
 ---
 
@@ -184,9 +191,10 @@ In the Supabase dashboard, open the **SQL Editor** and run the migrations in ord
 ```
 supabase/migrations/0001_initial_schema.sql
 supabase/migrations/0007_add_description_and_spend_rpc.sql
+supabase/migrations/0008_add_foreign_language_bonus.sql
 ```
 
-The first migration creates all tables, RLS policies, the `log_book` RPC, and the sign-up trigger. The second adds the `description` column and the `spend_livrux` RPC.
+The first migration creates all tables, RLS policies, the `log_book` RPC, and the sign-up trigger. The second adds the `description` column and the `spend_livrux` RPC. The third adds the `is_foreign_language` column to `books` and updates the `log_book` RPC to support it.
 
 Also create one **Storage bucket** in the Supabase dashboard:
 - `avatars` — for reader profile photos
@@ -216,6 +224,7 @@ To add a new language:
 
 - [x] Book search via ISBN / Google Books API (auto-fill title, author, cover, pages)
 - [x] Real-life Livrux spending — log expenses with amount and description
+- [x] Bonus rules — min pages threshold and foreign language bonuses configurable per account
 - [ ] Milestone celebrations (confetti animation on balance thresholds)
 - [ ] Reading streaks and badges
 - [ ] Dark mode

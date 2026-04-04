@@ -51,8 +51,10 @@ export default function AddBookScreen() {
 
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [searchKey, setSearchKey] = useState(0);
+  const [isForeignLanguage, setIsForeignLanguage] = useState(false);
 
   const activeFormula = formula ?? getDefaultFormula();
+  const hasForeignLanguageBonus = activeFormula.bonus_rules.some(r => r.type === 'foreign_language');
   const schema = useBookSchema();
 
   const { control, handleSubmit, watch, setValue, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -67,6 +69,7 @@ export default function AddBookScreen() {
       reset({ title: '', author: '', totalPages: '', notes: '' });
       setCoverUri(null);
       setSearchKey(k => k + 1);
+      setIsForeignLanguage(false);
     }, [reset])
   );
 
@@ -74,7 +77,7 @@ export default function AddBookScreen() {
   const pagesValue = watch('totalPages');
   const previewPages = Number(pagesValue) || 0;
   const previewCoins = previewPages > 0
-    ? calculateLivrux(previewPages, activeFormula)
+    ? calculateLivrux(previewPages, activeFormula, { isForeignLanguage })
     : 0;
 
   const handleBookSelected = (book: GoogleBookResult) => {
@@ -89,7 +92,7 @@ export default function AddBookScreen() {
 
     try {
       const pages = Number(data.totalPages);
-      const livruxEarned = calculateLivrux(pages, activeFormula);
+      const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
 
       await logBookRpc({
         readerId,
@@ -100,6 +103,7 @@ export default function AddBookScreen() {
         livruxEarned,
         dateCompleted: format(new Date(), 'yyyy-MM-dd'),
         notes: data.notes || null,
+        isForeignLanguage,
       });
 
       // Optimistically update the balance in the store so the dashboard
@@ -193,6 +197,20 @@ export default function AddBookScreen() {
           )}
         />
 
+        {/* Foreign language checkbox — only shown when the bonus rule is configured */}
+        {hasForeignLanguageBonus && (
+          <TouchableOpacity
+            style={styles.checkboxRow}
+            onPress={() => setIsForeignLanguage(v => !v)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.checkbox, isForeignLanguage && styles.checkboxChecked]}>
+              {isForeignLanguage && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <Text style={styles.checkboxLabel}>{t('book.foreignLanguage')}</Text>
+          </TouchableOpacity>
+        )}
+
         {/* Live Livrux preview */}
         {previewPages > 0 && (
           <View style={styles.previewCard}>
@@ -265,6 +283,34 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: Radius.md,
     ...Shadows.md,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: Radius.sm,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: Colors.primary,
+  },
+  checkmark: {
+    color: Colors.textOnPrimary,
+    fontSize: 13,
+    fontFamily: Fonts.bodyBold,
+  },
+  checkboxLabel: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.md,
+    color: Colors.textPrimary,
   },
   previewCard: {
     backgroundColor: Colors.primary,

@@ -44,6 +44,13 @@ export function useLivrux(readerId: string | null): UseLivruxResult {
   return { transactions, isLoading, error, refresh: fetch };
 }
 
+// Calls the atomic delete_book RPC which deletes the book, records a negative
+// transaction, and subtracts the reader balance in a single database transaction.
+export async function deleteBookRpc(bookId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_book', { p_book_id: bookId });
+  if (error) throw error;
+}
+
 // Calls the atomic log_book RPC which inserts the book, creates a transaction,
 // and updates the reader balance in a single database transaction.
 export async function logBookRpc(params: {

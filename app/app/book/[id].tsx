@@ -106,7 +106,7 @@ export default function BookDetailScreen() {
           <Text style={styles.earnedLabel}>{t('book.willEarn')}</Text>
           <View style={styles.earnedRow}>
             <Text style={styles.earnedCoin}>🪙</Text>
-            <Text style={styles.earnedAmount}>{book.livrux_earned}</Text>
+            <Text style={styles.earnedAmount}>{book.livrux_earned.toFixed(2)}</Text>
             <Text style={styles.earnedCurrency}>Livrux</Text>
           </View>
         </View>

@@ -27,7 +27,7 @@ function TransactionRow({ tx }: { tx: LivruxTransaction }) {
         </Text>
       </View>
       <Text style={[styles.txAmount, isEarned ? styles.earned : styles.spent]}>
-        {isEarned ? '+' : ''}{tx.amount} Lx
+        {isEarned ? '+' : ''}{tx.amount.toFixed(2)} Lx
       </Text>
     </View>
   );
@@ -51,7 +51,7 @@ export default function RewardsScreen() {
               <Text style={styles.balanceLabel}>{t('rewards.totalBalance')}</Text>
               <View style={styles.balanceRow}>
                 <Text style={styles.balanceCoin}>🪙</Text>
-                <Text style={styles.balanceAmount}>{totalBalance.toFixed(0)}</Text>
+                <Text style={styles.balanceAmount}>{totalBalance.toFixed(2)}</Text>
               </View>
               <Text style={styles.balanceCurrency}>Livrux</Text>
             </View>

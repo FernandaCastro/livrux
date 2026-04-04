@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -53,9 +53,20 @@ export default function AddBookScreen() {
 
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [searchKey, setSearchKey] = useState(0);
 
   const activeFormula = formula ?? getDefaultFormula();
   const schema = useBookSchema();
+
+  // Reset all form state every time the screen comes into focus so that
+  // a second (or third) book entry starts with a clean slate.
+  useFocusEffect(
+    useCallback(() => {
+      reset({ title: '', author: '', totalPages: '', notes: '' });
+      setCoverUri(null);
+      setSearchKey(k => k + 1);
+    }, [reset])
+  );
 
   const { control, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -150,7 +161,7 @@ export default function AddBookScreen() {
         </View>
 
         {/* Search bar — type or scan to auto-fill */}
-        <BookSearchBar onSelect={handleBookSelected} />
+        <BookSearchBar key={searchKey} onSelect={handleBookSelected} />
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />

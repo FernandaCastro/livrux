@@ -55,5 +55,6 @@ export interface LivruxTransaction {
   book_id: string | null;
   amount: number;
   reason: string | null;
+  description: string | null;
   created_at: string;
 }

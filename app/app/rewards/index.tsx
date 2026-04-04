@@ -5,9 +5,11 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useLivrux } from '../../../src/hooks/useLivrux';
@@ -16,12 +18,20 @@ import type { LivruxTransaction } from '../../../src/types';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 function TransactionRow({ tx }: { tx: LivruxTransaction }) {
+  const { t } = useTranslation();
   const isEarned = tx.amount > 0;
+  const reasonKey =
+    tx.reason === 'book_completed' ? 'rewards.reasonBookCompleted'
+    : tx.reason === 'book_deleted' ? 'rewards.reasonBookDeleted'
+    : 'rewards.reasonManualSpend';
   return (
     <View style={styles.txRow}>
       <Text style={styles.txIcon}>{isEarned ? '🪙' : '💸'}</Text>
       <View style={styles.txInfo}>
-        <Text style={styles.txReason}>{tx.reason ?? '—'}</Text>
+        <Text style={styles.txDescription} numberOfLines={1}>
+          {tx.description ?? t(reasonKey)}
+        </Text>
+        <Text style={styles.txReason}>{t(reasonKey)}</Text>
         <Text style={styles.txDate}>
           {format(new Date(tx.created_at), 'dd/MM/yyyy')}
         </Text>
@@ -35,6 +45,7 @@ function TransactionRow({ tx }: { tx: LivruxTransaction }) {
 
 export default function RewardsScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { selectedReader } = useReaderStore();
   const { transactions, isLoading, refresh } = useLivrux(selectedReader?.id ?? null);
 
@@ -55,6 +66,15 @@ export default function RewardsScreen() {
               </View>
               <Text style={styles.balanceCurrency}>Livrux</Text>
             </View>
+
+            {/* Spend button */}
+            <TouchableOpacity
+              style={styles.spendButton}
+              onPress={() => router.push(`/app/spend?readerId=${selectedReader.id}`)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.spendButtonText}>💸 {t('rewards.spendButton')}</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <Text style={styles.noReaderText}>
@@ -118,6 +138,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
     alignItems: 'center',
     ...Shadows.md,
+    marginBottom: Spacing.md,
   },
   balanceLabel: {
     fontFamily: Fonts.bodySemiBold,
@@ -141,6 +162,18 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: 'rgba(255,255,255,0.85)',
     marginTop: 2,
+  },
+  spendButton: {
+    backgroundColor: Colors.secondary,
+    borderRadius: Radius.xl,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.sm,
+    ...Shadows.sm,
+  },
+  spendButtonText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textOnPrimary,
   },
   noReaderText: {
     fontFamily: Fonts.body,
@@ -169,10 +202,16 @@ const styles = StyleSheet.create({
   },
   txIcon: { fontSize: 24, marginRight: Spacing.md },
   txInfo: { flex: 1 },
-  txReason: {
+  txDescription: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
     color: Colors.textPrimary,
+  },
+  txReason: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+    marginTop: 1,
     textTransform: 'capitalize',
   },
   txDate: {

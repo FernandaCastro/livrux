@@ -77,3 +77,19 @@ export async function logBookRpc(params: {
   if (error) throw error;
   return data as string;
 }
+
+// Calls the atomic spend_livrux RPC which records a real-life Livrux expense,
+// inserts a negative transaction with the user's description, and subtracts
+// the reader balance in a single database transaction.
+export async function spendLivruxRpc(params: {
+  readerId: string;
+  amount: number;
+  description: string;
+}): Promise<void> {
+  const { error } = await supabase.rpc('spend_livrux', {
+    p_reader_id: params.readerId,
+    p_amount: params.amount,
+    p_description: params.description,
+  });
+  if (error) throw error;
+}

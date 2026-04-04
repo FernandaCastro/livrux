@@ -58,6 +58,11 @@ export default function AddBookScreen() {
   const activeFormula = formula ?? getDefaultFormula();
   const schema = useBookSchema();
 
+  const { control, handleSubmit, watch, setValue, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { title: '', author: '', totalPages: '', notes: '' },
+  });
+
   // Reset all form state every time the screen comes into focus so that
   // a second (or third) book entry starts with a clean slate.
   useFocusEffect(
@@ -67,11 +72,6 @@ export default function AddBookScreen() {
       setSearchKey(k => k + 1);
     }, [reset])
   );
-
-  const { control, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { title: '', author: '', totalPages: '', notes: '' },
-  });
 
   // Watch pages to show the live Livrux preview.
   const pagesValue = watch('totalPages');

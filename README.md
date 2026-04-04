@@ -4,6 +4,8 @@
 
 Livrux is a cross-platform mobile app (iOS & Android) that gamifies reading for kids. Parents create reader profiles for their children and define a custom reward formula — every book a child finishes earns them **Livrux coins** based on the number of pages read. A virtual wallet tracks their growing balance and full reading history.
 
+Children spend their Livrux coins in real life (a treat, a trip, an activity) and log each expense in the app with a short description of where the coins went. Every transaction — earned or spent — is recorded in the wallet history.
+
 ---
 
 ## ✨ Features
@@ -13,7 +15,7 @@ Livrux is a cross-platform mobile app (iOS & Android) that gamifies reading for 
 - **Smart book entry** — search by title/author via Google Books API or scan the ISBN barcode with the camera; title, author, pages, and cover are filled automatically
 - **Live coin preview** — as you type the page count when logging a book, the earned coins update in real time
 - **Book library** — each book stores title, author, page count, cover (from Google Books API), and date completed
-- **Virtual wallet** — full transaction history with earned/spent coin tracking per reader
+- **Virtual wallet** — full transaction history with earned and spent coins per reader; each entry shows the book title or a user-entered description of the real-life expense
 - **Profile photos** — readers and books have photo support via device camera or gallery
 - **Secure authentication** — email/password sign-up with Supabase Auth (Google & Apple OAuth ready)
 - **3 languages** — English, German, and Portuguese; auto-detected from device locale, switchable in-app
@@ -67,6 +69,7 @@ livrux/
 │       │   └── [id].tsx        # Book detail
 │       ├── rewards/
 │       │   └── index.tsx       # Livrux wallet & transaction history
+│       ├── spend.tsx           # Log a real-life Livrux expense
 │       └── settings/
 │           ├── index.tsx       # Account, language, sign out
 │           └── formula.tsx     # Reward formula editor
@@ -79,7 +82,7 @@ livrux/
 │   ├── hooks/
 │   │   ├── useReaders.ts       # CRUD for reader profiles
 │   │   ├── useBooks.ts         # CRUD for book logs
-│   │   └── useLivrux.ts        # Transaction history + atomic logBookRpc
+│   │   └── useLivrux.ts        # Transaction history + logBookRpc + spendLivruxRpc
 │   ├── lib/
 │   │   ├── supabase.ts         # Supabase client singleton
 │   │   ├── formula.ts          # Livrux calculation engine (pure function)
@@ -101,7 +104,8 @@ livrux/
 │
 └── supabase/
     └── migrations/
-        └── 0001_initial_schema.sql   # Full DB schema, RLS policies, RPC, trigger
+        ├── 0001_initial_schema.sql              # Full DB schema, RLS policies, RPCs, trigger
+        └── 0007_add_description_and_spend_rpc.sql  # description column + spend_livrux RPC
 ```
 
 ---
@@ -117,7 +121,7 @@ books                   ← title, author, total_pages, cover_url, livrux_earned
 livrux_transactions     ← immutable audit log of every coin credit/debit
 ```
 
-All tables are protected by **Row-Level Security** — users can only access their own data. The `log_book` database function performs book insertion, transaction recording, and balance update **atomically** in a single transaction.
+All tables are protected by **Row-Level Security** — users can only access their own data. Three atomic RPC functions keep data consistent: `log_book` (insert book + earn coins), `delete_book` (remove book + deduct coins), and `spend_livrux` (record a real-life expense + deduct coins). Each one records a human-readable `description` on the transaction — the book title for book events, or the user's own text for expenses.
 
 #### Reward Formula
 
@@ -175,13 +179,14 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
 ### 3. Set up the database
 
-In the Supabase dashboard, open the **SQL Editor** and run the migration:
+In the Supabase dashboard, open the **SQL Editor** and run the migrations in order:
 
 ```
 supabase/migrations/0001_initial_schema.sql
+supabase/migrations/0007_add_description_and_spend_rpc.sql
 ```
 
-This creates all tables, RLS policies, the `log_book` RPC, and the sign-up trigger.
+The first migration creates all tables, RLS policies, the `log_book` RPC, and the sign-up trigger. The second adds the `description` column and the `spend_livrux` RPC.
 
 Also create one **Storage bucket** in the Supabase dashboard:
 - `avatars` — for reader profile photos
@@ -209,9 +214,9 @@ To add a new language:
 
 ## 🗺️ Roadmap
 
-- [ ] Spending / redeeming Livrux coins (reward shop)
-- [ ] Milestone celebrations (confetti animation on balance thresholds)
 - [x] Book search via ISBN / Google Books API (auto-fill title, author, cover, pages)
+- [x] Real-life Livrux spending — log expenses with amount and description
+- [ ] Milestone celebrations (confetti animation on balance thresholds)
 - [ ] Reading streaks and badges
 - [ ] Dark mode
 - [ ] Push notifications for reading reminders

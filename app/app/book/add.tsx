@@ -14,13 +14,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { logBookRpc } from '../../../src/hooks/useLivrux';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useReaderStore } from '../../../src/stores/readerStore';
-import { uploadImage } from '../../../src/lib/storage';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
@@ -52,7 +50,6 @@ export default function AddBookScreen() {
   const { updateBalance } = useReaderStore();
 
   const [coverUri, setCoverUri] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [searchKey, setSearchKey] = useState(0);
 
   const activeFormula = formula ?? getDefaultFormula();
@@ -87,43 +84,19 @@ export default function AddBookScreen() {
     if (book.coverUrl) setCoverUri(book.coverUrl);
   };
 
-  const pickCover = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [2, 3],
-      quality: 1,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setCoverUri(result.assets[0].uri);
-    }
-  };
-
   const onSubmit = async (data: FormData) => {
     if (!user || !readerId) return;
-    setIsUploading(true);
 
     try {
       const pages = Number(data.totalPages);
       const livruxEarned = calculateLivrux(pages, activeFormula);
-
-      let coverUrl: string | null = null;
-      if (coverUri) {
-        // Remote covers from Google Books are already hosted — upload only local files.
-        if (coverUri.startsWith('http')) {
-          coverUrl = coverUri;
-        } else {
-          const tempId = `tmp-${Date.now()}`;
-          coverUrl = await uploadImage('book-covers', user.id, tempId, coverUri);
-        }
-      }
 
       await logBookRpc({
         readerId,
         title: data.title,
         author: data.author || null,
         totalPages: pages,
-        coverUrl,
+        coverUrl: coverUri,
         livruxEarned,
         dateCompleted: format(new Date(), 'yyyy-MM-dd'),
         notes: data.notes || null,
@@ -139,8 +112,6 @@ export default function AddBookScreen() {
       router.back();
     } catch (err) {
       Alert.alert(t('common.error'), t('common.error'));
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -169,17 +140,12 @@ export default function AddBookScreen() {
           <View style={styles.dividerLine} />
         </View>
 
-        {/* Cover picker */}
-        <TouchableOpacity onPress={pickCover} activeOpacity={0.8} style={styles.coverButton}>
-          {coverUri ? (
+        {/* Cover — displayed only when auto-filled by Google Books */}
+        {coverUri && (
+          <View style={styles.coverButton}>
             <Image source={{ uri: coverUri }} style={styles.coverImage} resizeMode="cover" />
-          ) : (
-            <View style={styles.coverPlaceholder}>
-              <Text style={styles.coverIcon}>📕</Text>
-              <Text style={styles.coverHint}>{t('book.addCover')}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+          </View>
+        )}
 
         {/* Form fields */}
         <Controller
@@ -242,7 +208,7 @@ export default function AddBookScreen() {
         <Button
           label={t('book.logBook')}
           onPress={handleSubmit(onSubmit)}
-          loading={isSubmitting || isUploading}
+          loading={isSubmitting}
           fullWidth
           style={styles.saveButton}
         />
@@ -299,23 +265,6 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: Radius.md,
     ...Shadows.md,
-  },
-  coverPlaceholder: {
-    width: 120,
-    height: 180,
-    borderRadius: Radius.md,
-    backgroundColor: Colors.surfaceVariant,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.border,
-    borderStyle: 'dashed',
-  },
-  coverIcon: { fontSize: 36, marginBottom: Spacing.xs },
-  coverHint: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.xs,
-    color: Colors.secondary,
   },
   previewCard: {
     backgroundColor: Colors.primary,

@@ -55,11 +55,12 @@ export default function RootLayout() {
     if (!fontsLoaded || isLoading) return;
 
     const inAuthGroup = segments[0] === 'auth';
+    const inAppGroup  = segments[0] === 'app';
 
     if (!session && !inAuthGroup) {
       router.replace('/auth/sign-in');
-    } else if (session && inAuthGroup) {
-      router.replace('/');
+    } else if (session && !inAppGroup) {
+      router.replace('/app');
     }
   }, [session, isLoading, fontsLoaded, segments]);
 

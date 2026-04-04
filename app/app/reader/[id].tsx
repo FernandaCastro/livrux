@@ -9,23 +9,41 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReaders } from '../../../src/hooks/useReaders';
+import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import type { Reader } from '../../../src/types';
 
 export default function ReaderDashboardScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { selectedReader } = useReaderStore();
+  const { selectedReader, setSelectedReader } = useReaderStore();
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
+
+  // Refresh books list and re-fetch the reader from DB to get the latest balance.
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+      if (id) {
+        supabase
+          .from('readers')
+          .select('*')
+          .eq('id', id)
+          .single()
+          .then(({ data }) => { if (data) setSelectedReader(data as Reader); });
+      }
+    }, [id])
+  );
 
   // Use reader data from the store (set when the card was tapped on Home).
   const reader = selectedReader;
@@ -48,8 +66,8 @@ export default function ReaderDashboardScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            await deleteReader(reader.id);
-            router.replace('/');
+            await deleteReader(reader.id, reader.avatar_url);
+            router.replace('/app');
           },
         },
       ]
@@ -66,12 +84,20 @@ export default function ReaderDashboardScreen() {
         >
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.editText}>{t('common.edit')}</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.editText}>{t('common.edit')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleDelete}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.deleteText}>{t('common.delete')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Reader hero */}
@@ -169,10 +195,20 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.secondary,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.lg,
+  },
   editText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.md,
     color: Colors.secondary,
+  },
+  deleteText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.md,
+    color: Colors.error,
   },
   hero: {
     alignItems: 'center',

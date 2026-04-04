@@ -4,7 +4,7 @@ import { AVATAR_SIZE, IMAGE_MAX_HEIGHT, IMAGE_MAX_WIDTH, IMAGE_QUALITY } from '.
 
 type ImageBucket = 'avatars' | 'book-covers';
 
-// Resizes and compresses an image before upload.
+// Resizes and compresses an image before upload, returning base64-encoded data.
 async function resizeImage(
   uri: string,
   maxWidth: number,
@@ -13,13 +13,25 @@ async function resizeImage(
   const result = await ImageManipulator.manipulateAsync(
     uri,
     [{ resize: { width: maxWidth, height: maxHeight } }],
-    { compress: IMAGE_QUALITY, format: ImageManipulator.SaveFormat.JPEG }
+    { compress: IMAGE_QUALITY, format: ImageManipulator.SaveFormat.JPEG, base64: true }
   );
-  return result.uri;
+  return result.base64!;
+}
+
+// Decodes a base64 string into an ArrayBuffer.
+// Using ArrayBuffer avoids the React Native Blob serialization bug that causes
+// StorageUnknownError: Network request failed when uploading to Supabase Storage.
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
 }
 
 // Uploads an image to Supabase Storage and returns the public URL.
-// Path format: {userId}/{folder}/{entityId}.jpg
+// Path format: {userId}/{entityId}.jpg
 export async function uploadImage(
   bucket: ImageBucket,
   userId: string,
@@ -27,19 +39,16 @@ export async function uploadImage(
   localUri: string
 ): Promise<string> {
   const isAvatar = bucket === 'avatars';
-  const processedUri = await resizeImage(
+  const base64 = await resizeImage(
     localUri,
     isAvatar ? AVATAR_SIZE : IMAGE_MAX_WIDTH,
     isAvatar ? AVATAR_SIZE : IMAGE_MAX_HEIGHT
   );
 
-  // Fetch blob from the local file URI (works on both Android and iOS).
-  const response = await fetch(processedUri);
-  const blob = await response.blob();
-
+  const arrayBuffer = base64ToArrayBuffer(base64);
   const path = `${userId}/${entityId}.jpg`;
 
-  const { error } = await supabase.storage.from(bucket).upload(path, blob, {
+  const { error } = await supabase.storage.from(bucket).upload(path, arrayBuffer, {
     contentType: 'image/jpeg',
     upsert: true, // overwrite if the user updates the photo
   });

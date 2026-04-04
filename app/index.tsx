@@ -7,9 +7,10 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback } from 'react';
 
 import { useReaders } from '../src/hooks/useReaders';
 import { useReaderStore } from '../src/stores/readerStore';
@@ -24,6 +25,10 @@ export default function HomeScreen() {
   const { readers, isLoading, refresh } = useReaders();
   const { setSelectedReader } = useReaderStore();
   const { profile } = useAuthStore();
+
+  useFocusEffect(
+    useCallback(() => { refresh(); }, [])
+  );
 
   const handleSelectReader = (reader: Reader) => {
     setSelectedReader(reader);

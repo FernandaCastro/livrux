@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { deleteImage } from '../lib/storage';
 import { useAuthStore } from '../stores/authStore';
 import type { Reader } from '../types';
 
@@ -10,7 +11,7 @@ interface UseReadersResult {
   refresh: () => Promise<void>;
   createReader: (name: string, avatarUrl?: string) => Promise<Reader>;
   updateReader: (id: string, updates: Partial<Pick<Reader, 'name' | 'avatar_url'>>) => Promise<void>;
-  deleteReader: (id: string) => Promise<void>;
+  deleteReader: (id: string, avatarUrl?: string | null) => Promise<void>;
 }
 
 export function useReaders(): UseReadersResult {
@@ -70,7 +71,7 @@ export function useReaders(): UseReadersResult {
     );
   };
 
-  const deleteReader = async (id: string): Promise<void> => {
+  const deleteReader = async (id: string, avatarUrl?: string | null): Promise<void> => {
     const { error: dbError } = await supabase
       .from('readers')
       .delete()
@@ -78,6 +79,10 @@ export function useReaders(): UseReadersResult {
 
     if (dbError) throw dbError;
     setReaders((prev) => prev.filter((r) => r.id !== id));
+
+    if (avatarUrl && user) {
+      await deleteImage('avatars', user.id, id).catch(() => {});
+    }
   };
 
   return { readers, isLoading, error, refresh: fetch, createReader, updateReader, deleteReader };

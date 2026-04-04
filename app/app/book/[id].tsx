@@ -99,6 +99,12 @@ export default function BookDetailScreen() {
               {format(new Date(book.date_completed), 'dd/MM/yyyy')}
             </Text>
           </View>
+          {book.is_foreign_language && (
+            <View style={styles.detailChip}>
+              <Text style={styles.detailIcon}>🌍</Text>
+              <Text style={styles.detailText}>{t('book.foreignLanguage')}</Text>
+            </View>
+          )}
         </View>
 
         {/* Livrux earned card */}

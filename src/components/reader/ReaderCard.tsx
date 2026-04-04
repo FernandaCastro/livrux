@@ -47,7 +47,7 @@ export function ReaderCard({ reader, onPress }: ReaderCardProps) {
       <View style={styles.badge}>
         <Text style={styles.badgeCoin}>🪙</Text>
         <Text style={styles.badgeAmount}>
-          {reader.livrux_balance.toFixed(0)}
+          {reader.livrux_balance.toFixed(2)}
         </Text>
       </View>
     </TouchableOpacity>

@@ -51,7 +51,7 @@ export async function uploadImage(
   if (error) throw error;
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-  return data.publicUrl;
+  return `${data.publicUrl}?t=${Date.now()}`;
 }
 
 // Deletes an image from Supabase Storage (e.g., when a reader or book is deleted).

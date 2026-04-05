@@ -103,7 +103,7 @@ function makeParticleGroup(side: 'left' | 'right', startId: number): ParticleDat
       spreadX,
       peakHeight,
       riseTime: 850 + Math.random() * 600,
-      fallTime: 1200 + Math.random() * 1000,
+      fallTime: 2000 + Math.random() * 2000,
       delay: Math.random() * 500,
       shape,
       solidColor: shape === 'ribbon' ? pick(GOLD_COLORS) : pick(SOLID_COLORS),
@@ -280,14 +280,14 @@ function ConfettiParticle({ data }: { data: ParticleData }) {
 function AnimatedCounter({ prevCount, newCount, animKey }: { prevCount: number; newCount: number; animKey: number }) {
   const oldY = useSharedValue(0);
   const oldOpacity = useSharedValue(1);
-  const newY = useSharedValue(52);
+  const newY = useSharedValue(80);
   const newOpacity = useSharedValue(0);
 
   useEffect(() => {
-    oldY.value = withTiming(-52, { duration: 360, easing: Easing.in(Easing.quad) });
-    oldOpacity.value = withTiming(0, { duration: 360 });
-    newY.value = withDelay(260, withTiming(0, { duration: 420, easing: Easing.out(Easing.back(1.5)) }));
-    newOpacity.value = withDelay(260, withTiming(1, { duration: 360 }));
+    oldY.value = withTiming(-80, { duration: 700, easing: Easing.in(Easing.quad) });
+    oldOpacity.value = withTiming(0, { duration: 700 });
+    newY.value = withDelay(550, withTiming(0, { duration: 800, easing: Easing.out(Easing.back(1.5)) }));
+    newOpacity.value = withDelay(550, withTiming(1, { duration: 700 }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animKey]);
 

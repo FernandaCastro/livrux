@@ -33,18 +33,22 @@ export default function ReaderDashboardScreen() {
 
   // Celebration state: tracks prev/new book count for the confetti overlay.
   const [confetti, setConfetti] = useState<{ prev: number; next: number } | null>(null);
-  const prevBookCountRef = useRef<number | null>(null);
+  // Ref always reflects the latest known count — safe to read from a stale closure.
+  const bookCountRef = useRef(books.length);
+  useEffect(() => {
+    bookCountRef.current = books.length;
+  }, [books.length]);
   const handleConfettiDone = useCallback(() => setConfetti(null), []);
 
   // Refresh books list and re-fetch the reader from DB to get the latest balance.
-  // If the user just added a book, snapshot the current count before refreshing
-  // so the confetti overlay can animate from the old value to the new one.
+  // When the user just added a book, show the celebration immediately on focus
+  // (before the refresh completes) for instant feedback.
   useFocusEffect(
     useCallback(() => {
       const { bookJustAdded, setBookJustAdded } = useReaderStore.getState();
       if (bookJustAdded) {
-        prevBookCountRef.current = books.length;
         setBookJustAdded(false);
+        setConfetti({ prev: bookCountRef.current, next: bookCountRef.current + 1 });
       }
       refresh();
       if (id) {
@@ -57,14 +61,6 @@ export default function ReaderDashboardScreen() {
       }
     }, [id])
   );
-
-  // After the books list updates, check if a celebration should be shown.
-  useEffect(() => {
-    if (prevBookCountRef.current !== null && books.length > prevBookCountRef.current) {
-      setConfetti({ prev: prevBookCountRef.current, next: books.length });
-      prevBookCountRef.current = null;
-    }
-  }, [books.length]);
 
   // Use reader data from the store (set when the card was tapped on Home).
   const reader = selectedReader;

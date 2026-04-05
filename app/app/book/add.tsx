@@ -108,11 +108,13 @@ export default function AddBookScreen() {
 
       // Optimistically update the balance in the store so the dashboard
       // reflects the new amount without a full refetch.
-      const { selectedReader } = useReaderStore.getState();
+      const { selectedReader, setBookJustAdded } = useReaderStore.getState();
       if (selectedReader) {
         updateBalance(selectedReader.livrux_balance + livruxEarned);
       }
 
+      // Signal the Reader Dashboard to trigger the celebration animation.
+      setBookJustAdded(true);
       router.back();
     } catch (err) {
       Alert.alert(t('common.error'), t('common.error'));

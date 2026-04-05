@@ -12,13 +12,14 @@ import {
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReaders } from '../../../src/hooks/useReaders';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
+import { ConfettiOverlay } from '../../../src/components/ConfettiOverlay';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
@@ -30,9 +31,21 @@ export default function ReaderDashboardScreen() {
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
 
+  // Celebration state: tracks prev/new book count for the confetti overlay.
+  const [confetti, setConfetti] = useState<{ prev: number; next: number } | null>(null);
+  const prevBookCountRef = useRef<number | null>(null);
+  const handleConfettiDone = useCallback(() => setConfetti(null), []);
+
   // Refresh books list and re-fetch the reader from DB to get the latest balance.
+  // If the user just added a book, snapshot the current count before refreshing
+  // so the confetti overlay can animate from the old value to the new one.
   useFocusEffect(
     useCallback(() => {
+      const { bookJustAdded, setBookJustAdded } = useReaderStore.getState();
+      if (bookJustAdded) {
+        prevBookCountRef.current = books.length;
+        setBookJustAdded(false);
+      }
       refresh();
       if (id) {
         supabase
@@ -44,6 +57,14 @@ export default function ReaderDashboardScreen() {
       }
     }, [id])
   );
+
+  // After the books list updates, check if a celebration should be shown.
+  useEffect(() => {
+    if (prevBookCountRef.current !== null && books.length > prevBookCountRef.current) {
+      setConfetti({ prev: prevBookCountRef.current, next: books.length });
+      prevBookCountRef.current = null;
+    }
+  }, [books.length]);
 
   // Use reader data from the store (set when the card was tapped on Home).
   const reader = selectedReader;
@@ -174,6 +195,14 @@ export default function ReaderDashboardScreen() {
       >
         <Text style={styles.fabText}>+ {t('book.logBook')}</Text>
       </TouchableOpacity>
+
+      {/* Celebration confetti shown after each book is logged */}
+      <ConfettiOverlay
+        visible={!!confetti}
+        prevCount={confetti?.prev ?? 0}
+        newCount={confetti?.next ?? 0}
+        onDone={handleConfettiDone}
+      />
     </SafeAreaView>
   );
 }

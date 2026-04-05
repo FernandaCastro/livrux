@@ -102,9 +102,9 @@ function makeParticleGroup(side: 'left' | 'right', startId: number): ParticleDat
       startX,
       spreadX,
       peakHeight,
-      riseTime: 550 + Math.random() * 450,
-      fallTime: 750 + Math.random() * 650,
-      delay: Math.random() * 350,
+      riseTime: 850 + Math.random() * 600,
+      fallTime: 1200 + Math.random() * 1000,
+      delay: Math.random() * 500,
       shape,
       solidColor: shape === 'ribbon' ? pick(GOLD_COLORS) : pick(SOLID_COLORS),
       curlColors: pick(CURL_GRADIENTS),
@@ -294,18 +294,20 @@ function AnimatedCounter({ prevCount, newCount, animKey }: { prevCount: number; 
   const oldStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: oldY.value }],
     opacity: oldOpacity.value,
-    position: 'absolute',
   }));
   const newStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: newY.value }],
     opacity: newOpacity.value,
-    position: 'absolute',
   }));
 
   return (
     <View style={styles.counterContainer}>
-      <Animated.Text style={[styles.counterText, oldStyle]}>{prevCount}</Animated.Text>
-      <Animated.Text style={[styles.counterText, newStyle]}>{newCount}</Animated.Text>
+      <Animated.Text style={[styles.counterAbsolute, styles.counterText, oldStyle]}>
+        {prevCount}
+      </Animated.Text>
+      <Animated.Text style={[styles.counterAbsolute, styles.counterText, newStyle]}>
+        {newCount}
+      </Animated.Text>
     </View>
   );
 }
@@ -329,7 +331,7 @@ export function ConfettiOverlay({ visible, prevCount, newCount, onDone }: Confet
     if (!visible) return;
     particlesRef.current = randomParticles();
     setRenderKey(k => k + 1);
-    const timer = setTimeout(onDone, 4000);
+    const timer = setTimeout(onDone, 6500);
     return () => clearTimeout(timer);
   }, [visible, onDone]);
 
@@ -381,10 +383,17 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   counterContainer: {
-    height: 72,
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: 80,
+    width: 220,
     overflow: 'hidden',
+  },
+  // position: 'absolute' must live in the static style, not in useAnimatedStyle,
+  // because layout properties are resolved by the native engine before transforms.
+  counterAbsolute: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center',
   },
   counterText: {
     fontFamily: Fonts.heading,

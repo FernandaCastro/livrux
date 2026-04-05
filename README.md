@@ -225,7 +225,7 @@ To add a new language:
 - [x] Book search via ISBN / Google Books API (auto-fill title, author, cover, pages)
 - [x] Real-life Livrux spending — log expenses with amount and description
 - [x] Bonus rules — min pages threshold and foreign language bonuses configurable per account
-- [ ] Milestone celebrations (confetti animation on balance thresholds)
+- [x] Milestone celebrations — confetti animation with animated book-count flip after each book is logged
 - [ ] Reading streaks and badges
 - [ ] Dark mode
 - [ ] Push notifications for reading reminders

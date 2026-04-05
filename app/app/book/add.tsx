@@ -44,7 +44,8 @@ type FormData = { title: string; author?: string; totalPages: string; notes?: st
 export default function AddBookScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { readerId } = useLocalSearchParams<{ readerId: string }>();
+  const { readerId, bookCount } = useLocalSearchParams<{ readerId: string; bookCount: string }>();
+  const prevBookCount = Number(bookCount) || 0;
 
   const { user, formula } = useAuthStore();
   const { updateBalance } = useReaderStore();
@@ -108,13 +109,14 @@ export default function AddBookScreen() {
 
       // Optimistically update the balance in the store so the dashboard
       // reflects the new amount without a full refetch.
-      const { selectedReader, setBookJustAdded } = useReaderStore.getState();
+      const { selectedReader, triggerConfetti } = useReaderStore.getState();
       if (selectedReader) {
         updateBalance(selectedReader.livrux_balance + livruxEarned);
       }
 
-      // Signal the Reader Dashboard to trigger the celebration animation.
-      setBookJustAdded(true);
+      // Trigger the celebration overlay (rendered in the persistent app layout)
+      // before navigating back so it appears during the transition.
+      triggerConfetti(prevBookCount, prevBookCount + 1);
       router.back();
     } catch (err) {
       Alert.alert(t('common.error'), t('common.error'));

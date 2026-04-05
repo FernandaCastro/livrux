@@ -79,7 +79,7 @@ function makeParticleGroup(side: 'left' | 'right', startId: number): ParticleDat
     // Fan from ~20° to ~160° (upper hemisphere), both spreading outward and inward.
     const angleDeg = 20 + Math.random() * 140;
     const angleRad = (angleDeg * Math.PI) / 180;
-    const distance = 200 + Math.random() * 350;
+    const distance = 350 + Math.random() * 500;
 
     // Horizontal spread: left side fans rightward (+cos), right side fans leftward (-cos).
     const spreadX = (isLeft ? 1 : -1) * Math.cos(angleRad) * distance;

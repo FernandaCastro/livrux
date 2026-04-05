@@ -12,14 +12,13 @@ import {
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReaders } from '../../../src/hooks/useReaders';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
-import { ConfettiOverlay } from '../../../src/components/ConfettiOverlay';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
@@ -31,25 +30,9 @@ export default function ReaderDashboardScreen() {
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
 
-  // Celebration state: tracks prev/new book count for the confetti overlay.
-  const [confetti, setConfetti] = useState<{ prev: number; next: number } | null>(null);
-  // Ref always reflects the latest known count — safe to read from a stale closure.
-  const bookCountRef = useRef(books.length);
-  useEffect(() => {
-    bookCountRef.current = books.length;
-  }, [books.length]);
-  const handleConfettiDone = useCallback(() => setConfetti(null), []);
-
   // Refresh books list and re-fetch the reader from DB to get the latest balance.
-  // When the user just added a book, show the celebration immediately on focus
-  // (before the refresh completes) for instant feedback.
   useFocusEffect(
     useCallback(() => {
-      const { bookJustAdded, setBookJustAdded } = useReaderStore.getState();
-      if (bookJustAdded) {
-        setBookJustAdded(false);
-        setConfetti({ prev: bookCountRef.current, next: bookCountRef.current + 1 });
-      }
       refresh();
       if (id) {
         supabase
@@ -183,22 +166,14 @@ export default function ReaderDashboardScreen() {
         )}
       />
 
-      {/* FAB — Log a book */}
+      {/* FAB — Log a book. Pass current count so add screen can compute prev/next for confetti. */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push(`/app/book/add?readerId=${reader.id}`)}
+        onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
         activeOpacity={0.85}
       >
         <Text style={styles.fabText}>+ {t('book.logBook')}</Text>
       </TouchableOpacity>
-
-      {/* Celebration confetti shown after each book is logged */}
-      <ConfettiOverlay
-        visible={!!confetti}
-        prevCount={confetti?.prev ?? 0}
-        newCount={confetti?.next ?? 0}
-        onDone={handleConfettiDone}
-      />
     </SafeAreaView>
   );
 }

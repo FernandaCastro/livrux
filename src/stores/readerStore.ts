@@ -6,15 +6,16 @@ interface ReaderState {
   selectedReader: Reader | null;
   setSelectedReader: (reader: Reader | null) => void;
   updateBalance: (newBalance: number) => void;
-  // Set to true by the Add Book screen just before navigating back so the
-  // Reader Dashboard knows to show the celebration animation on next focus.
-  bookJustAdded: boolean;
-  setBookJustAdded: (value: boolean) => void;
+  // Set by the Add Book screen on success so the app layout can display the
+  // confetti celebration while the navigation transition back is playing.
+  confettiTrigger: { prev: number; next: number } | null;
+  triggerConfetti: (prev: number, next: number) => void;
+  clearConfetti: () => void;
 }
 
 export const useReaderStore = create<ReaderState>((set) => ({
   selectedReader: null,
-  bookJustAdded: false,
+  confettiTrigger: null,
 
   setSelectedReader: (reader) => set({ selectedReader: reader }),
 
@@ -26,5 +27,6 @@ export const useReaderStore = create<ReaderState>((set) => ({
         : null,
     })),
 
-  setBookJustAdded: (value) => set({ bookJustAdded: value }),
+  triggerConfetti: (prev, next) => set({ confettiTrigger: { prev, next } }),
+  clearConfetti: () => set({ confettiTrigger: null }),
 }));

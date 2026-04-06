@@ -24,9 +24,11 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GoogleBookResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [scanLoading, setScanLoading] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -36,14 +38,23 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
 
     if (!query.trim()) {
       setResults([]);
+      setSearchError(null);
       return;
     }
 
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const found = await searchBooks(query);
-      setResults(found);
-      setLoading(false);
+      setSearchError(null);
+      try {
+        const found = await searchBooks(query);
+        setResults(found);
+      } catch (e) {
+        console.error('[BookSearch]', e);
+        setResults([]);
+        setSearchError(e instanceof Error ? e.message : String(e));
+      } finally {
+        setLoading(false);
+      }
     }, 350);
 
     return () => {
@@ -54,6 +65,7 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
   const handleSelect = (book: GoogleBookResult) => {
     setQuery('');
     setResults([]);
+    setSearchError(null);
     onSelect(book);
   };
 
@@ -71,12 +83,18 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
     setScanned(true);
     setScanLoading(true);
 
-    const book = await fetchByIsbn(data);
-    setScanLoading(false);
-    setScannerOpen(false);
-
-    if (book) {
-      onSelect(book);
+    try {
+      const book = await fetchByIsbn(data);
+      setScanLoading(false);
+      setScannerOpen(false);
+      if (book) {
+        onSelect(book);
+      }
+    } catch (e) {
+      console.error('[ISBNScan]', e);
+      setScanLoading(false);
+      setScannerOpen(false);
+      setScanError(e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -104,6 +122,14 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
           <Text style={styles.scanIcon}>📷</Text>
         </TouchableOpacity>
       </View>
+
+      {searchError && (
+        <Text style={styles.errorText}>{searchError}</Text>
+      )}
+
+      {scanError && (
+        <Text style={styles.errorText}>{scanError}</Text>
+      )}
 
       {results.length > 0 && (
         <View style={styles.dropdown}>
@@ -253,6 +279,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
     color: Colors.secondary,
+  },
+
+  errorText: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.error,
+    marginTop: Spacing.xs,
   },
 
   // Scanner

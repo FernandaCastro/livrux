@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
+  InteractionManager,
   Modal,
   StyleSheet,
   Text,
@@ -325,27 +326,39 @@ export interface ConfettiOverlayProps {
 export function ConfettiOverlay({ visible, prevCount, newCount, onDone }: ConfettiOverlayProps) {
   const { t } = useTranslation();
   const [renderKey, setRenderKey] = useState(0);
-  const particlesRef = useRef<ParticleData[]>([]);
+  // Pre-generate particles at app startup so the first confetti trigger is
+  // instant — no blocking JS work on the critical save→animation path.
+  const [particles, setParticles] = useState<ParticleData[]>(() => randomParticles());
 
+  // Kick off the confetti animation when overlay becomes visible.
   useEffect(() => {
     if (!visible) return;
-    particlesRef.current = randomParticles();
     setRenderKey(k => k + 1);
     const timer = setTimeout(onDone, 6500);
     return () => clearTimeout(timer);
   }, [visible, onDone]);
 
+  // Regenerate particles off the critical path after the overlay closes so
+  // the next trigger is also instant.
+  useEffect(() => {
+    if (visible) return;
+    const task = InteractionManager.runAfterInteractions(() => {
+      setParticles(randomParticles());
+    });
+    return () => task.cancel();
+  }, [visible]);
+
   return (
     <Modal
       transparent
       visible={visible}
-      animationType="fade"
+      animationType="none"
       onRequestClose={onDone}
       statusBarTranslucent
     >
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onDone}>
         {/* 300 confetti particles — 150 from each bottom corner */}
-        {particlesRef.current.map(p => (
+        {particles.map(p => (
           <ConfettiParticle key={`${renderKey}-${p.id}`} data={p} />
         ))}
 

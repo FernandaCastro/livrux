@@ -119,6 +119,7 @@ export default function AddBookScreen() {
         notes: data.notes || null,
         isForeignLanguage,
       });
+      useReaderStore.getState().notifyBookPersisted();
     } catch {
       useReaderStore.getState().updateBalance(originalBalance);
       useReaderStore.getState().clearConfetti();

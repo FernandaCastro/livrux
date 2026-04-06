@@ -10,7 +10,7 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { useReaders } from '../src/hooks/useReaders';
 import { useReaderStore } from '../src/stores/readerStore';
@@ -23,12 +23,18 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { readers, isLoading, refresh } = useReaders();
-  const { setSelectedReader } = useReaderStore();
+  const { setSelectedReader, bookPersistedCount } = useReaderStore();
   const { profile } = useAuthStore();
 
   useFocusEffect(
     useCallback(() => { refresh(); }, [])
   );
+
+  // Refresh the readers list whenever a book is successfully persisted to the
+  // DB so that the balance badge on each card stays up to date.
+  useEffect(() => {
+    if (bookPersistedCount > 0) refresh();
+  }, [bookPersistedCount]);
 
   const handleSelectReader = (reader: Reader) => {
     setSelectedReader(reader);

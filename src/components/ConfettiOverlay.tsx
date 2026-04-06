@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
   InteractionManager,
@@ -325,28 +325,23 @@ export interface ConfettiOverlayProps {
 
 export function ConfettiOverlay({ visible, prevCount, newCount, onDone }: ConfettiOverlayProps) {
   const { t } = useTranslation();
-  const [renderKey, setRenderKey] = useState(0);
-  // Pre-generate particles at app startup so the first confetti trigger is
-  // instant — no blocking JS work on the critical save→animation path.
+  // Pre-generate particles at app startup so confetti triggers are instant —
+  // no blocking JS work on the critical save→animation path.
   const [particles, setParticles] = useState<ParticleData[]>(() => randomParticles());
 
-  // Kick off the confetti animation when overlay becomes visible.
   useEffect(() => {
     if (!visible) return;
-    setRenderKey(k => k + 1);
     const timer = setTimeout(onDone, 6500);
-    return () => clearTimeout(timer);
-  }, [visible, onDone]);
-
-  // Regenerate particles off the critical path after the overlay closes so
-  // the next trigger is also instant.
-  useEffect(() => {
-    if (visible) return;
+    // Regenerate the next batch asynchronously while confetti is playing,
+    // so the following trigger is also instant.
     const task = InteractionManager.runAfterInteractions(() => {
       setParticles(randomParticles());
     });
-    return () => task.cancel();
-  }, [visible]);
+    return () => {
+      clearTimeout(timer);
+      task.cancel();
+    };
+  }, [visible, onDone]);
 
   return (
     <Modal
@@ -357,20 +352,28 @@ export function ConfettiOverlay({ visible, prevCount, newCount, onDone }: Confet
       statusBarTranslucent
     >
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onDone}>
-        {/* 300 confetti particles — 150 from each bottom corner */}
-        {particles.map(p => (
-          <ConfettiParticle key={`${renderKey}-${p.id}`} data={p} />
+        {/*
+         * Particles are conditionally rendered so Reanimated worklets are not
+         * running in the background while the overlay is hidden.
+         * They mount fresh on every trigger, so animations always restart
+         * from scratch without needing an explicit key increment.
+         * The pre-generated `particles` state means the first render already
+         * has the full particle list — no second render needed.
+         */}
+        {visible && particles.map(p => (
+          <ConfettiParticle key={p.id} data={p} />
         ))}
 
         {/* Transparent celebration area — only text is visible */}
         <View style={styles.celebration}>
           <Text style={styles.bookEmoji}>📚</Text>
-          <AnimatedCounter
-            key={renderKey}
-            animKey={renderKey}
-            prevCount={prevCount}
-            newCount={newCount}
-          />
+          {visible && (
+            <AnimatedCounter
+              animKey={0}
+              prevCount={prevCount}
+              newCount={newCount}
+            />
+          )}
           <Text style={styles.booksLabel}>{t('reader.books')}</Text>
         </View>
       </TouchableOpacity>

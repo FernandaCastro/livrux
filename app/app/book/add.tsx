@@ -44,7 +44,8 @@ type FormData = { title: string; author?: string; totalPages: string; notes?: st
 export default function AddBookScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { readerId } = useLocalSearchParams<{ readerId: string }>();
+  const { readerId, bookCount } = useLocalSearchParams<{ readerId: string; bookCount: string }>();
+  const prevBookCount = Number(bookCount) || 0;
 
   const { user, formula } = useAuthStore();
   const { updateBalance } = useReaderStore();
@@ -90,10 +91,23 @@ export default function AddBookScreen() {
   const onSubmit = async (data: FormData) => {
     if (!user || !readerId) return;
 
-    try {
-      const pages = Number(data.totalPages);
-      const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
+    const pages = Number(data.totalPages);
+    const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
 
+    // Snapshot current balance for rollback on failure.
+    const { selectedReader, triggerConfetti } = useReaderStore.getState();
+    const originalBalance = selectedReader?.livrux_balance ?? 0;
+
+    // Optimistic mutations fire immediately — no waiting for the network.
+    // This matches the same pattern used for balance updates throughout the app.
+    updateBalance(originalBalance + livruxEarned);
+    triggerConfetti(prevBookCount, prevBookCount + 1);
+    router.back();
+
+    // Persist to the DB in the background. On failure, roll back all state.
+    // Access the store directly (not via hook) since the component may have
+    // already unmounted after router.back().
+    try {
       await logBookRpc({
         readerId,
         title: data.title,
@@ -105,16 +119,9 @@ export default function AddBookScreen() {
         notes: data.notes || null,
         isForeignLanguage,
       });
-
-      // Optimistically update the balance in the store so the dashboard
-      // reflects the new amount without a full refetch.
-      const { selectedReader } = useReaderStore.getState();
-      if (selectedReader) {
-        updateBalance(selectedReader.livrux_balance + livruxEarned);
-      }
-
-      router.back();
-    } catch (err) {
+    } catch {
+      useReaderStore.getState().updateBalance(originalBalance);
+      useReaderStore.getState().clearConfetti();
       Alert.alert(t('common.error'), t('common.error'));
     }
   };

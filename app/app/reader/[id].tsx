@@ -166,10 +166,10 @@ export default function ReaderDashboardScreen() {
         )}
       />
 
-      {/* FAB — Log a book */}
+      {/* FAB — Log a book. Pass current count so add screen can compute prev/next for confetti. */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => router.push(`/app/book/add?readerId=${reader.id}`)}
+        onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
         activeOpacity={0.85}
       >
         <Text style={styles.fabText}>+ {t('book.logBook')}</Text>

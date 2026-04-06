@@ -27,14 +27,19 @@ export function useReaders(): UseReadersResult {
 
     const { data, error: dbError } = await supabase
       .from('readers')
-      .select('*')
+      .select('*, books(count)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true });
 
     if (dbError) {
       setError(dbError.message);
     } else {
-      setReaders((data ?? []) as Reader[]);
+      const readers = (data ?? []).map((r: any) => ({
+        ...r,
+        book_count: (r.books?.[0]?.count ?? 0) as number,
+        books: undefined,
+      })) as Reader[];
+      setReaders(readers);
     }
     setIsLoading(false);
   }, [user?.id]);

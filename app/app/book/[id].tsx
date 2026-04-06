@@ -24,6 +24,14 @@ export default function BookDetailScreen() {
   const { selectedReader, updateBalance } = useReaderStore();
   const { books, isLoading, deleteBook } = useBooks(selectedReader?.id ?? null);
 
+  const handleBack = () => {
+    if (selectedReader) {
+      router.push(`/app/reader/${selectedReader.id}`);
+    } else {
+      router.back();
+    }
+  };
+
   const book = books.find((b) => b.id === id);
 
   if (isLoading) {
@@ -38,7 +46,7 @@ export default function BookDetailScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.container}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Text style={styles.backText}>←</Text>
           </TouchableOpacity>
         </View>
@@ -61,7 +69,7 @@ export default function BookDetailScreen() {
             if (selectedReader) {
               updateBalance(selectedReader.livrux_balance - book.livrux_earned);
             }
-            router.back();
+            handleBack();
           },
         },
       ]
@@ -73,7 +81,7 @@ export default function BookDetailScreen() {
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={handleBack}>
             <Text style={styles.backText}>←</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleDelete}>

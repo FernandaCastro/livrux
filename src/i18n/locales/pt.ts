@@ -54,7 +54,7 @@ const pt = {
     readerNamePlaceholder: 'ex: João',
     addPhoto: 'Adicionar foto',
     changePhoto: 'Alterar foto',
-    deleteReader: 'Excluir leitor',
+    deleteReader: 'Excluir Leitor',
     deleteConfirm: 'Excluir {{name}}? Todos os livros e Livrux serão perdidos.',
     balance: 'Saldo',
     books: 'Livros lidos',

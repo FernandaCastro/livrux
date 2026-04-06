@@ -32,6 +32,7 @@ export interface Reader {
   livrux_balance: number;
   created_at: string;
   updated_at: string;
+  book_count?: number;
 }
 
 export interface Book {

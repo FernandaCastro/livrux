@@ -6,22 +6,21 @@ import {
   Image,
   StyleSheet,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import type { Reader } from '../../types';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
 
 interface ReaderCardProps {
   reader: Reader;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
 // Displays a single reader as a tappable card in the home grid.
-export function ReaderCard({ reader, onPress }: ReaderCardProps) {
-  const { t } = useTranslation();
-
+export function ReaderCard({ reader, onPress, onLongPress }: ReaderCardProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
+      onLongPress={onLongPress}
       activeOpacity={0.8}
       style={styles.card}
     >
@@ -48,6 +47,14 @@ export function ReaderCard({ reader, onPress }: ReaderCardProps) {
         <Text style={styles.badgeCoin}>🪙</Text>
         <Text style={styles.badgeAmount}>
           {reader.livrux_balance.toFixed(2)}
+        </Text>
+      </View>
+
+      {/* Books read badge */}
+      <View style={[styles.badge, styles.booksBadge]}>
+        <Text style={styles.badgeCoin}>📚</Text>
+        <Text style={styles.badgeAmount}>
+          {reader.book_count ?? 0}
         </Text>
       </View>
     </TouchableOpacity>
@@ -107,6 +114,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     gap: 4,
+  },
+  booksBadge: {
+    marginTop: Spacing.xs,
   },
   badgeCoin: {
     fontSize: 14,

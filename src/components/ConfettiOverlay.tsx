@@ -336,9 +336,13 @@ export function ConfettiOverlay({ visible, prevCount, newCount, onDone }: Confet
   const [modalVisible, setModalVisible] = useState(false);
   const fadeOpacity = useSharedValue(0);
   const fadeOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Freeze counts when the overlay opens so they don't change to 0 when
+  // clearConfetti() nulls the store trigger during the fade-out.
+  const frozenCounts = useRef({ prev: 0, next: 0 });
 
   useEffect(() => {
     if (visible) {
+      frozenCounts.current = { prev: prevCount, next: newCount };
       // Cancel any pending fade-out from a quick re-trigger.
       if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
       setModalVisible(true);
@@ -392,8 +396,8 @@ export function ConfettiOverlay({ visible, prevCount, newCount, onDone }: Confet
             {modalVisible && (
               <AnimatedCounter
                 animKey={0}
-                prevCount={prevCount}
-                newCount={newCount}
+                prevCount={frozenCounts.current.prev}
+                newCount={frozenCounts.current.next}
               />
             )}
             <Text style={styles.booksLabel}>{t('reader.books')}</Text>

@@ -11,11 +11,16 @@ interface ReaderState {
   confettiTrigger: { prev: number; next: number } | null;
   triggerConfetti: (prev: number, next: number) => void;
   clearConfetti: () => void;
+  // Incremented each time a book is successfully persisted to the DB so that
+  // screens holding a readers list can react and refresh stale data.
+  bookPersistedCount: number;
+  notifyBookPersisted: () => void;
 }
 
 export const useReaderStore = create<ReaderState>((set) => ({
   selectedReader: null,
   confettiTrigger: null,
+  bookPersistedCount: 0,
 
   setSelectedReader: (reader) => set({ selectedReader: reader }),
 
@@ -29,4 +34,6 @@ export const useReaderStore = create<ReaderState>((set) => ({
 
   triggerConfetti: (prev, next) => set({ confettiTrigger: { prev, next } }),
   clearConfetti: () => set({ confettiTrigger: null }),
+  notifyBookPersisted: () =>
+    set((state) => ({ bookPersistedCount: state.bookPersistedCount + 1 })),
 }));

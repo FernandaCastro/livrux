@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
+  InteractionManager,
   Modal,
   StyleSheet,
   Text,
@@ -322,50 +323,95 @@ export interface ConfettiOverlayProps {
   onDone: () => void;
 }
 
+const FADE_IN_MS = 250;
+const FADE_OUT_MS = 400;
+const AUTO_CLOSE_MS = 6500;
+
 export function ConfettiOverlay({ visible, prevCount, newCount, onDone }: ConfettiOverlayProps) {
   const { t } = useTranslation();
-  const [renderKey, setRenderKey] = useState(0);
-  const particlesRef = useRef<ParticleData[]>([]);
+  // Pre-generate particles at app startup so confetti triggers are instant —
+  // no blocking JS work on the critical save→animation path.
+  const [particles, setParticles] = useState<ParticleData[]>(() => randomParticles());
+  // Keep the Modal mounted during fade-out so the animation plays fully.
+  const [modalVisible, setModalVisible] = useState(false);
+  const fadeOpacity = useSharedValue(0);
+  const fadeOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Freeze counts when the overlay opens so they don't change to 0 when
+  // clearConfetti() nulls the store trigger during the fade-out.
+  const frozenCounts = useRef({ prev: 0, next: 0 });
 
   useEffect(() => {
-    if (!visible) return;
-    particlesRef.current = randomParticles();
-    setRenderKey(k => k + 1);
-    const timer = setTimeout(onDone, 6500);
-    return () => clearTimeout(timer);
+    if (visible) {
+      frozenCounts.current = { prev: prevCount, next: newCount };
+      // Cancel any pending fade-out from a quick re-trigger.
+      if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+      setModalVisible(true);
+      fadeOpacity.value = withTiming(1, { duration: FADE_IN_MS, easing: Easing.out(Easing.quad) });
+
+      const autoClose = setTimeout(onDone, AUTO_CLOSE_MS);
+      // Regenerate the next batch asynchronously while confetti plays.
+      const task = InteractionManager.runAfterInteractions(() => {
+        setParticles(randomParticles());
+      });
+      return () => {
+        clearTimeout(autoClose);
+        task.cancel();
+      };
+    } else {
+      // Fade out, then unmount the Modal so it's fully gone.
+      fadeOpacity.value = withTiming(0, { duration: FADE_OUT_MS, easing: Easing.in(Easing.quad) });
+      fadeOutTimer.current = setTimeout(() => setModalVisible(false), FADE_OUT_MS);
+      return () => {
+        if (fadeOutTimer.current) clearTimeout(fadeOutTimer.current);
+      };
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, onDone]);
+
+  const fadeStyle = useAnimatedStyle(() => ({ opacity: fadeOpacity.value }));
 
   return (
     <Modal
       transparent
-      visible={visible}
-      animationType="fade"
+      visible={modalVisible}
+      animationType="none"
       onRequestClose={onDone}
       statusBarTranslucent
     >
-      <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onDone}>
-        {/* 300 confetti particles — 150 from each bottom corner */}
-        {particlesRef.current.map(p => (
-          <ConfettiParticle key={`${renderKey}-${p.id}`} data={p} />
-        ))}
+      <Animated.View style={[styles.animatedWrapper, fadeStyle]}>
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onDone}>
+          {/*
+           * Particles are conditionally rendered so Reanimated worklets are not
+           * running in the background while the overlay is hidden.
+           * They mount fresh on every trigger, so animations always restart
+           * from scratch without needing an explicit key increment.
+           */}
+          {modalVisible && particles.map(p => (
+            <ConfettiParticle key={p.id} data={p} />
+          ))}
 
-        {/* Transparent celebration area — only text is visible */}
-        <View style={styles.celebration}>
-          <Text style={styles.bookEmoji}>📚</Text>
-          <AnimatedCounter
-            key={renderKey}
-            animKey={renderKey}
-            prevCount={prevCount}
-            newCount={newCount}
-          />
-          <Text style={styles.booksLabel}>{t('reader.books')}</Text>
-        </View>
-      </TouchableOpacity>
+          {/* Transparent celebration area — only text is visible */}
+          <View style={styles.celebration}>
+            <Text style={styles.bookEmoji}>📚</Text>
+            {modalVisible && (
+              <AnimatedCounter
+                animKey={0}
+                prevCount={frozenCounts.current.prev}
+                newCount={frozenCounts.current.next}
+              />
+            )}
+            <Text style={styles.booksLabel}>{t('reader.books')}</Text>
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  animatedWrapper: {
+    flex: 1,
+  },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.38)',

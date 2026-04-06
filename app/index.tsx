@@ -68,8 +68,10 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Readers grid */}
-      {isLoading ? (
+      {/* Readers grid — show the full-screen spinner only on the very first
+          load (no data yet). Background refreshes (focus, post-persist) use
+          the FlatList's RefreshControl so the list doesn't flash away. */}
+      {isLoading && readers.length === 0 ? (
         <ActivityIndicator
           color={Colors.primary}
           size="large"

@@ -162,6 +162,7 @@ export default function ReaderDashboardScreen() {
           <BookCard
             book={item}
             onPress={() => router.push(`/app/book/${item.id}`)}
+            onLongPress={() => router.push(`/app/book/edit?bookId=${item.id}`)}
           />
         )}
       />

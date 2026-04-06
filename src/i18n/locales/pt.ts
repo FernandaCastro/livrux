@@ -87,6 +87,8 @@ const pt = {
       titleRequired: 'O título é obrigatório.',
       pagesRequired: 'O total de páginas é obrigatório.',
       pagesInvalid: 'As páginas devem ser um número positivo.',
+      dateRequired: 'A data é obrigatória.',
+      dateInvalid: 'Informe uma data válida (DD/MM/AAAA).',
     },
   },
   rewards: {
@@ -99,6 +101,7 @@ const pt = {
     spendButton: 'Gastar Livrux',
     reasonBookCompleted: 'Livro lido',
     reasonBookDeleted: 'Livro excluído',
+    reasonBookUpdated: 'Livro atualizado',
     reasonManualSpend: 'Gasto',
   },
   spend: {

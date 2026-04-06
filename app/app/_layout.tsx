@@ -58,6 +58,7 @@ export default function AppLayout() {
       <Tabs.Screen name="reader/add" options={{ href: null }} />
       <Tabs.Screen name="book/add" options={{ href: null }} />
       <Tabs.Screen name="book/[id]" options={{ href: null }} />
+      <Tabs.Screen name="book/edit" options={{ href: null }} />
       <Tabs.Screen name="settings/formula" options={{ href: null }} />
       <Tabs.Screen name="spend" options={{ href: null }} />
     </Tabs>

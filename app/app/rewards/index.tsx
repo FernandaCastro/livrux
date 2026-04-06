@@ -23,6 +23,7 @@ function TransactionRow({ tx }: { tx: LivruxTransaction }) {
   const reasonKey =
     tx.reason === 'book_completed' ? 'rewards.reasonBookCompleted'
     : tx.reason === 'book_deleted' ? 'rewards.reasonBookDeleted'
+    : tx.reason === 'book_updated' ? 'rewards.reasonBookUpdated'
     : 'rewards.reasonManualSpend';
   return (
     <View style={styles.txRow}>

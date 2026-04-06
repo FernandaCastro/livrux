@@ -87,6 +87,8 @@ const en = {
       titleRequired: 'Title is required.',
       pagesRequired: 'Total pages is required.',
       pagesInvalid: 'Pages must be a positive number.',
+      dateRequired: 'Date is required.',
+      dateInvalid: 'Enter a valid date (DD/MM/YYYY).',
     },
   },
   rewards: {
@@ -99,6 +101,7 @@ const en = {
     spendButton: 'Spend Livrux',
     reasonBookCompleted: 'Book read',
     reasonBookDeleted: 'Book removed',
+    reasonBookUpdated: 'Book updated',
     reasonManualSpend: 'Expense',
   },
   spend: {

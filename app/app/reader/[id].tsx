@@ -8,11 +8,13 @@ import {
   RefreshControl,
   Image,
   Alert,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -29,6 +31,7 @@ export default function ReaderDashboardScreen() {
   const { selectedReader, setSelectedReader } = useReaderStore();
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
+  const [avatarModalVisible, setAvatarModalVisible] = useState(false);
 
   // Refresh books list and re-fetch the reader from DB to get the latest balance.
   useFocusEffect(
@@ -92,10 +95,26 @@ export default function ReaderDashboardScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Avatar full-screen modal */}
+      {reader.avatar_url && (
+        <Modal
+          visible={avatarModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setAvatarModalVisible(false)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setAvatarModalVisible(false)}>
+            <Image source={{ uri: reader.avatar_url }} style={styles.modalAvatar} resizeMode="contain" />
+          </Pressable>
+        </Modal>
+      )}
+
       {/* Reader hero */}
       <View style={styles.hero}>
         {reader.avatar_url ? (
-          <Image source={{ uri: reader.avatar_url }} style={styles.avatar} />
+          <TouchableOpacity onPress={() => setAvatarModalVisible(true)} activeOpacity={0.85}>
+            <Image source={{ uri: reader.avatar_url }} style={styles.avatar} />
+          </TouchableOpacity>
         ) : (
           <View style={styles.avatarPlaceholder}>
             <Text style={styles.avatarInitial}>
@@ -295,6 +314,17 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalAvatar: {
+    width: '90%',
+    aspectRatio: 1,
+    borderRadius: Radius.lg,
   },
   fab: {
     position: 'absolute',

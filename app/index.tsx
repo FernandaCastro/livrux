@@ -85,7 +85,14 @@ export default function HomeScreen() {
             />
           }
           renderItem={({ item }) => (
-            <ReaderCard reader={item} onPress={() => handleSelectReader(item)} />
+            <ReaderCard
+            reader={item}
+            onPress={() => handleSelectReader(item)}
+            onLongPress={() => {
+              setSelectedReader(item);
+              router.push(`/app/reader/add?editId=${item.id}`);
+            }}
+          />
           )}
           // "Add reader" card appended after the real items.
           ListFooterComponent={

@@ -12,13 +12,15 @@ import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../consta
 interface ReaderCardProps {
   reader: Reader;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
 // Displays a single reader as a tappable card in the home grid.
-export function ReaderCard({ reader, onPress }: ReaderCardProps) {
+export function ReaderCard({ reader, onPress, onLongPress }: ReaderCardProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
+      onLongPress={onLongPress}
       activeOpacity={0.8}
       style={styles.card}
     >

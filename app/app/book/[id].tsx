@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -21,9 +22,17 @@ export default function BookDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { selectedReader, updateBalance } = useReaderStore();
-  const { books, deleteBook } = useBooks(selectedReader?.id ?? null);
+  const { books, isLoading, deleteBook } = useBooks(selectedReader?.id ?? null);
 
   const book = books.find((b) => b.id === id);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
+      </SafeAreaView>
+    );
+  }
 
   if (!book) {
     return (

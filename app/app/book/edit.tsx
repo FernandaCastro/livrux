@@ -105,11 +105,17 @@ export default function EditBookScreen() {
     try {
       const pages = Number(data.totalPages);
       const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
-      // Convert DD/MM/YYYY → YYYY-MM-DD for storage.
-      const dateCompleted = format(
-        parse(data.dateCompleted, 'dd/MM/yyyy', new Date()),
-        'yyyy-MM-dd'
+      // Combine user-entered date (DD/MM/YYYY) with the original time from
+      // book.date_completed so the sort order among same-day books is preserved.
+      const newDate = parse(data.dateCompleted, 'dd/MM/yyyy', new Date());
+      const originalDateTime = new Date(book.date_completed);
+      newDate.setHours(
+        originalDateTime.getHours(),
+        originalDateTime.getMinutes(),
+        originalDateTime.getSeconds(),
+        originalDateTime.getMilliseconds(),
       );
+      const dateCompleted = newDate.toISOString();
 
       await updateBook({
         bookId: book.id,

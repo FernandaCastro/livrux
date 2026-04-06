@@ -115,7 +115,7 @@ export default function AddBookScreen() {
         totalPages: pages,
         coverUrl: coverUri,
         livruxEarned,
-        dateCompleted: format(new Date(), 'yyyy-MM-dd'),
+        dateCompleted: new Date().toISOString(),
         notes: data.notes || null,
         isForeignLanguage,
       });

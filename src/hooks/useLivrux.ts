@@ -80,6 +80,32 @@ export async function logBookRpc(params: {
   return data as string;
 }
 
+// Calls the atomic update_book RPC which updates all editable book fields,
+// records a 'book_updated' transaction with the Livrux delta, and adjusts the
+// reader balance in a single database transaction.
+export async function updateBookRpc(params: {
+  bookId: string;
+  title: string;
+  author: string | null;
+  totalPages: number;
+  coverUrl: string | null;
+  notes: string | null;
+  isForeignLanguage: boolean;
+  livruxEarned: number;
+}): Promise<void> {
+  const { error } = await supabase.rpc('update_book', {
+    p_book_id:             params.bookId,
+    p_title:               params.title,
+    p_author:              params.author,
+    p_total_pages:         params.totalPages,
+    p_cover_url:           params.coverUrl,
+    p_notes:               params.notes,
+    p_is_foreign_language: params.isForeignLanguage,
+    p_livrux_earned:       params.livruxEarned,
+  });
+  if (error) throw error;
+}
+
 // Calls the atomic spend_livrux RPC which records a real-life Livrux expense,
 // inserts a negative transaction with the user's description, and subtracts
 // the reader balance in a single database transaction.

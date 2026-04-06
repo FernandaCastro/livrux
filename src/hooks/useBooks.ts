@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { deleteBookRpc } from './useLivrux';
+import { deleteBookRpc, updateBookRpc } from './useLivrux';
 import type { Book } from '../types';
 
 interface UseBooksResult {
@@ -9,6 +9,7 @@ interface UseBooksResult {
   error: string | null;
   refresh: () => Promise<void>;
   deleteBook: (bookId: string) => Promise<void>;
+  updateBook: (params: Parameters<typeof updateBookRpc>[0]) => Promise<void>;
 }
 
 // Fetches all books for a given reader, ordered newest first.
@@ -47,5 +48,25 @@ export function useBooks(readerId: string | null): UseBooksResult {
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
   };
 
-  return { books, isLoading, error, refresh: fetch, deleteBook };
+  const updateBook = async (params: Parameters<typeof updateBookRpc>[0]): Promise<void> => {
+    await updateBookRpc(params);
+    setBooks((prev) =>
+      prev.map((b) =>
+        b.id === params.bookId
+          ? {
+              ...b,
+              title: params.title,
+              author: params.author,
+              total_pages: params.totalPages,
+              cover_url: params.coverUrl,
+              notes: params.notes,
+              is_foreign_language: params.isForeignLanguage,
+              livrux_earned: params.livruxEarned,
+            }
+          : b
+      )
+    );
+  };
+
+  return { books, isLoading, error, refresh: fetch, deleteBook, updateBook };
 }

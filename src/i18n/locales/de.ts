@@ -99,6 +99,7 @@ const de = {
     spendButton: 'Livrux ausgeben',
     reasonBookCompleted: 'Buch gelesen',
     reasonBookDeleted: 'Buch entfernt',
+    reasonBookUpdated: 'Buch aktualisiert',
     reasonManualSpend: 'Ausgabe',
   },
   spend: {

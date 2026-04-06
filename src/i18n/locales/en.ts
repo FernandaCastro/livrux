@@ -99,6 +99,7 @@ const en = {
     spendButton: 'Spend Livrux',
     reasonBookCompleted: 'Book read',
     reasonBookDeleted: 'Book removed',
+    reasonBookUpdated: 'Book updated',
     reasonManualSpend: 'Expense',
   },
   spend: {

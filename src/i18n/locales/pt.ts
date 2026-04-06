@@ -99,6 +99,7 @@ const pt = {
     spendButton: 'Gastar Livrux',
     reasonBookCompleted: 'Livro lido',
     reasonBookDeleted: 'Livro excluído',
+    reasonBookUpdated: 'Livro atualizado',
     reasonManualSpend: 'Gasto',
   },
   spend: {

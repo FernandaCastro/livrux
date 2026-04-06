@@ -6,7 +6,6 @@ import {
   Image,
   StyleSheet,
 } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import type { Reader } from '../../types';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
 
@@ -17,8 +16,6 @@ interface ReaderCardProps {
 
 // Displays a single reader as a tappable card in the home grid.
 export function ReaderCard({ reader, onPress }: ReaderCardProps) {
-  const { t } = useTranslation();
-
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -55,7 +52,7 @@ export function ReaderCard({ reader, onPress }: ReaderCardProps) {
       <View style={[styles.badge, styles.booksBadge]}>
         <Text style={styles.badgeCoin}>📚</Text>
         <Text style={styles.badgeAmount}>
-          {reader.book_count ?? 0} {t('reader.books')}
+          {reader.book_count ?? 0}
         </Text>
       </View>
     </TouchableOpacity>

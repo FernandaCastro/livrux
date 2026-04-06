@@ -6,6 +6,13 @@ export interface GoogleBookResult {
   isbn: string | null;
 }
 
+export class GoogleBooksError extends Error {
+  constructor(public readonly status: number, message: string) {
+    super(message);
+    this.name = 'GoogleBooksError';
+  }
+}
+
 function mapVolume(item: any): GoogleBookResult {
   const info = item.volumeInfo ?? {};
 
@@ -28,29 +35,37 @@ function mapVolume(item: any): GoogleBookResult {
   };
 }
 
-export async function searchBooks(query: string): Promise<GoogleBookResult[]> {
-  if (!query.trim()) return [];
+const BASE_URL = 'https://www.googleapis.com/books/v1/volumes';
 
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5`;
-  try {
-    const response = await fetch(url);
-    if (!response.ok) return [];
-    const data = await response.json();
-    return (data.items ?? []).map(mapVolume);
-  } catch {
-    return [];
+function buildUrl(params: Record<string, string>): string {
+  const apiKey = process.env.EXPO_PUBLIC_GOOGLE_BOOKS_API_KEY;
+  const search = new URLSearchParams(params);
+  if (apiKey) search.set('key', apiKey);
+  return `${BASE_URL}?${search.toString()}`;
+}
+
+async function checkResponse(response: Response): Promise<void> {
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    throw new GoogleBooksError(response.status, body);
   }
 }
 
+export async function searchBooks(query: string): Promise<GoogleBookResult[]> {
+  if (!query.trim()) return [];
+
+  const url = buildUrl({ q: query, maxResults: '5' });
+  const response = await fetch(url);
+  await checkResponse(response);
+  const data = await response.json();
+  return (data.items ?? []).map(mapVolume);
+}
+
 export async function fetchByIsbn(isbn: string): Promise<GoogleBookResult | null> {
-  const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`;
-  try {
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    const data = await response.json();
-    if (!data.items?.length) return null;
-    return mapVolume(data.items[0]);
-  } catch {
-    return null;
-  }
+  const url = buildUrl({ q: `isbn:${isbn}` });
+  const response = await fetch(url);
+  await checkResponse(response);
+  const data = await response.json();
+  if (!data.items?.length) return null;
+  return mapVolume(data.items[0]);
 }

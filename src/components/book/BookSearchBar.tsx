@@ -12,7 +12,7 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTranslation } from 'react-i18next';
 import { TextInput } from '../ui/TextInput';
-import { searchBooks, fetchByIsbn, type GoogleBookResult } from '../../lib/googleBooks';
+import { searchBooks, fetchByIsbn, GoogleBooksError, type GoogleBookResult } from '../../lib/googleBooks';
 import { Colors, Fonts, FontSizes, Radius, Spacing, Shadows } from '../../constants/theme';
 
 interface BookSearchBarProps {
@@ -24,9 +24,11 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GoogleBookResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [scanLoading, setScanLoading] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -36,14 +38,24 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
 
     if (!query.trim()) {
       setResults([]);
+      setSearchError(null);
       return;
     }
 
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
-      const found = await searchBooks(query);
-      setResults(found);
-      setLoading(false);
+      setSearchError(null);
+      try {
+        const found = await searchBooks(query);
+        setResults(found);
+      } catch (e) {
+        console.error('[BookSearch]', e);
+        setResults([]);
+        const isRateLimit = e instanceof GoogleBooksError && e.status === 429;
+        setSearchError(isRateLimit ? t('book.errors.searchUnavailable') : t('book.errors.searchFailed'));
+      } finally {
+        setLoading(false);
+      }
     }, 350);
 
     return () => {
@@ -54,6 +66,7 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
   const handleSelect = (book: GoogleBookResult) => {
     setQuery('');
     setResults([]);
+    setSearchError(null);
     onSelect(book);
   };
 
@@ -71,12 +84,19 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
     setScanned(true);
     setScanLoading(true);
 
-    const book = await fetchByIsbn(data);
-    setScanLoading(false);
-    setScannerOpen(false);
-
-    if (book) {
-      onSelect(book);
+    try {
+      const book = await fetchByIsbn(data);
+      setScanLoading(false);
+      setScannerOpen(false);
+      if (book) {
+        onSelect(book);
+      }
+    } catch (e) {
+      console.error('[ISBNScan]', e);
+      setScanLoading(false);
+      setScannerOpen(false);
+      const isRateLimit = e instanceof GoogleBooksError && e.status === 429;
+      setScanError(isRateLimit ? t('book.errors.searchUnavailable') : t('book.errors.searchFailed'));
     }
   };
 
@@ -104,6 +124,12 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
           <Text style={styles.scanIcon}>📷</Text>
         </TouchableOpacity>
       </View>
+
+      {(searchError || scanError) && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorBannerText}>{searchError ?? scanError}</Text>
+        </View>
+      )}
 
       {results.length > 0 && (
         <View style={styles.dropdown}>
@@ -253,6 +279,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
     color: Colors.secondary,
+  },
+
+  errorBanner: {
+    backgroundColor: '#FDECEA',
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginTop: Spacing.xs,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.error,
+  },
+  errorBannerText: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: Colors.error,
   },
 
   // Scanner

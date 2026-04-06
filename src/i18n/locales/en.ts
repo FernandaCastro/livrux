@@ -89,6 +89,8 @@ const en = {
       pagesInvalid: 'Pages must be a positive number.',
       dateRequired: 'Date is required.',
       dateInvalid: 'Enter a valid date (DD/MM/YYYY).',
+      searchUnavailable: 'Search unavailable right now. Try again later or fill in manually.',
+      searchFailed: 'Could not reach the book search. Check your connection and try again.',
     },
   },
   rewards: {

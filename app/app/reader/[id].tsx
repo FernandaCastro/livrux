@@ -91,7 +91,7 @@ export default function ReaderDashboardScreen() {
           onPress={handleDelete}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.deleteText}>{t('common.delete')}</Text>
+          <Text style={styles.deleteText}>{t('reader.deleteReader')}</Text>
         </TouchableOpacity>
       </View>
 

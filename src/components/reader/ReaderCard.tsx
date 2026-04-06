@@ -50,6 +50,14 @@ export function ReaderCard({ reader, onPress }: ReaderCardProps) {
           {reader.livrux_balance.toFixed(2)}
         </Text>
       </View>
+
+      {/* Books read badge */}
+      <View style={[styles.badge, styles.booksBadge]}>
+        <Text style={styles.badgeCoin}>📚</Text>
+        <Text style={styles.badgeAmount}>
+          {reader.book_count ?? 0} {t('reader.books')}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -107,6 +115,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     gap: 4,
+  },
+  booksBadge: {
+    marginTop: Spacing.xs,
   },
   badgeCoin: {
     fontSize: 14,

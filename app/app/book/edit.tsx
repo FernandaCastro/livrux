@@ -59,6 +59,14 @@ export default function EditBookScreen() {
   const { selectedReader, updateBalance } = useReaderStore();
   const { books, updateBook } = useBooks(selectedReader?.id ?? null);
 
+  const handleBack = () => {
+    if (selectedReader) {
+      router.push(`/app/reader/${selectedReader.id}`);
+    } else {
+      handleBack();
+    }
+  };
+
   const book = books.find((b) => b.id === bookId);
 
   const activeFormula = formula ?? getDefaultFormula();
@@ -133,7 +141,7 @@ export default function EditBookScreen() {
         updateBalance(selectedReader.livrux_balance + (livruxEarned - book.livrux_earned));
       }
 
-      router.back();
+      handleBack();
     } catch {
       Alert.alert(t('common.error'), t('common.error'));
     }

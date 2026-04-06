@@ -322,9 +322,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalAvatar: {
-    width: '90%',
+    width: '80%',
     aspectRatio: 1,
-    borderRadius: Radius.lg,
+    borderRadius: 9999,
+    borderWidth: 4,
+    borderColor: Colors.primaryLight,
   },
   fab: {
     position: 'absolute',

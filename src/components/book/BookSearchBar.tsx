@@ -12,7 +12,7 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTranslation } from 'react-i18next';
 import { TextInput } from '../ui/TextInput';
-import { searchBooks, fetchByIsbn, type GoogleBookResult } from '../../lib/googleBooks';
+import { searchBooks, fetchByIsbn, GoogleBooksError, type GoogleBookResult } from '../../lib/googleBooks';
 import { Colors, Fonts, FontSizes, Radius, Spacing, Shadows } from '../../constants/theme';
 
 interface BookSearchBarProps {
@@ -51,7 +51,8 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
       } catch (e) {
         console.error('[BookSearch]', e);
         setResults([]);
-        setSearchError(e instanceof Error ? e.message : String(e));
+        const isRateLimit = e instanceof GoogleBooksError && e.status === 429;
+        setSearchError(isRateLimit ? t('book.errors.searchUnavailable') : t('book.errors.searchFailed'));
       } finally {
         setLoading(false);
       }
@@ -94,7 +95,8 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
       console.error('[ISBNScan]', e);
       setScanLoading(false);
       setScannerOpen(false);
-      setScanError(e instanceof Error ? e.message : String(e));
+      const isRateLimit = e instanceof GoogleBooksError && e.status === 429;
+      setScanError(isRateLimit ? t('book.errors.searchUnavailable') : t('book.errors.searchFailed'));
     }
   };
 
@@ -123,12 +125,10 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
         </TouchableOpacity>
       </View>
 
-      {searchError && (
-        <Text style={styles.errorText}>{searchError}</Text>
-      )}
-
-      {scanError && (
-        <Text style={styles.errorText}>{scanError}</Text>
+      {(searchError || scanError) && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorBannerText}>{searchError ?? scanError}</Text>
+        </View>
       )}
 
       {results.length > 0 && (
@@ -281,11 +281,18 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
   },
 
-  errorText: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.error,
+  errorBanner: {
+    backgroundColor: '#FDECEA',
+    borderRadius: Radius.md,
+    padding: Spacing.md,
     marginTop: Spacing.xs,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.error,
+  },
+  errorBannerText: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: Colors.error,
   },
 
   // Scanner

@@ -89,6 +89,8 @@ const de = {
       pagesInvalid: 'Seiten müssen eine positive Zahl sein.',
       dateRequired: 'Datum ist erforderlich.',
       dateInvalid: 'Gib ein gültiges Datum ein (TT/MM/JJJJ).',
+      searchUnavailable: 'Suche gerade nicht verfügbar. Versuche es später oder fülle manuell aus.',
+      searchFailed: 'Buchsuche nicht erreichbar. Überprüfe deine Verbindung und versuche es erneut.',
     },
   },
   rewards: {

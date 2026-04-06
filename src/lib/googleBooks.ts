@@ -6,6 +6,13 @@ export interface GoogleBookResult {
   isbn: string | null;
 }
 
+export class GoogleBooksError extends Error {
+  constructor(public readonly status: number, message: string) {
+    super(message);
+    this.name = 'GoogleBooksError';
+  }
+}
+
 function mapVolume(item: any): GoogleBookResult {
   const info = item.volumeInfo ?? {};
 
@@ -37,15 +44,19 @@ function buildUrl(params: Record<string, string>): string {
   return `${BASE_URL}?${search.toString()}`;
 }
 
+async function checkResponse(response: Response): Promise<void> {
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    throw new GoogleBooksError(response.status, body);
+  }
+}
+
 export async function searchBooks(query: string): Promise<GoogleBookResult[]> {
   if (!query.trim()) return [];
 
   const url = buildUrl({ q: query, maxResults: '5' });
   const response = await fetch(url);
-  if (!response.ok) {
-    const body = await response.text().catch(() => '');
-    throw new Error(`Google Books API error ${response.status}: ${body}`);
-  }
+  await checkResponse(response);
   const data = await response.json();
   return (data.items ?? []).map(mapVolume);
 }
@@ -53,10 +64,7 @@ export async function searchBooks(query: string): Promise<GoogleBookResult[]> {
 export async function fetchByIsbn(isbn: string): Promise<GoogleBookResult | null> {
   const url = buildUrl({ q: `isbn:${isbn}` });
   const response = await fetch(url);
-  if (!response.ok) {
-    const body = await response.text().catch(() => '');
-    throw new Error(`Google Books API error ${response.status}: ${body}`);
-  }
+  await checkResponse(response);
   const data = await response.json();
   if (!data.items?.length) return null;
   return mapVolume(data.items[0]);

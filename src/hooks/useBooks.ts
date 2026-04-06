@@ -59,7 +59,7 @@ export function useBooks(readerId: string | null): UseBooksResult {
               author: params.author,
               total_pages: params.totalPages,
               cover_url: params.coverUrl,
-              notes: params.notes,
+              date_completed: params.dateCompleted,
               is_foreign_language: params.isForeignLanguage,
               livrux_earned: params.livruxEarned,
             }

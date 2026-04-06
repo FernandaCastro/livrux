@@ -8,12 +8,13 @@ import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../consta
 interface BookCardProps {
   book: Book;
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
-export function BookCard({ book, onPress }: BookCardProps) {
+export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
   const { t } = useTranslation();
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.card}>
+    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} activeOpacity={0.8} style={styles.card}>
       {/* Cover thumbnail */}
       <View style={styles.coverContainer}>
         {book.cover_url ? (

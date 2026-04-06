@@ -89,7 +89,7 @@ export async function updateBookRpc(params: {
   author: string | null;
   totalPages: number;
   coverUrl: string | null;
-  notes: string | null;
+  dateCompleted: string;
   isForeignLanguage: boolean;
   livruxEarned: number;
 }): Promise<void> {
@@ -99,7 +99,7 @@ export async function updateBookRpc(params: {
     p_author:              params.author,
     p_total_pages:         params.totalPages,
     p_cover_url:           params.coverUrl,
-    p_notes:               params.notes,
+    p_date_completed:      params.dateCompleted,
     p_is_foreign_language: params.isForeignLanguage,
     p_livrux_earned:       params.livruxEarned,
   });

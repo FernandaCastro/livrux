@@ -87,6 +87,8 @@ const de = {
       titleRequired: 'Titel ist erforderlich.',
       pagesRequired: 'Seitenanzahl ist erforderlich.',
       pagesInvalid: 'Seiten müssen eine positive Zahl sein.',
+      dateRequired: 'Datum ist erforderlich.',
+      dateInvalid: 'Gib ein gültiges Datum ein (TT/MM/JJJJ).',
     },
   },
   rewards: {

@@ -13,6 +13,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
+import { parse, format, isValid } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useBooks } from '../../../src/hooks/useBooks';
@@ -32,11 +33,22 @@ function useBookSchema() {
       .string()
       .min(1, t('book.errors.pagesRequired'))
       .refine((v) => Number(v) > 0, t('book.errors.pagesInvalid')),
-    notes: z.string().optional(),
+    dateCompleted: z
+      .string()
+      .min(1, t('book.errors.dateRequired'))
+      .refine((v) => {
+        const parsed = parse(v, 'dd/MM/yyyy', new Date());
+        return isValid(parsed);
+      }, t('book.errors.dateInvalid')),
   });
 }
 
-type FormData = { title: string; author?: string; totalPages: string; notes?: string };
+type FormData = {
+  title: string;
+  author?: string;
+  totalPages: string;
+  dateCompleted: string;
+};
 
 export default function EditBookScreen() {
   const { t } = useTranslation();
@@ -53,18 +65,13 @@ export default function EditBookScreen() {
   const hasForeignLanguageBonus = activeFormula.bonus_rules.some(r => r.type === 'foreign_language');
   const schema = useBookSchema();
 
-  const [coverUri, setCoverUri] = useState<string | null>(book?.cover_url ?? null);
-  const [isForeignLanguage, setIsForeignLanguage] = useState(book?.is_foreign_language ?? false);
+  const [coverUri, setCoverUri] = useState<string | null>(null);
+  const [isForeignLanguage, setIsForeignLanguage] = useState(false);
   const [initialised, setInitialised] = useState(false);
 
   const { control, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      title: '',
-      author: '',
-      totalPages: '',
-      notes: '',
-    },
+    defaultValues: { title: '', author: '', totalPages: '', dateCompleted: '' },
   });
 
   // Pre-fill the form once the book is available from the store.
@@ -74,7 +81,8 @@ export default function EditBookScreen() {
         title: book.title,
         author: book.author ?? '',
         totalPages: String(book.total_pages),
-        notes: book.notes ?? '',
+        // Convert stored YYYY-MM-DD to display format DD/MM/YYYY.
+        dateCompleted: format(new Date(book.date_completed), 'dd/MM/yyyy'),
       });
       setCoverUri(book.cover_url);
       setIsForeignLanguage(book.is_foreign_language);
@@ -97,6 +105,11 @@ export default function EditBookScreen() {
     try {
       const pages = Number(data.totalPages);
       const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
+      // Convert DD/MM/YYYY → YYYY-MM-DD for storage.
+      const dateCompleted = format(
+        parse(data.dateCompleted, 'dd/MM/yyyy', new Date()),
+        'yyyy-MM-dd'
+      );
 
       await updateBook({
         bookId: book.id,
@@ -104,15 +117,14 @@ export default function EditBookScreen() {
         author: data.author || null,
         totalPages: pages,
         coverUrl: coverUri,
-        notes: data.notes || null,
+        dateCompleted,
         isForeignLanguage,
         livruxEarned,
       });
 
       // Optimistically adjust the reader balance by the delta.
       if (selectedReader) {
-        const balanceDelta = livruxEarned - book.livrux_earned;
-        updateBalance(selectedReader.livrux_balance + balanceDelta);
+        updateBalance(selectedReader.livrux_balance + (livruxEarned - book.livrux_earned));
       }
 
       router.back();
@@ -204,14 +216,16 @@ export default function EditBookScreen() {
 
         <Controller
           control={control}
-          name="notes"
+          name="dateCompleted"
           render={({ field: { onChange, onBlur, value } }) => (
             <TextInput
-              label="Notes"
-              placeholder="..."
+              label={t('book.dateCompleted')}
+              placeholder="DD/MM/YYYY"
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
+              keyboardType="number-pad"
+              error={errors.dateCompleted?.message}
             />
           )}
         />

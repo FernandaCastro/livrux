@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION public.update_book(
   p_author              TEXT,
   p_total_pages         INTEGER,
   p_cover_url           TEXT,
-  p_notes               TEXT,
+  p_date_completed      DATE,
   p_is_foreign_language BOOLEAN,
   p_livrux_earned       NUMERIC
 )
@@ -42,7 +42,7 @@ BEGIN
     author              = p_author,
     total_pages         = p_total_pages,
     cover_url           = p_cover_url,
-    notes               = p_notes,
+    date_completed      = p_date_completed,
     is_foreign_language = p_is_foreign_language,
     livrux_earned       = p_livrux_earned
   WHERE id = p_book_id;

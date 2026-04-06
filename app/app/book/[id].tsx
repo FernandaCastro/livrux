@@ -67,14 +67,9 @@ export default function BookDetailScreen() {
           <TouchableOpacity onPress={() => router.back()}>
             <Text style={styles.backText}>←</Text>
           </TouchableOpacity>
-          <View style={styles.headerActions}>
-            <TouchableOpacity onPress={() => router.push(`/app/book/edit?bookId=${book.id}`)}>
-              <Text style={styles.editText}>{t('common.edit')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleDelete}>
-              <Text style={styles.deleteText}>{t('book.deleteBook')}</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={handleDelete}>
+            <Text style={styles.deleteText}>{t('book.deleteBook')}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Cover */}
@@ -159,16 +154,6 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
   },
   backButton: { paddingVertical: Spacing.lg },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.lg,
-  },
-  editText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: Colors.secondary,
-  },
   deleteText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,

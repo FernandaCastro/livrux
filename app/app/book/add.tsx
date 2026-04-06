@@ -88,7 +88,7 @@ export default function AddBookScreen() {
     if (book.coverUrl) setCoverUri(book.coverUrl);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = (data: FormData) => {
     if (!user || !readerId) return;
 
     const pages = Number(data.totalPages);
@@ -103,28 +103,29 @@ export default function AddBookScreen() {
     updateBalance(originalBalance + livruxEarned);
     triggerConfetti(prevBookCount, prevBookCount + 1);
     router.back();
+    // onSubmit returns here synchronously so react-hook-form sets
+    // isSubmitting=false immediately — the button re-enables right away.
 
     // Persist to the DB in the background. On failure, roll back all state.
     // Access the store directly (not via hook) since the component may have
     // already unmounted after router.back().
-    try {
-      await logBookRpc({
-        readerId,
-        title: data.title,
-        author: data.author || null,
-        totalPages: pages,
-        coverUrl: coverUri,
-        livruxEarned,
-        dateCompleted: new Date().toISOString(),
-        notes: data.notes || null,
-        isForeignLanguage,
-      });
+    logBookRpc({
+      readerId,
+      title: data.title,
+      author: data.author || null,
+      totalPages: pages,
+      coverUrl: coverUri,
+      livruxEarned,
+      dateCompleted: new Date().toISOString(),
+      notes: data.notes || null,
+      isForeignLanguage,
+    }).then(() => {
       useReaderStore.getState().notifyBookPersisted();
-    } catch {
+    }).catch(() => {
       useReaderStore.getState().updateBalance(originalBalance);
       useReaderStore.getState().clearConfetti();
       Alert.alert(t('common.error'), t('common.error'));
-    }
+    });
   };
 
   return (

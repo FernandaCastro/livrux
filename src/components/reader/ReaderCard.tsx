@@ -13,10 +13,11 @@ interface ReaderCardProps {
   reader: Reader;
   onPress: () => void;
   onLongPress?: () => void;
+  locked?: boolean;
 }
 
 // Displays a single reader as a tappable card in the home grid.
-export function ReaderCard({ reader, onPress, onLongPress }: ReaderCardProps) {
+export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -24,6 +25,13 @@ export function ReaderCard({ reader, onPress, onLongPress }: ReaderCardProps) {
       activeOpacity={0.8}
       style={styles.card}
     >
+      {/* Lock badge — shown when reader has a PIN and isn't unlocked this session */}
+      {locked && (
+        <View style={styles.lockBadge}>
+          <Text style={styles.lockIcon}>🔒</Text>
+        </View>
+      )}
+
       {/* Avatar */}
       <View style={styles.avatarContainer}>
         {reader.avatar_url ? (
@@ -73,6 +81,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: Spacing.sm,
     ...Shadows.md,
+  },
+  lockBadge: {
+    position: 'absolute',
+    top: Spacing.xs,
+    right: Spacing.xs,
+    zIndex: 1,
+  },
+  lockIcon: {
+    fontSize: 16,
   },
   avatarContainer: {
     marginBottom: Spacing.sm,

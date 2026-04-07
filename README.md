@@ -190,7 +190,7 @@ EXPO_PUBLIC_GOOGLE_BOOKS_API_KEY=your-google-books-api-key-here
 In the Supabase dashboard, open the **SQL Editor** and run the migrations in order:
 
 ```
-<project-folder>/supabase/migrations/
+livrux/supabase/migrations/
 ```
 
 The first migration creates all tables, RLS policies, the `log_book` RPC, and the sign-up trigger. The second adds the `description` column and the `spend_livrux` RPC. The third adds the `is_foreign_language` column to `books` and updates the `log_book` RPC to support it.

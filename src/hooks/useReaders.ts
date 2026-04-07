@@ -27,7 +27,7 @@ export function useReaders(): UseReadersResult {
 
     const { data, error: dbError } = await supabase
       .from('readers')
-      .select('*, books(count)')
+      .select('id, user_id, name, avatar_url, pin, livrux_balance, created_at, updated_at, books(count)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true });
 

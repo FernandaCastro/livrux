@@ -15,6 +15,9 @@ import { useCallback, useEffect } from 'react';
 import { useReaders } from '../src/hooks/useReaders';
 import { useReaderStore } from '../src/stores/readerStore';
 import { useAuthStore } from '../src/stores/authStore';
+import { useParentalStore } from '../src/stores/parentalStore';
+import { useParentalGuard } from '../src/hooks/useParentalGuard';
+import { PinModal } from '../src/components/PinModal';
 import { ReaderCard } from '../src/components/reader/ReaderCard';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../src/constants/theme';
 import type { Reader } from '../src/types';
@@ -25,6 +28,8 @@ export default function HomeScreen() {
   const { readers, isLoading, refresh } = useReaders();
   const { setSelectedReader, bookPersistedCount } = useReaderStore();
   const { profile } = useAuthStore();
+  const { canAccessReader } = useParentalStore();
+  const { requireParentPin, requireReaderPin, modalProps } = useParentalGuard();
 
   useFocusEffect(
     useCallback(() => { refresh(); }, [])
@@ -37,8 +42,23 @@ export default function HomeScreen() {
   }, [bookPersistedCount]);
 
   const handleSelectReader = (reader: Reader) => {
-    setSelectedReader(reader);
-    router.push(`/app/reader/${reader.id}`);
+    requireReaderPin(reader, () => {
+      setSelectedReader(reader);
+      router.push(`/app/reader/${reader.id}`);
+    });
+  };
+
+  const handleEditReader = (reader: Reader) => {
+    requireParentPin(() => {
+      setSelectedReader(reader);
+      router.push(`/app/reader/add?editId=${reader.id}`);
+    });
+  };
+
+  const handleAddReader = () => {
+    requireParentPin(() => {
+      router.push('/app/reader/add');
+    });
   };
 
   const renderEmpty = () => (
@@ -51,6 +71,8 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      {modalProps && <PinModal {...modalProps} />}
+
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -60,7 +82,7 @@ export default function HomeScreen() {
           )}
         </View>
         <TouchableOpacity
-          onPress={() => router.push('/app/settings')}
+          onPress={() => requireParentPin(() => router.push('/app/settings'))}
           style={styles.settingsButton}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
@@ -94,18 +116,16 @@ export default function HomeScreen() {
           }
           renderItem={({ item }) => (
             <ReaderCard
-            reader={item}
-            onPress={() => handleSelectReader(item)}
-            onLongPress={() => {
-              setSelectedReader(item);
-              router.push(`/app/reader/add?editId=${item.id}`);
-            }}
-          />
+              reader={item}
+              onPress={() => handleSelectReader(item)}
+              onLongPress={() => handleEditReader(item)}
+              locked={!!item.pin && !canAccessReader(item.id)}
+            />
           )}
           // "Add reader" card appended after the real items.
           ListFooterComponent={
             <TouchableOpacity
-              onPress={() => router.push('/app/reader/add')}
+              onPress={handleAddReader}
               style={styles.addCard}
               activeOpacity={0.75}
             >

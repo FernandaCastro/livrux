@@ -4,6 +4,8 @@ export interface UserProfile {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
+  parental_pin: string | null; // SHA-256 hash; null = no parental lock
+  parental_unlock_duration: number; // minutes; 0 = session-long
   created_at: string;
 }
 
@@ -29,6 +31,7 @@ export interface Reader {
   user_id: string;
   name: string;
   avatar_url: string | null;
+  pin: string | null; // SHA-256 hash; null = no PIN required for this reader
   livrux_balance: number;
   created_at: string;
   updated_at: string;

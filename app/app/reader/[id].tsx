@@ -19,6 +19,7 @@ import { useCallback, useState } from 'react';
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReaders } from '../../../src/hooks/useReaders';
+import { useParentalStore } from '../../../src/stores/parentalStore';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
@@ -31,7 +32,10 @@ export default function ReaderDashboardScreen() {
   const { selectedReader, setSelectedReader } = useReaderStore();
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
+  const { canEditReader } = useParentalStore();
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+
+  const canEdit = canEditReader();
 
   // Refresh books list and re-fetch the reader from DB to get the latest balance.
   useFocusEffect(
@@ -87,12 +91,14 @@ export default function ReaderDashboardScreen() {
         >
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleDelete}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.deleteText}>{t('reader.deleteReader')}</Text>
-        </TouchableOpacity>
+        {canEdit && (
+          <TouchableOpacity
+            onPress={handleDelete}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.deleteText}>{t('reader.deleteReader')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Avatar full-screen modal */}
@@ -173,7 +179,7 @@ export default function ReaderDashboardScreen() {
           <BookCard
             book={item}
             onPress={() => router.push(`/app/book/${item.id}`)}
-            onLongPress={() => router.push(`/app/book/edit?bookId=${item.id}`)}
+            onLongPress={canEdit ? () => router.push(`/app/book/edit?bookId=${item.id}`) : undefined}
           />
         )}
       />

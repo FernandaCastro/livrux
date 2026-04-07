@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts, FredokaOne_400Regular } from '@expo-google-fonts/fredoka-one';
@@ -13,6 +14,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { supabase } from '../src/lib/supabase';
 import { useAuthStore } from '../src/stores/authStore';
+import { useParentalStore } from '../src/stores/parentalStore';
 import '../src/i18n'; // initialize i18n before any component renders
 
 // Root layout: loads fonts, initializes auth state, and routes to (auth) or (app).
@@ -20,6 +22,8 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const { session, isLoading, setSession, fetchProfile, fetchFormula } = useAuthStore();
+  const { lock, checkExpiry } = useParentalStore();
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   const [fontsLoaded] = useFonts({
     FredokaOne_400Regular,
@@ -28,6 +32,22 @@ export default function RootLayout() {
     Nunito_700Bold,
     Nunito_800ExtraBold,
   });
+
+  // Lock parental state when the app goes to the background.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (
+        appStateRef.current === 'active' &&
+        (nextState === 'background' || nextState === 'inactive')
+      ) {
+        lock();
+      } else if (nextState === 'active') {
+        checkExpiry();
+      }
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, []);
 
   // Subscribe to Supabase auth state changes for the lifetime of the app.
   useEffect(() => {

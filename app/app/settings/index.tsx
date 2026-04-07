@@ -76,6 +76,16 @@ export default function SettingsScreen() {
           />
         </View>
 
+        {/* Parental controls section */}
+        <Text style={styles.sectionLabel}>{t('settings.parentalControls')}</Text>
+        <View style={styles.card}>
+          <SettingsRow
+            icon="🛡️"
+            label={t('settings.parentalControlsTitle')}
+            onPress={() => router.push('/app/settings/parental')}
+          />
+        </View>
+
         {/* Reward formula section */}
         <Text style={styles.sectionLabel}>{t('settings.formula')}</Text>
         <View style={styles.card}>

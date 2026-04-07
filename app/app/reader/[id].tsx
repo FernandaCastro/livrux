@@ -129,6 +129,17 @@ export default function ReaderDashboardScreen() {
           </View>
         )}
         <Text style={styles.readerName}>{reader.name}</Text>
+      </View>
+
+      <View style={styles.heroBalance}>
+
+        {/* Stats */}
+        <View style={styles.statsRow}>
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>{books.length}</Text>
+            <Text style={styles.statLabel}>{t('reader.books')}</Text>
+          </View>
+        </View>
 
         {/* Balance card */}
         <View style={styles.balanceCard}>
@@ -139,14 +150,6 @@ export default function ReaderDashboardScreen() {
               {reader.livrux_balance.toFixed(2)}
             </Text>
             <Text style={styles.balanceCurrency}>Livrux</Text>
-          </View>
-        </View>
-
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{books.length}</Text>
-            <Text style={styles.statLabel}>{t('reader.books')}</Text>
           </View>
         </View>
       </View>
@@ -184,9 +187,20 @@ export default function ReaderDashboardScreen() {
         )}
       />
 
+
+      {/* FAB — Reward Wallet. */}
+      <TouchableOpacity
+        style={styles.fabL}
+        onPress={() => router.push(`/app/rewards?readerId=${reader.id}`)}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.fabText}>🪙 {t('rewards.title')}</Text>
+      </TouchableOpacity>
+
+
       {/* FAB — Log a book. Pass current count so add screen can compute prev/next for confetti. */}
       <TouchableOpacity
-        style={styles.fab}
+        style={styles.fabR}
         onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
         activeOpacity={0.85}
       >
@@ -219,6 +233,17 @@ const styles = StyleSheet.create({
     color: Colors.error,
   },
   hero: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    borderBottomWidth: 0,
+    borderBottomColor: Colors.divider,
+  },
+  heroBalance: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
@@ -254,6 +279,7 @@ const styles = StyleSheet.create({
     fontSize: FontSizes['2xl'],
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
+    paddingLeft: 10,
   },
   balanceCard: {
     backgroundColor: Colors.primary,
@@ -300,7 +326,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
+    fontSize: FontSizes.md,
     color: Colors.textSecondary,
   },
   list: {
@@ -334,7 +360,17 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: Colors.primaryLight,
   },
-  fab: {
+  fabL: {
+    position: 'absolute',
+    bottom: Spacing.xl,
+    left: Spacing.xl,
+    backgroundColor: Colors.secondary,
+    borderRadius: Radius.xl,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    ...Shadows.lg,
+  },
+  fabR: {
     position: 'absolute',
     bottom: Spacing.xl,
     right: Spacing.xl,

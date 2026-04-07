@@ -22,9 +22,9 @@ function TransactionRow({ tx }: { tx: LivruxTransaction }) {
   const isEarned = tx.amount > 0;
   const reasonKey =
     tx.reason === 'book_completed' ? 'rewards.reasonBookCompleted'
-    : tx.reason === 'book_deleted' ? 'rewards.reasonBookDeleted'
-    : tx.reason === 'book_updated' ? 'rewards.reasonBookUpdated'
-    : 'rewards.reasonManualSpend';
+      : tx.reason === 'book_deleted' ? 'rewards.reasonBookDeleted'
+        : tx.reason === 'book_updated' ? 'rewards.reasonBookUpdated'
+          : 'rewards.reasonManualSpend';
   return (
     <View style={styles.txRow}>
       <Text style={styles.txIcon}>{isEarned ? '🪙' : '💸'}</Text>
@@ -54,6 +54,14 @@ export default function RewardsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Text style={styles.backText}>←</Text>
+        </TouchableOpacity>
+      </View>
       {/* Balance hero */}
       <View style={styles.hero}>
         {selectedReader ? (
@@ -131,6 +139,19 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
+  },
+  backText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.xl,
+    color: Colors.secondary,
   },
   balanceCard: {
     backgroundColor: Colors.primary,

@@ -25,11 +25,7 @@ export default function BookDetailScreen() {
   const { books, isLoading, deleteBook } = useBooks(selectedReader?.id ?? null);
 
   const handleBack = () => {
-    if (selectedReader) {
-      router.push(`/app/reader/${selectedReader.id}`);
-    } else {
-      router.back();
-    }
+    router.back();
   };
 
   const book = books.find((b) => b.id === id);

@@ -28,11 +28,14 @@ export default function HomeScreen() {
   const { readers, isLoading, refresh } = useReaders();
   const { setSelectedReader, bookPersistedCount } = useReaderStore();
   const { profile } = useAuthStore();
-  const { canAccessReader } = useParentalStore();
+  const { canAccessReader, lockReaders } = useParentalStore();
   const { requireParentPin, requireReaderPin, toggleParentLock, isParentUnlocked, modalProps } = useParentalGuard();
 
   useFocusEffect(
-    useCallback(() => { refresh(); }, [])
+    useCallback(() => {
+      refresh();
+      lockReaders();
+    }, [])
   );
 
   // Refresh the readers list whenever a book is successfully persisted to the

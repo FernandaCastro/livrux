@@ -13,6 +13,7 @@ interface ParentalState {
   unlockParent: () => void;
   lockParent: () => void; // lock only parent mode, keep reader unlocks intact
   unlockReader: (readerId: string) => void;
+  lockReaders: () => void; // clear reader unlocks (called on home focus)
   lock: () => void; // call on AppState → background (clears everything)
 
   // --- Helpers ---
@@ -37,6 +38,10 @@ export const useParentalStore = create<ParentalState>((set, get) => ({
     set((state) => ({
       unlockedReaders: new Set([...state.unlockedReaders, readerId]),
     }));
+  },
+
+  lockReaders: () => {
+    set({ unlockedReaders: new Set() });
   },
 
   lock: () => {

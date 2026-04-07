@@ -87,7 +87,7 @@ export default function HomeScreen() {
         {!!profile?.parental_pin && (
           <TouchableOpacity
             onPress={toggleParentLock}
-            style={styles.lockButton}
+            style={[styles.lockButton, isParentUnlocked && styles.lockButtonUnlocked]}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Text style={styles.lockIcon}>{isParentUnlocked ? '🔓' : '🔒'}</Text>
@@ -170,6 +170,12 @@ const styles = StyleSheet.create({
   },
   lockButton: {
     padding: Spacing.xs,
+    borderRadius: Radius.full,
+  },
+  lockButtonUnlocked: {
+    backgroundColor: Colors.success,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
   },
   lockIcon: { fontSize: 24 },
   loader: { flex: 1 },

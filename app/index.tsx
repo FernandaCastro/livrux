@@ -28,11 +28,14 @@ export default function HomeScreen() {
   const { readers, isLoading, refresh } = useReaders();
   const { setSelectedReader, bookPersistedCount } = useReaderStore();
   const { profile } = useAuthStore();
-  const { canAccessReader } = useParentalStore();
-  const { requireParentPin, requireReaderPin, modalProps } = useParentalGuard();
+  const { canAccessReader, lockReaders } = useParentalStore();
+  const { requireParentPin, requireReaderPin, toggleParentLock, isParentUnlocked, modalProps } = useParentalGuard();
 
   useFocusEffect(
-    useCallback(() => { refresh(); }, [])
+    useCallback(() => {
+      refresh();
+      lockReaders();
+    }, [])
   );
 
   // Refresh the readers list whenever a book is successfully persisted to the
@@ -81,13 +84,15 @@ export default function HomeScreen() {
             <Text style={styles.greeting}>👋 {profile.display_name}</Text>
           )}
         </View>
-        <TouchableOpacity
-          onPress={() => requireParentPin(() => router.push('/app/settings'))}
-          style={styles.settingsButton}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.settingsIcon}>⚙️</Text>
-        </TouchableOpacity>
+        {!!profile?.parental_pin && (
+          <TouchableOpacity
+            onPress={toggleParentLock}
+            style={styles.lockButton}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.lockIcon}>{isParentUnlocked ? '🔓' : '🔒'}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Readers grid — show the full-screen spinner only on the very first
@@ -163,10 +168,10 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 2,
   },
-  settingsButton: {
+  lockButton: {
     padding: Spacing.xs,
   },
-  settingsIcon: { fontSize: 24 },
+  lockIcon: { fontSize: 26 },
   loader: { flex: 1 },
   list: {
     paddingHorizontal: Spacing.md,

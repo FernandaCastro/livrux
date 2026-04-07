@@ -5,15 +5,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Fonts, FontSizes } from '../../src/constants/theme';
 import { useReaderStore } from '../../src/stores/readerStore';
 import { ConfettiOverlay } from '../../src/components/ConfettiOverlay';
+import { useAuthStore } from '../../src/stores/authStore';
 import { useParentalStore } from '../../src/stores/parentalStore';
-import { useParentalGuard } from '../../src/hooks/useParentalGuard';
 
 // Bottom tab navigator for the main app sections.
 export default function AppLayout() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { confettiTrigger, clearConfetti } = useReaderStore();
-  const { requireParentPin, requireReaderPin, modalProps } = useParentalGuard();
+  const { profile } = useAuthStore();
+  const { isParentUnlocked } = useParentalStore();
+  const showSettingsTab = !profile?.parental_pin || isParentUnlocked;
 
   return (
     <>
@@ -47,6 +49,7 @@ export default function AppLayout() {
         options={{
           title: t('settings.title'),
           tabBarIcon: ({ color }) => <Text style={{ fontSize: 22, color }}>⚙️</Text>,
+          tabBarButton: showSettingsTab ? undefined : () => null,
         }}
       />
       {/* Hidden routes — not shown in the tab bar */}

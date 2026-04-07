@@ -5,16 +5,16 @@ import { create } from 'zustand';
 interface ParentalState {
   // --- Parent unlock ---
   isParentUnlocked: boolean;
-  parentUnlockedUntil: number | null; // epoch ms; null = session-long
 
   // --- Per-reader unlock (child's own PIN) ---
   unlockedReaders: Set<string>; // reader IDs whose PIN was entered this session
 
   // --- Actions ---
-  unlockParent: (durationMinutes: number) => void;
+  unlockParent: () => void;
+  lockParent: () => void; // lock only parent mode, keep reader unlocks intact
   unlockReader: (readerId: string) => void;
-  lock: () => void; // call on AppState → background
-  checkExpiry: () => void; // call on AppState → active / useFocusEffect
+  lockReaders: () => void; // clear reader unlocks (called on home focus)
+  lock: () => void; // call on AppState → background (clears everything)
 
   // --- Helpers ---
   canEditReader: () => boolean;
@@ -24,14 +24,14 @@ interface ParentalState {
 
 export const useParentalStore = create<ParentalState>((set, get) => ({
   isParentUnlocked: false,
-  parentUnlockedUntil: null,
   unlockedReaders: new Set(),
 
-  unlockParent: (durationMinutes) => {
-    const until = durationMinutes === 0
-      ? null // 0 = session-long (no expiry)
-      : Date.now() + durationMinutes * 60 * 1000;
-    set({ isParentUnlocked: true, parentUnlockedUntil: until });
+  unlockParent: () => {
+    set({ isParentUnlocked: true });
+  },
+
+  lockParent: () => {
+    set({ isParentUnlocked: false });
   },
 
   unlockReader: (readerId) => {
@@ -40,15 +40,12 @@ export const useParentalStore = create<ParentalState>((set, get) => ({
     }));
   },
 
-  lock: () => {
-    set({ isParentUnlocked: false, parentUnlockedUntil: null, unlockedReaders: new Set() });
+  lockReaders: () => {
+    set({ unlockedReaders: new Set() });
   },
 
-  checkExpiry: () => {
-    const { parentUnlockedUntil } = get();
-    if (parentUnlockedUntil !== null && Date.now() > parentUnlockedUntil) {
-      set({ isParentUnlocked: false, parentUnlockedUntil: null });
-    }
+  lock: () => {
+    set({ isParentUnlocked: false, unlockedReaders: new Set() });
   },
 
   canEditReader: () => get().isParentUnlocked,

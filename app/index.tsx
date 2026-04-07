@@ -84,24 +84,15 @@ export default function HomeScreen() {
             <Text style={styles.greeting}>👋 {profile.display_name}</Text>
           )}
         </View>
-        <View style={styles.headerActions}>
-          {!!profile?.parental_pin && (
-            <TouchableOpacity
-              onPress={toggleParentLock}
-              style={styles.lockButton}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.lockIcon}>{isParentUnlocked ? '🔓' : '🔒'}</Text>
-            </TouchableOpacity>
-          )}
+        {!!profile?.parental_pin && (
           <TouchableOpacity
-            onPress={() => requireParentPin(() => router.push('/app/settings'))}
-            style={styles.settingsButton}
+            onPress={toggleParentLock}
+            style={styles.lockButton}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={styles.settingsIcon}>⚙️</Text>
+            <Text style={styles.lockIcon}>{isParentUnlocked ? '🔓' : '🔒'}</Text>
           </TouchableOpacity>
-        </View>
+        )}
       </View>
 
       {/* Readers grid — show the full-screen spinner only on the very first
@@ -177,19 +168,10 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 2,
   },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
   lockButton: {
     padding: Spacing.xs,
   },
   lockIcon: { fontSize: 24 },
-  settingsButton: {
-    padding: Spacing.xs,
-  },
-  settingsIcon: { fontSize: 24 },
   loader: { flex: 1 },
   list: {
     paddingHorizontal: Spacing.md,

@@ -22,42 +22,6 @@ import { ReaderCard } from '../src/components/reader/ReaderCard';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../src/constants/theme';
 import type { Reader } from '../src/types';
 
-// Cadeado aberto: arco (shackle) com borda superior+direita conectado
-// apenas no lado direito ao corpo — abre para a esquerda.
-function LockOpenIcon({ size = 26 }: { size?: number }) {
-  const color = Colors.secondary;
-  const thick = Math.max(2, Math.round(size * 0.11));
-  const bodyW = Math.round(size * 0.74);
-  const bodyH = Math.round(size * 0.48);
-  const shackleW = Math.round(size * 0.44);
-  const shackleH = Math.round(size * 0.52);
-  const bodyOffset = Math.round((size - bodyW) / 2);
-
-  return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'flex-end' }}>
-      {/* Shackle: borda top + right com raio no canto → arco aberto à esquerda */}
-      <View style={{
-        position: 'absolute',
-        top: 0,
-        right: bodyOffset,
-        width: shackleW,
-        height: shackleH,
-        borderTopWidth: thick,
-        borderRightWidth: thick,
-        borderTopRightRadius: shackleW / 2,
-        borderColor: color,
-      }} />
-      {/* Corpo do cadeado */}
-      <View style={{
-        width: bodyW,
-        height: bodyH,
-        backgroundColor: color,
-        borderRadius: Math.round(size * 0.09),
-      }} />
-    </View>
-  );
-}
-
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -126,10 +90,7 @@ export default function HomeScreen() {
             style={styles.lockButton}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            {isParentUnlocked
-              ? <LockOpenIcon size={26} />
-              : <Text style={styles.lockIcon}>🔒</Text>
-            }
+            <Text style={styles.lockIcon}>{isParentUnlocked ? '🔓' : '🔒'}</Text>
           </TouchableOpacity>
         )}
       </View>

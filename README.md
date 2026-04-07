@@ -129,7 +129,7 @@ All tables are protected by **Row-Level Security** — users can only access the
 Livrux earned = base_reward + (total_pages × per_page_rate) + bonuses
 ```
 
-Each account has its own formula. The default is `5 + (pages × 0.1)` — a 200-page book earns **25 Livrux**.
+Each account has its own formula. The default is `2 + (pages × 0.01)` — a 200-page book earns **4 Livrux**.
 
 Bonus rules are stored as a JSON array in `reward_formulas.bonus_rules` and evaluated at book-log time:
 
@@ -182,6 +182,7 @@ Edit `.env` and fill in your Supabase project credentials:
 ```env
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+EXPO_PUBLIC_GOOGLE_BOOKS_API_KEY=your-google-books-api-key-here
 ```
 
 ### 3. Set up the database
@@ -189,9 +190,7 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 In the Supabase dashboard, open the **SQL Editor** and run the migrations in order:
 
 ```
-supabase/migrations/0001_initial_schema.sql
-supabase/migrations/0007_add_description_and_spend_rpc.sql
-supabase/migrations/0008_add_foreign_language_bonus.sql
+<project-folder>/supabase/migrations/
 ```
 
 The first migration creates all tables, RLS policies, the `log_book` RPC, and the sign-up trigger. The second adds the `description` column and the `spend_livrux` RPC. The third adds the `is_foreign_language` column to `books` and updates the `log_book` RPC to support it.
@@ -229,6 +228,7 @@ To add a new language:
 - [ ] Reading streaks and badges
 - [ ] Dark mode
 - [ ] Push notifications for reading reminders
+- [ ] Authentication (Google & Apple OAuth ready)
 - [ ] EAS Build + App Store / Google Play deployment
 
 ---

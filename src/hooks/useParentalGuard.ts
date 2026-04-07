@@ -11,32 +11,26 @@ export function useParentalGuard() {
   const {
     isParentUnlocked,
     unlockParent,
+    lockParent,
     unlockReader,
     canAccessReader,
-    checkExpiry,
   } = useParentalStore();
 
   const [modalProps, setModalProps] = useState<PinModalProps | null>(null);
 
   const closeModal = () => setModalProps(null);
 
-  /** Call before accessing Settings or performing any parent-only action. */
-  const requireParentPin = (onSuccess: () => void) => {
-    checkExpiry();
-
-    // No PIN configured → act as parent mode
-    if (!profile?.parental_pin) {
-      onSuccess();
-      return;
-    }
-
-    // Already unlocked and not expired
+  /** Toggle parent lock. If unlocked, locks immediately. If locked, shows PIN modal. */
+  const toggleParentLock = () => {
     if (isParentUnlocked) {
-      onSuccess();
+      lockParent();
       return;
     }
 
-    const durationMinutes = profile.parental_unlock_duration ?? 5;
+    if (!profile?.parental_pin) {
+      unlockParent();
+      return;
+    }
 
     setModalProps({
       visible: true,
@@ -44,7 +38,34 @@ export function useParentalGuard() {
       subtitle: 'Digite o PIN parental',
       pinHash: profile.parental_pin,
       onSuccess: () => {
-        unlockParent(durationMinutes);
+        unlockParent();
+        closeModal();
+      },
+      onCancel: closeModal,
+    });
+  };
+
+  /** Call before accessing Settings or performing any parent-only action. */
+  const requireParentPin = (onSuccess: () => void) => {
+    // No PIN configured → act as parent mode
+    if (!profile?.parental_pin) {
+      onSuccess();
+      return;
+    }
+
+    // Already unlocked
+    if (isParentUnlocked) {
+      onSuccess();
+      return;
+    }
+
+    setModalProps({
+      visible: true,
+      title: '🔑 Acesso de pais',
+      subtitle: 'Digite o PIN parental',
+      pinHash: profile.parental_pin,
+      onSuccess: () => {
+        unlockParent();
         closeModal();
         onSuccess();
       },
@@ -54,8 +75,6 @@ export function useParentalGuard() {
 
   /** Call when tapping a reader card. Handles both "reader has PIN" and "reader has no PIN" cases. */
   const requireReaderPin = (reader: Reader, onSuccess: () => void) => {
-    checkExpiry();
-
     // Parent mode always grants access
     if (isParentUnlocked) {
       onSuccess();
@@ -92,6 +111,7 @@ export function useParentalGuard() {
   return {
     requireParentPin,
     requireReaderPin,
+    toggleParentLock,
     isParentUnlocked,
     modalProps,
     closeModal,

@@ -104,14 +104,6 @@ interface FlowState {
 
 const IDLE: FlowState = { step: 'idle', action: 'set', context: 'parental', pendingHash: null };
 
-const DURATION_OPTIONS = [
-  { label: '2 min', value: 2 },
-  { label: '5 min', value: 5 },
-  { label: '10 min', value: 10 },
-  { label: '30 min', value: 30 },
-  { label: 'Sessão inteira', value: 0 },
-];
-
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function ParentalControlsScreen() {
@@ -125,7 +117,6 @@ export default function ParentalControlsScreen() {
   const [flow, setFlow] = useState<FlowState>(IDLE);
 
   const hasParentalPin = !!profile?.parental_pin;
-  const currentDuration = profile?.parental_unlock_duration ?? 5;
 
   const resetFlow = () => setFlow(IDLE);
 
@@ -164,19 +155,6 @@ export default function ParentalControlsScreen() {
     );
   };
 
-  // ─── Duration ─────────────────────────────────────────────────────────────
-
-  const handleDurationChange = async (minutes: number) => {
-    if (!profile) return;
-    setSaving(true);
-    await supabase
-      .from('user_profiles')
-      .update({ parental_unlock_duration: minutes })
-      .eq('id', profile.id);
-    await fetchProfile();
-    setSaving(false);
-  };
-
   // ─── Persist helpers ──────────────────────────────────────────────────────
 
   const saveParentalPin = async (hash: string | null) => {
@@ -187,7 +165,7 @@ export default function ParentalControlsScreen() {
       .update({ parental_pin: hash })
       .eq('id', profile.id);
     await fetchProfile();
-    if (hash) unlockParent(currentDuration);
+    if (hash) unlockParent();
     setSaving(false);
   };
 
@@ -302,24 +280,6 @@ export default function ParentalControlsScreen() {
             </>
           )}
         </View>
-
-        {/* ── Unlock duration ── */}
-        {hasParentalPin && (
-          <>
-            <Text style={styles.sectionLabel}>{t('parental.unlockDuration')}</Text>
-            <View style={styles.card}>
-              {DURATION_OPTIONS.map((opt, i) => (
-                <View key={opt.value}>
-                  <TouchableOpacity style={styles.row} onPress={() => handleDurationChange(opt.value)} activeOpacity={0.75}>
-                    <Text style={styles.rowLabel}>{opt.label}</Text>
-                    {currentDuration === opt.value && <Text style={styles.checkmark}>✓</Text>}
-                  </TouchableOpacity>
-                  {i < DURATION_OPTIONS.length - 1 && <View style={styles.divider} />}
-                </View>
-              ))}
-            </View>
-          </>
-        )}
 
         {/* ── Reader PINs ── */}
         <Text style={styles.sectionLabel}>{t('parental.readerPinsSection')}</Text>
@@ -548,10 +508,5 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     paddingVertical: Spacing.xl,
-  },
-  checkmark: {
-    fontSize: FontSizes.lg,
-    color: Colors.primary,
-    fontFamily: Fonts.bodyBold,
   },
 });

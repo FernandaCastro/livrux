@@ -29,7 +29,7 @@ export default function HomeScreen() {
   const { setSelectedReader, bookPersistedCount } = useReaderStore();
   const { profile } = useAuthStore();
   const { canAccessReader } = useParentalStore();
-  const { requireParentPin, requireReaderPin, modalProps } = useParentalGuard();
+  const { requireParentPin, requireReaderPin, toggleParentLock, isParentUnlocked, modalProps } = useParentalGuard();
 
   useFocusEffect(
     useCallback(() => { refresh(); }, [])
@@ -81,13 +81,24 @@ export default function HomeScreen() {
             <Text style={styles.greeting}>👋 {profile.display_name}</Text>
           )}
         </View>
-        <TouchableOpacity
-          onPress={() => requireParentPin(() => router.push('/app/settings'))}
-          style={styles.settingsButton}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.settingsIcon}>⚙️</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          {!!profile?.parental_pin && (
+            <TouchableOpacity
+              onPress={toggleParentLock}
+              style={styles.lockButton}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.lockIcon}>{isParentUnlocked ? '🔓' : '🔒'}</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            onPress={() => requireParentPin(() => router.push('/app/settings'))}
+            style={styles.settingsButton}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.settingsIcon}>⚙️</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Readers grid — show the full-screen spinner only on the very first
@@ -163,6 +174,15 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 2,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  lockButton: {
+    padding: Spacing.xs,
+  },
+  lockIcon: { fontSize: 24 },
   settingsButton: {
     padding: Spacing.xs,
   },

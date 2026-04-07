@@ -22,7 +22,7 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const { session, isLoading, setSession, fetchProfile, fetchFormula } = useAuthStore();
-  const { lock, checkExpiry } = useParentalStore();
+  const { lock } = useParentalStore();
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   const [fontsLoaded] = useFonts({
@@ -41,8 +41,6 @@ export default function RootLayout() {
         (nextState === 'background' || nextState === 'inactive')
       ) {
         lock();
-      } else if (nextState === 'active') {
-        checkExpiry();
       }
       appStateRef.current = nextState;
     });

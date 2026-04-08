@@ -60,11 +60,7 @@ export default function EditBookScreen() {
   const { books, updateBook } = useBooks(selectedReader?.id ?? null);
 
   const handleBack = () => {
-    if (selectedReader) {
-      router.push(`/app/reader/${selectedReader.id}`);
-    } else {
-      handleBack();
-    }
+    router.back();
   };
 
   const book = books.find((b) => b.id === bookId);

@@ -155,6 +155,15 @@ export default function ReaderDashboardScreen() {
         </View>
       </View>
 
+      {/* Add book button — fixed, centered below the stats/balance section */}
+      <TouchableOpacity
+        style={styles.addBookButton}
+        onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.addBookButtonText}>+ {t('book.logBook')}</Text>
+      </TouchableOpacity>
+
       {/* Books list */}
       <FlatList
         data={books}
@@ -169,16 +178,7 @@ export default function ReaderDashboardScreen() {
           />
         }
         ListHeaderComponent={
-          <View>
-            <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
-            <TouchableOpacity
-              style={styles.addBookButton}
-              onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.addBookButtonText}>+ {t('book.logBook')}</Text>
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
         }
         ListEmptyComponent={
           !isLoading ? (
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    marginBottom: Spacing.lg,
+    marginVertical: Spacing.md,
     ...Shadows.md,
   },
   addBookButtonText: {

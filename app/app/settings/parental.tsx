@@ -21,6 +21,7 @@ import { useAuthStore } from '../../../src/stores/authStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { useReaders } from '../../../src/hooks/useReaders';
 import { PinModal } from '../../../src/components/PinModal';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
@@ -314,6 +315,7 @@ export default function ParentalControlsScreen() {
           </View>
         )}
       </ScrollView>
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -413,7 +415,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing['2xl'],
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
   headerRow: {
     flexDirection: 'row',

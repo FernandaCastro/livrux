@@ -22,6 +22,7 @@ import { useReaders } from '../../../src/hooks/useReaders';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
@@ -188,16 +189,6 @@ export default function ReaderDashboardScreen() {
       />
 
 
-      {/* FAB — Reward Wallet. */}
-      <TouchableOpacity
-        style={styles.fabL}
-        onPress={() => router.push(`/app/rewards?readerId=${reader.id}`)}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.fabText}>🪙 {t('rewards.title')}</Text>
-      </TouchableOpacity>
-
-
       {/* FAB — Log a book. Pass current count so add screen can compute prev/next for confetti. */}
       <TouchableOpacity
         style={styles.fabR}
@@ -206,6 +197,8 @@ export default function ReaderDashboardScreen() {
       >
         <Text style={styles.fabText}>+ {t('book.logBook')}</Text>
       </TouchableOpacity>
+
+      <BottomMenu showWallet readerId={id} />
     </SafeAreaView>
   );
 }
@@ -332,7 +325,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.md,
-    paddingBottom: 100,
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl + Spacing['2xl'],
   },
   sectionTitle: {
     fontFamily: Fonts.heading,
@@ -360,19 +353,9 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: Colors.primaryLight,
   },
-  fabL: {
-    position: 'absolute',
-    bottom: Spacing.xl,
-    left: Spacing.xl,
-    backgroundColor: Colors.secondary,
-    borderRadius: Radius.xl,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    ...Shadows.lg,
-  },
   fabR: {
     position: 'absolute',
-    bottom: Spacing.xl,
+    bottom: BOTTOM_MENU_HEIGHT + Spacing.md,
     right: Spacing.xl,
     backgroundColor: Colors.secondary,
     borderRadius: Radius.xl,

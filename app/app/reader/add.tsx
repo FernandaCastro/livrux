@@ -23,6 +23,7 @@ import { useAuthStore } from '../../../src/stores/authStore';
 import { uploadImage } from '../../../src/lib/storage';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 const AVATAR_SIZE = 100;
@@ -176,6 +177,7 @@ export default function AddReaderScreen() {
           style={styles.saveButton}
         />
       </ScrollView>
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing['2xl'],
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
   header: {
     flexDirection: 'row',

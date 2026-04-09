@@ -19,6 +19,7 @@ import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
 import { FORMULA_PREVIEW_PAGES } from '../../../src/constants/config';
 import type { BonusRule } from '../../../src/types';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 export default function FormulaScreen() {
@@ -232,6 +233,7 @@ export default function FormulaScreen() {
           style={styles.saveButton}
         />
       </ScrollView>
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing['2xl'],
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
   header: {
     flexDirection: 'row',

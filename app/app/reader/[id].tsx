@@ -169,7 +169,16 @@ export default function ReaderDashboardScreen() {
           />
         }
         ListHeaderComponent={
-          <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+          <View>
+            <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+            <TouchableOpacity
+              style={styles.addBookButton}
+              onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.addBookButtonText}>+ {t('book.logBook')}</Text>
+            </TouchableOpacity>
+          </View>
         }
         ListEmptyComponent={
           !isLoading ? (
@@ -187,16 +196,6 @@ export default function ReaderDashboardScreen() {
           />
         )}
       />
-
-
-      {/* FAB — Log a book. Pass current count so add screen can compute prev/next for confetti. */}
-      <TouchableOpacity
-        style={styles.fabR}
-        onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.fabText}>+ {t('book.logBook')}</Text>
-      </TouchableOpacity>
 
       <BottomMenu showWallet readerId={id} />
     </SafeAreaView>
@@ -325,7 +324,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.md,
-    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl + Spacing['2xl'],
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
   },
   sectionTitle: {
     fontFamily: Fonts.heading,
@@ -353,17 +352,16 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: Colors.primaryLight,
   },
-  fabR: {
-    position: 'absolute',
-    bottom: BOTTOM_MENU_HEIGHT + Spacing.md,
-    right: Spacing.xl,
+  addBookButton: {
+    alignSelf: 'center',
     backgroundColor: Colors.secondary,
     borderRadius: Radius.xl,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    ...Shadows.lg,
+    marginBottom: Spacing.lg,
+    ...Shadows.md,
   },
-  fabText: {
+  addBookButtonText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
     color: Colors.textOnPrimary,

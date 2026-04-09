@@ -22,6 +22,7 @@ import { useReaderStore } from '../../../src/stores/readerStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 function useBookSchema() {
@@ -279,6 +280,7 @@ export default function EditBookScreen() {
           style={styles.saveButton}
         />
       </ScrollView>
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -288,7 +290,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing['2xl'],
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
   header: {
     flexDirection: 'row',

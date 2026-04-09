@@ -10,6 +10,7 @@ import { spendLivruxRpc } from '../../src/hooks/useLivrux';
 import { useReaderStore } from '../../src/stores/readerStore';
 import { Button } from '../../src/components/ui/Button';
 import { TextInput } from '../../src/components/ui/TextInput';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../src/constants/theme';
 
 function useSpendSchema(maxBalance: number) {
@@ -129,6 +130,7 @@ export default function SpendScreen() {
           variant="ghost"
         />
       </ScrollView>
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
-    paddingBottom: Spacing['2xl'],
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
   title: {
     fontFamily: Fonts.heading,

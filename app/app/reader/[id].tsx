@@ -22,6 +22,7 @@ import { useReaders } from '../../../src/hooks/useReaders';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
@@ -154,6 +155,16 @@ export default function ReaderDashboardScreen() {
         </View>
       </View>
 
+      {/* Add book button — fixed, centered below the stats/balance section */}
+      <TouchableOpacity
+        style={styles.addBookButton}
+        onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.addBookButtonText}>+ {t('book.logBook')}</Text>
+      </TouchableOpacity>
+      <View style={styles.addBookButtonDivider} />
+
       {/* Books list */}
       <FlatList
         data={books}
@@ -187,25 +198,7 @@ export default function ReaderDashboardScreen() {
         )}
       />
 
-
-      {/* FAB — Reward Wallet. */}
-      <TouchableOpacity
-        style={styles.fabL}
-        onPress={() => router.push(`/app/rewards?readerId=${reader.id}`)}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.fabText}>🪙 {t('rewards.title')}</Text>
-      </TouchableOpacity>
-
-
-      {/* FAB — Log a book. Pass current count so add screen can compute prev/next for confetti. */}
-      <TouchableOpacity
-        style={styles.fabR}
-        onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.fabText}>+ {t('book.logBook')}</Text>
-      </TouchableOpacity>
+      <BottomMenu showWallet readerId={id} />
     </SafeAreaView>
   );
 }
@@ -247,8 +240,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
   },
   avatar: {
     width: AVATAR_SIZE,
@@ -288,7 +279,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     alignItems: 'center',
     ...Shadows.md,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xs,
   },
   balanceLabel: {
     fontFamily: Fonts.bodySemiBold,
@@ -332,7 +323,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.md,
-    paddingBottom: 100,
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
   },
   sectionTitle: {
     fontFamily: Fonts.heading,
@@ -360,27 +351,22 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: Colors.primaryLight,
   },
-  fabL: {
-    position: 'absolute',
-    bottom: Spacing.xl,
-    left: Spacing.xl,
+  addBookButton: {
+    alignSelf: 'center',
     backgroundColor: Colors.secondary,
     borderRadius: Radius.xl,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    ...Shadows.lg,
+    marginTop: 0,
+    marginBottom: Spacing.lg,
+    ...Shadows.md,
   },
-  fabR: {
-    position: 'absolute',
-    bottom: Spacing.xl,
-    right: Spacing.xl,
-    backgroundColor: Colors.secondary,
-    borderRadius: Radius.xl,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    ...Shadows.lg,
+  addBookButtonDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.divider,
+    marginBottom: Spacing.xs,
   },
-  fabText: {
+  addBookButtonText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
     color: Colors.textOnPrimary,

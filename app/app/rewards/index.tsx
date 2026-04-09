@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLivrux } from '../../../src/hooks/useLivrux';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import type { LivruxTransaction } from '../../../src/types';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 function TransactionRow({ tx }: { tx: LivruxTransaction }) {
@@ -120,6 +121,7 @@ export default function RewardsScreen() {
           renderItem={({ item }) => <TransactionRow tx={item} />}
         />
       )}
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -205,7 +207,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.lg,
-    paddingBottom: Spacing.xl,
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
   },
   sectionTitle: {
     fontFamily: Fonts.heading,

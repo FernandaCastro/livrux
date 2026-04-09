@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    marginVertical: Spacing.md,
+    marginTop: Spacing.xs,
     marginBottom: Spacing.lg,
     ...Shadows.md,
   },

@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     alignItems: 'center',
     ...Shadows.md,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xs,
   },
   balanceLabel: {
     fontFamily: Fonts.bodySemiBold,
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
-    marginTop: Spacing.xs,
+    marginTop: 0,
     marginBottom: Spacing.lg,
     ...Shadows.md,
   },

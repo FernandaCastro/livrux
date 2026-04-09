@@ -163,6 +163,7 @@ export default function ReaderDashboardScreen() {
       >
         <Text style={styles.addBookButtonText}>+ {t('book.logBook')}</Text>
       </TouchableOpacity>
+      <View style={styles.addBookButtonDivider} />
 
       {/* Books list */}
       <FlatList
@@ -239,8 +240,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
   },
   avatar: {
     width: AVATAR_SIZE,
@@ -359,7 +358,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     marginVertical: Spacing.md,
+    marginBottom: Spacing.lg,
     ...Shadows.md,
+  },
+  addBookButtonDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.divider,
+    marginBottom: Spacing.xs,
   },
   addBookButtonText: {
     fontFamily: Fonts.bodyBold,

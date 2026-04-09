@@ -27,6 +27,7 @@ export function BottomMenu({ showWallet = false, readerId }: BottomMenuProps) {
 
   return (
     <View style={styles.container}>
+      {/* Left — always Home */}
       <TouchableOpacity
         style={styles.tab}
         onPress={() => router.push('/app')}
@@ -36,27 +37,33 @@ export function BottomMenu({ showWallet = false, readerId }: BottomMenuProps) {
         <Text style={[styles.label, isHome && styles.activeLabel]}>{t('home.title')}</Text>
       </TouchableOpacity>
 
-      {showWallet && readerId && (
-        <TouchableOpacity
-          style={styles.tab}
-          onPress={() => router.push(`/app/rewards?readerId=${readerId}`)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.icon}>🪙</Text>
-          <Text style={[styles.label, isWallet && styles.activeLabel]}>{t('rewards.title')}</Text>
-        </TouchableOpacity>
-      )}
+      {/* Centre — optional items (e.g. Wallet) */}
+      <View style={styles.tab}>
+        {showWallet && readerId && (
+          <TouchableOpacity
+            style={styles.centreItem}
+            onPress={() => router.push(`/app/rewards?readerId=${readerId}`)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.icon}>🪙</Text>
+            <Text style={[styles.label, isWallet && styles.activeLabel]}>{t('rewards.title')}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
-      {showSettingsTab && (
-        <TouchableOpacity
-          style={styles.tab}
-          onPress={() => router.push('/app/settings')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.icon}>⚙️</Text>
-          <Text style={[styles.label, isSettings && styles.activeLabel]}>{t('settings.title')}</Text>
-        </TouchableOpacity>
-      )}
+      {/* Right — always Settings (placeholder keeps layout when hidden) */}
+      <View style={styles.tab}>
+        {showSettingsTab && (
+          <TouchableOpacity
+            style={styles.centreItem}
+            onPress={() => router.push('/app/settings')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.icon}>⚙️</Text>
+            <Text style={[styles.label, isSettings && styles.activeLabel]}>{t('settings.title')}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -74,6 +81,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: Spacing.xs,
+    gap: 2,
+  },
+  centreItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: 2,
   },
   icon: { fontSize: 22 },

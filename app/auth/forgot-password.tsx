@@ -33,7 +33,7 @@ function useStep2Schema() {
   const { t } = useTranslation();
   return z
     .object({
-      code: z.string().length(6, t('auth.errors.invalidCode')),
+      code: z.string().length(8, t('auth.errors.invalidCode')),
       newPassword: z.string().min(8, t('auth.errors.weakPassword')),
       confirmPassword: z.string(),
     })
@@ -89,10 +89,7 @@ export default function ForgotPasswordScreen() {
   };
 
   const sendCode = async (emailAddress: string) => {
-    await supabase.auth.signInWithOtp({
-      email: emailAddress,
-      options: { shouldCreateUser: false },
-    });
+    await supabase.auth.resetPasswordForEmail( emailAddress );
     startCooldown();
   };
 
@@ -117,7 +114,7 @@ export default function ForgotPasswordScreen() {
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email,
       token: data.code.trim(),
-      type: 'email',
+      type: 'recovery',  
     });
 
     if (verifyError) {
@@ -224,11 +221,11 @@ export default function ForgotPasswordScreen() {
                     label={t('auth.verificationCode')}
                     placeholder={t('auth.verificationCodePlaceholder')}
                     value={value}
-                    onChangeText={(text) => onChange(text.replace(/\D/g, '').slice(0, 6))}
+                    onChangeText={(text) => onChange(text.replace(/\D/g, ''))}
                     onBlur={onBlur}
                     keyboardType="number-pad"
                     autoComplete="one-time-code"
-                    maxLength={7}
+                    maxLength={8}
                     error={step2Form.formState.errors.code?.message}
                   />
                 )}

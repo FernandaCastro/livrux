@@ -30,7 +30,14 @@ const pt = {
     name: 'Seu nome',
     emailPlaceholder: 'voce@exemplo.com',
     passwordPlaceholder: 'Pelo menos 8 caracteres',
-    resetEmailSent: 'Verifique sua caixa de entrada para o link de redefinição.',
+    sendCode: 'Enviar código',
+    codeSent: 'Um código de 6 dígitos foi enviado para seu e-mail. Insira-o abaixo junto com sua nova senha.',
+    verificationCode: 'Código de verificação',
+    verificationCodePlaceholder: '123456',
+    newPassword: 'Nova senha',
+    resetSuccess: 'Senha redefinida com sucesso. Entre com sua nova senha.',
+    resendCode: 'Reenviar código',
+    resendCodeIn: 'Reenviar código ({{seconds}}s)',
     errors: {
       invalidEmail: 'Insira um endereço de e-mail válido.',
       weakPassword: 'A senha deve ter pelo menos 8 caracteres.',
@@ -38,6 +45,7 @@ const pt = {
       invalidCredentials: 'E-mail ou senha incorretos.',
       emailInUse: 'Este e-mail já está cadastrado.',
       generic: 'Algo deu errado. Por favor, tente novamente.',
+      invalidCode: 'Código inválido ou expirado.',
     },
   },
   home: {

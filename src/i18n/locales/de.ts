@@ -30,7 +30,14 @@ const de = {
     name: 'Dein Name',
     emailPlaceholder: 'du@beispiel.de',
     passwordPlaceholder: 'Mindestens 8 Zeichen',
-    resetEmailSent: 'Prüfe dein Postfach für den Reset-Link.',
+    sendCode: 'Code senden',
+    codeSent: 'Ein 6-stelliger Code wurde an deine E-Mail gesendet. Gib ihn unten zusammen mit deinem neuen Passwort ein.',
+    verificationCode: 'Bestätigungscode',
+    verificationCodePlaceholder: '123456',
+    newPassword: 'Neues Passwort',
+    resetSuccess: 'Passwort erfolgreich zurückgesetzt. Melde dich mit deinem neuen Passwort an.',
+    resendCode: 'Code erneut senden',
+    resendCodeIn: 'Code erneut senden ({{seconds}}s)',
     errors: {
       invalidEmail: 'Gib eine gültige E-Mail-Adresse ein.',
       weakPassword: 'Das Passwort muss mindestens 8 Zeichen haben.',
@@ -38,6 +45,7 @@ const de = {
       invalidCredentials: 'Falsche E-Mail-Adresse oder falsches Passwort.',
       emailInUse: 'Diese E-Mail-Adresse ist bereits registriert.',
       generic: 'Etwas ist schiefgelaufen. Bitte versuche es erneut.',
+      invalidCode: 'Ungültiger oder abgelaufener Code.',
     },
   },
   home: {

@@ -36,6 +36,8 @@ const pt = {
     verificationCodePlaceholder: '123456',
     newPassword: 'Nova senha',
     resetSuccess: 'Senha redefinida com sucesso. Entre com sua nova senha.',
+    resendCode: 'Reenviar código',
+    resendCodeIn: 'Reenviar código ({{seconds}}s)',
     errors: {
       invalidEmail: 'Insira um endereço de e-mail válido.',
       weakPassword: 'A senha deve ter pelo menos 8 caracteres.',

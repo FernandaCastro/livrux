@@ -36,6 +36,8 @@ const de = {
     verificationCodePlaceholder: '123456',
     newPassword: 'Neues Passwort',
     resetSuccess: 'Passwort erfolgreich zurückgesetzt. Melde dich mit deinem neuen Passwort an.',
+    resendCode: 'Code erneut senden',
+    resendCodeIn: 'Code erneut senden ({{seconds}}s)',
     errors: {
       invalidEmail: 'Gib eine gültige E-Mail-Adresse ein.',
       weakPassword: 'Das Passwort muss mindestens 8 Zeichen haben.',

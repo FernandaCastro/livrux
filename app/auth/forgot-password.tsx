@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,8 @@ import { supabase } from '../../src/lib/supabase';
 import { Button } from '../../src/components/ui/Button';
 import { TextInput } from '../../src/components/ui/TextInput';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/constants/theme';
+
+const RESEND_COOLDOWN_S = 60;
 
 function useStep1Schema() {
   const { t } = useTranslation();
@@ -51,6 +53,8 @@ export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState('');
   const [serverError, setServerError] = useState('');
   const [done, setDone] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const step1Schema = useStep1Schema();
   const step2Schema = useStep2Schema();
@@ -65,15 +69,43 @@ export default function ForgotPasswordScreen() {
     defaultValues: { code: '', newPassword: '', confirmPassword: '' },
   });
 
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const startCooldown = () => {
+    setResendCooldown(RESEND_COOLDOWN_S);
+    timerRef.current = setInterval(() => {
+      setResendCooldown((s) => {
+        if (s <= 1) {
+          clearInterval(timerRef.current!);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+  };
+
+  const sendCode = async (emailAddress: string) => {
+    await supabase.auth.resetPasswordForEmail(emailAddress);
+    startCooldown();
+  };
+
   const onStep1Submit = async (data: Step1Data) => {
     setServerError('');
-    await supabase.auth.signInWithOtp({
-      email: data.email,
-      options: { shouldCreateUser: false },
-    });
+    await sendCode(data.email);
     // Always advance to prevent email enumeration.
     setEmail(data.email);
     setStep(2);
+  };
+
+  const onResend = async () => {
+    if (resendCooldown > 0) return;
+    setServerError('');
+    step2Form.reset();
+    await sendCode(email);
   };
 
   const onStep2Submit = async (data: Step2Data) => {
@@ -81,8 +113,8 @@ export default function ForgotPasswordScreen() {
 
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email,
-      token: data.code,
-      type: 'email',
+      token: data.code.trim(),
+      type: 'recovery',
     });
 
     if (verifyError) {
@@ -234,6 +266,18 @@ export default function ForgotPasswordScreen() {
                 fullWidth
                 style={styles.submitButton}
               />
+
+              <TouchableOpacity
+                onPress={onResend}
+                disabled={resendCooldown > 0}
+                style={styles.resendButton}
+              >
+                <Text style={[styles.resendText, resendCooldown > 0 && styles.resendDisabled]}>
+                  {resendCooldown > 0
+                    ? t('auth.resendCodeIn', { seconds: resendCooldown })
+                    : t('auth.resendCode')}
+                </Text>
+              </TouchableOpacity>
             </>
           )}
         </ScrollView>
@@ -265,6 +309,13 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   submitButton: { marginTop: Spacing.md },
+  resendButton: { alignItems: 'center', marginTop: Spacing.lg },
+  resendText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.secondary,
+  },
+  resendDisabled: { color: Colors.textSecondary },
   infoBanner: {
     backgroundColor: '#E3F2FD',
     borderRadius: Radius.lg,

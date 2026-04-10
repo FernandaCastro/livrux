@@ -30,7 +30,12 @@ const en = {
     name: 'Your name',
     emailPlaceholder: 'you@example.com',
     passwordPlaceholder: 'At least 8 characters',
-    resetEmailSent: 'Check your inbox for a reset link.',
+    sendCode: 'Send code',
+    codeSent: 'A 6-digit code was sent to your email. Enter it below together with your new password.',
+    verificationCode: 'Verification code',
+    verificationCodePlaceholder: '123456',
+    newPassword: 'New password',
+    resetSuccess: 'Password reset successfully. Sign in with your new password.',
     errors: {
       invalidEmail: 'Enter a valid email address.',
       weakPassword: 'Password must be at least 8 characters.',
@@ -38,6 +43,7 @@ const en = {
       invalidCredentials: 'Incorrect email or password.',
       emailInUse: 'This email is already registered.',
       generic: 'Something went wrong. Please try again.',
+      invalidCode: 'Invalid or expired code.',
     },
   },
   home: {

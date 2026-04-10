@@ -121,8 +121,7 @@ export default function ForgotPasswordScreen() {
     });
 
     if (verifyError) {
-      // Show raw Supabase error to help diagnose configuration issues.
-      setServerError(verifyError.message);
+      setServerError(t('auth.errors.invalidCode'));
       return;
     }
 
@@ -225,10 +224,11 @@ export default function ForgotPasswordScreen() {
                     label={t('auth.verificationCode')}
                     placeholder={t('auth.verificationCodePlaceholder')}
                     value={value}
-                    onChangeText={onChange}
+                    onChangeText={(text) => onChange(text.replace(/\D/g, '').slice(0, 6))}
                     onBlur={onBlur}
                     keyboardType="number-pad"
                     autoComplete="one-time-code"
+                    maxLength={7}
                     error={step2Form.formState.errors.code?.message}
                   />
                 )}

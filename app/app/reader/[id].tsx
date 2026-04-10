@@ -14,7 +14,7 @@ import {
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -30,13 +30,29 @@ export default function ReaderDashboardScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { selectedReader, setSelectedReader } = useReaderStore();
+  const { selectedReader, setSelectedReader, bookPersistedCount } = useReaderStore();
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
   const { canEditReader } = useParentalStore();
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
 
   const canEdit = canEditReader();
+
+  // Refresh books + reader data whenever a book is successfully persisted to
+  // the DB — the confetti animation plays during this window, so this update
+  // lands right as (or just after) the overlay fades out.
+  useEffect(() => {
+    if (bookPersistedCount > 0 && id) {
+      refresh();
+      supabase
+        .from('readers')
+        .select('*')
+        .eq('id', id)
+        .single()
+        .then(({ data }) => { if (data) setSelectedReader(data as Reader); });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookPersistedCount]);
 
   // Refresh books list and re-fetch the reader from DB to get the latest balance.
   useFocusEffect(

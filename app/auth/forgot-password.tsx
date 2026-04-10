@@ -89,7 +89,10 @@ export default function ForgotPasswordScreen() {
   };
 
   const sendCode = async (emailAddress: string) => {
-    await supabase.auth.resetPasswordForEmail(emailAddress);
+    await supabase.auth.signInWithOtp({
+      email: emailAddress,
+      options: { shouldCreateUser: false },
+    });
     startCooldown();
   };
 
@@ -114,11 +117,12 @@ export default function ForgotPasswordScreen() {
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email,
       token: data.code.trim(),
-      type: 'recovery',
+      type: 'email',
     });
 
     if (verifyError) {
-      setServerError(t('auth.errors.invalidCode'));
+      // Show raw Supabase error to help diagnose configuration issues.
+      setServerError(verifyError.message);
       return;
     }
 

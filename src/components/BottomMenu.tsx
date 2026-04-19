@@ -27,17 +27,7 @@ export function BottomMenu({ showWallet = false, readerId }: BottomMenuProps) {
 
   return (
     <View style={styles.container}>
-      {/* Left — always Home */}
-      <TouchableOpacity
-        style={styles.tab}
-        onPress={() => router.push('/app')}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.icon}>🏠</Text>
-        <Text style={[styles.label, isHome && styles.activeLabel]}>{t('home.title')}</Text>
-      </TouchableOpacity>
-
-      {/* Centre — optional items (e.g. Wallet) */}
+      {/* Left — Wallet when available, otherwise placeholder */}
       <View style={styles.tab}>
         {showWallet && readerId && (
           <TouchableOpacity
@@ -51,7 +41,17 @@ export function BottomMenu({ showWallet = false, readerId }: BottomMenuProps) {
         )}
       </View>
 
-      {/* Right — always Settings (placeholder keeps layout when hidden) */}
+      {/* Centre — always Home */}
+      <TouchableOpacity
+        style={styles.tab}
+        onPress={() => router.push('/app')}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.icon}>🏠</Text>
+        <Text style={[styles.label, isHome && styles.activeLabel]}>{t('home.title')}</Text>
+      </TouchableOpacity>
+
+      {/* Right — Settings when available, otherwise placeholder */}
       <View style={styles.tab}>
         {showSettingsTab && (
           <TouchableOpacity

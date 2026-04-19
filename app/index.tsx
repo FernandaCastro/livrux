@@ -22,6 +22,10 @@ import { ReaderCard } from '../src/components/reader/ReaderCard';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../src/constants/theme';
 import type { Reader } from '../src/types';
 
+type AddItem = { __isAdd: true };
+type PhantomItem = { __isPhantom: true };
+type GridItem = Reader | AddItem | PhantomItem;
+
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -64,13 +68,49 @@ export default function HomeScreen() {
     });
   };
 
-  const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>📖</Text>
-      <Text style={styles.emptyTitle}>{t('home.emptyTitle')}</Text>
-      <Text style={styles.emptySubtitle}>{t('home.emptySubtitle')}</Text>
-    </View>
-  );
+  // Add card is part of the grid so it occupies a proper column slot.
+  // A phantom item is appended when the add card would otherwise be alone
+  // in its row (even number of readers), keeping the grid symmetric.
+  const gridData: GridItem[] = [
+    ...readers,
+    { __isAdd: true },
+    ...(readers.length % 2 === 0 ? [{ __isPhantom: true } as PhantomItem] : []),
+  ];
+
+  const renderItem = ({ item }: { item: GridItem }) => {
+    if ('__isPhantom' in item) {
+      return <View style={styles.phantom} />;
+    }
+    if ('__isAdd' in item) {
+      return (
+        <TouchableOpacity
+          onPress={handleAddReader}
+          style={styles.addCard}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.addIcon}>＋</Text>
+          <Text style={styles.addLabel}>{t('home.addReader')}</Text>
+        </TouchableOpacity>
+      );
+    }
+    return (
+      <ReaderCard
+        reader={item}
+        onPress={() => handleSelectReader(item)}
+        onLongPress={() => handleEditReader(item)}
+        locked={!!item.pin && !canAccessReader(item.id)}
+      />
+    );
+  };
+
+  const renderEmptyHeader = () =>
+    readers.length === 0 ? (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyIcon}>📖</Text>
+        <Text style={styles.emptyTitle}>{t('home.emptyTitle')}</Text>
+        <Text style={styles.emptySubtitle}>{t('home.emptySubtitle')}</Text>
+      </View>
+    ) : null;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -106,12 +146,14 @@ export default function HomeScreen() {
         />
       ) : (
         <FlatList
-          data={readers}
-          keyExtractor={(item) => item.id}
+          data={gridData}
+          keyExtractor={(item) =>
+            '__isAdd' in item ? '__add__' : '__isPhantom' in item ? '__phantom__' : item.id
+          }
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.list}
-          ListEmptyComponent={renderEmpty}
+          ListHeaderComponent={renderEmptyHeader}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
@@ -119,25 +161,7 @@ export default function HomeScreen() {
               tintColor={Colors.primary}
             />
           }
-          renderItem={({ item }) => (
-            <ReaderCard
-              reader={item}
-              onPress={() => handleSelectReader(item)}
-              onLongPress={() => handleEditReader(item)}
-              locked={!!item.pin && !canAccessReader(item.id)}
-            />
-          )}
-          // "Add reader" card appended after the real items.
-          ListFooterComponent={
-            <TouchableOpacity
-              onPress={handleAddReader}
-              style={styles.addCard}
-              activeOpacity={0.75}
-            >
-              <Text style={styles.addIcon}>＋</Text>
-              <Text style={styles.addLabel}>{t('home.addReader')}</Text>
-            </TouchableOpacity>
-          }
+          renderItem={renderItem}
         />
       )}
     </SafeAreaView>
@@ -199,8 +223,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: Spacing.sm,
   },
+  phantom: {
+    flex: 1,
+    margin: Spacing.sm,
+  },
   addCard: {
-    width: CARD_SIZE,
+    flex: 1,
     height: CARD_SIZE + 20,
     backgroundColor: Colors.surfaceVariant,
     borderRadius: Radius.lg,

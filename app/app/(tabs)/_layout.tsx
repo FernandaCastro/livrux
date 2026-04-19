@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Fonts, FontSizes } from '../../../src/constants/theme';
@@ -33,6 +33,13 @@ export default function TabsLayout() {
         },
       }}
     >
+      {/* Invisible spacer keeps Home centred between left and right slots */}
+      <Tabs.Screen
+        name="placeholder"
+        options={{
+          tabBarButton: () => <View style={{ flex: 1 }} />,
+        }}
+      />
       <Tabs.Screen
         name="index"
         options={{

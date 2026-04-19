@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Pressable,
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -16,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { supabase } from '../../src/lib/supabase';
+import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/ui/Button';
 import { TextInput } from '../../src/components/ui/TextInput';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/constants/theme';
@@ -35,6 +37,7 @@ export default function SignInScreen() {
   const router = useRouter();
   const [serverError, setServerError] = useState('');
   const schema = useSignInSchema();
+  const { pendingEmailConfirmation, setPendingEmailConfirmation } = useAuthStore();
 
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -55,6 +58,7 @@ export default function SignInScreen() {
           : t('auth.errors.generic')
       );
     } else {
+      setPendingEmailConfirmation(false);
       router.replace('/');
     }
   };
@@ -79,6 +83,25 @@ export default function SignInScreen() {
 
           {/* Form */}
           <View style={styles.form}>
+            {pendingEmailConfirmation && (
+              <View style={styles.confirmationBanner}>
+                <View style={styles.confirmationBannerContent}>
+                  <Text style={styles.confirmationBannerTitle}>
+                    {t('auth.confirmationEmailTitle')}
+                  </Text>
+                  <Text style={styles.confirmationBannerBody}>
+                    {t('auth.confirmationEmailBody')}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setPendingEmailConfirmation(false)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={styles.confirmationBannerClose}>✕</Text>
+                </Pressable>
+              </View>
+            )}
+
             {serverError ? (
               <View style={styles.errorBanner}>
                 <Text style={styles.errorBannerText}>{serverError}</Text>
@@ -180,6 +203,34 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+  },
+  confirmationBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#E3F2FD',
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.info,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  confirmationBannerContent: { flex: 1 },
+  confirmationBannerTitle: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.sm,
+    color: Colors.info,
+    marginBottom: 2,
+  },
+  confirmationBannerBody: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: '#1565C0',
+  },
+  confirmationBannerClose: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.sm,
+    color: Colors.info,
+    marginLeft: Spacing.sm,
   },
   errorBanner: {
     backgroundColor: '#FDECEA',

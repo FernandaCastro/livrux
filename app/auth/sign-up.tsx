@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { supabase } from '../../src/lib/supabase';
+import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/ui/Button';
 import { TextInput } from '../../src/components/ui/TextInput';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/constants/theme';
@@ -47,6 +48,7 @@ export default function SignUpScreen() {
   const router = useRouter();
   const [serverError, setServerError] = useState('');
   const schema = useSignUpSchema();
+  const setPendingEmailConfirmation = useAuthStore((s) => s.setPendingEmailConfirmation);
 
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -70,6 +72,7 @@ export default function SignUpScreen() {
           : t('auth.errors.generic')
       );
     } else {
+      setPendingEmailConfirmation(true);
       router.replace('/');
     }
   };

@@ -38,6 +38,8 @@ const de = {
     resetSuccess: 'Passwort erfolgreich zurückgesetzt. Melde dich mit deinem neuen Passwort an.',
     resendCode: 'Code erneut senden',
     resendCodeIn: 'Code erneut senden ({{seconds}}s)',
+    confirmationEmailTitle: 'Posteingang prüfen',
+    confirmationEmailBody: 'Eine Bestätigungs-E-Mail wurde gesendet. Bitte bestätige deine E-Mail-Adresse, bevor du dich anmeldest.',
     errors: {
       invalidEmail: 'Gib eine gültige E-Mail-Adresse ein.',
       weakPassword: 'Das Passwort muss mindestens 8 Zeichen haben.',

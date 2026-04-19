@@ -9,12 +9,14 @@ interface AuthState {
   profile: UserProfile | null;
   formula: RewardFormula | null;
   isLoading: boolean;
+  pendingEmailConfirmation: boolean;
 
   // Actions
   setSession: (session: Session | null) => void;
   fetchProfile: () => Promise<void>;
   fetchFormula: () => Promise<void>;
   signOut: () => Promise<void>;
+  setPendingEmailConfirmation: (value: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -23,9 +25,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   formula: null,
   isLoading: true,
+  pendingEmailConfirmation: false,
 
   setSession: (session) => {
     set({ session, user: session?.user ?? null, isLoading: false });
+  },
+
+  setPendingEmailConfirmation: (value) => {
+    set({ pendingEmailConfirmation: value });
   },
 
   fetchProfile: async () => {

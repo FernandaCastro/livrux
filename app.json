@@ -23,7 +23,8 @@
         "backgroundColor": "#F5A623"
       },
       "package": "com.livrux.app",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",

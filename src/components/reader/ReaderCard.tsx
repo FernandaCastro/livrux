@@ -74,7 +74,7 @@ const AVATAR_SIZE = 72;
 
 const styles = StyleSheet.create({
   card: {
-    width: CARD_SIZE,
+    flex: 1,
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     padding: Spacing.md,

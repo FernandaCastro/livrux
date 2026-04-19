@@ -38,6 +38,8 @@ const en = {
     resetSuccess: 'Password reset successfully. Sign in with your new password.',
     resendCode: 'Resend code',
     resendCodeIn: 'Resend code ({{seconds}}s)',
+    confirmationEmailTitle: 'Check your inbox',
+    confirmationEmailBody: 'A confirmation email was sent. Please verify your email address before signing in.',
     errors: {
       invalidEmail: 'Enter a valid email address.',
       weakPassword: 'Password must be at least 8 characters.',

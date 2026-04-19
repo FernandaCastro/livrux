@@ -38,6 +38,8 @@ const pt = {
     resetSuccess: 'Senha redefinida com sucesso. Entre com sua nova senha.',
     resendCode: 'Reenviar código',
     resendCodeIn: 'Reenviar código ({{seconds}}s)',
+    confirmationEmailTitle: 'Verifique sua caixa de entrada',
+    confirmationEmailBody: 'Um e-mail de confirmação foi enviado. Verifique seu e-mail antes de entrar.',
     errors: {
       invalidEmail: 'Insira um endereço de e-mail válido.',
       weakPassword: 'A senha deve ter pelo menos 8 caracteres.',

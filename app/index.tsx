@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Pressable,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +34,7 @@ export default function HomeScreen() {
   const { setSelectedReader, bookPersistedCount } = useReaderStore();
   const { profile } = useAuthStore();
   const { canAccessReader, lockReaders } = useParentalStore();
+  const { pendingEmailConfirmation, setPendingEmailConfirmation } = useAuthStore();
   const { requireParentPin, requireReaderPin, toggleParentLock, isParentUnlocked, modalProps } = useParentalGuard();
 
   useFocusEffect(
@@ -135,6 +137,25 @@ export default function HomeScreen() {
         )}
       </View>
 
+      {pendingEmailConfirmation && (
+        <View style={styles.confirmationBanner}>
+          <View style={styles.confirmationBannerContent}>
+            <Text style={styles.confirmationBannerTitle}>
+              {t('auth.confirmationEmailTitle')}
+            </Text>
+            <Text style={styles.confirmationBannerBody}>
+              {t('auth.confirmationEmailBody')}
+            </Text>
+          </View>
+          <Pressable
+            onPress={() => setPendingEmailConfirmation(false)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.confirmationBannerClose}>✕</Text>
+          </Pressable>
+        </View>
+      )}
+
       {/* Readers grid — show the full-screen spinner only on the very first
           load (no data yet). Background refreshes (focus, post-persist) use
           the FlatList's RefreshControl so the list doesn't flash away. */}
@@ -197,6 +218,35 @@ const styles = StyleSheet.create({
   },
   lockIcon: { fontSize: 26 },
   loader: { flex: 1 },
+  confirmationBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#E3F2FD',
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.info,
+    borderRadius: Radius.md,
+    marginHorizontal: Spacing.xl,
+    marginBottom: Spacing.md,
+    padding: Spacing.md,
+  },
+  confirmationBannerContent: { flex: 1 },
+  confirmationBannerTitle: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.sm,
+    color: Colors.info,
+    marginBottom: 2,
+  },
+  confirmationBannerBody: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: '#1565C0',
+  },
+  confirmationBannerClose: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.sm,
+    color: Colors.info,
+    marginLeft: Spacing.sm,
+  },
   list: {
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.xl,

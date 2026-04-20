@@ -4,11 +4,11 @@
     "slug": "livrux",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/livrux.png",
     "userInterfaceStyle": "light",
     "scheme": "livrux",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/livrux.png",
       "resizeMode": "contain",
       "backgroundColor": "#FAFAF7"
     },
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/livrux.png",
         "backgroundColor": "#F5A623"
       },
       "package": "com.livrux.app",
@@ -34,7 +34,7 @@
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/livrux.png"
     },
     "plugins": [
       "expo-router",

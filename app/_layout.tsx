@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, FredokaOne_400Regular } from '@expo-google-fonts/fredoka-one';
 import {
   Nunito_400Regular,
@@ -17,7 +18,8 @@ import { useAuthStore } from '../src/stores/authStore';
 import { useParentalStore } from '../src/stores/parentalStore';
 import '../src/i18n'; // initialize i18n before any component renders
 
-// Root layout: loads fonts, initializes auth state, and routes to (auth) or (app).
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
@@ -81,6 +83,12 @@ export default function RootLayout() {
       router.replace('/app');
     }
   }, [session, isLoading, fontsLoaded, segments]);
+
+  useEffect(() => {
+    if (fontsLoaded && !isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, isLoading]);
 
   if (!fontsLoaded || isLoading) return null;
 

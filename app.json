@@ -24,7 +24,11 @@
       },
       "package": "com.livrux.app",
       "edgeToEdgeEnabled": true,
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -49,6 +53,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2817e5d9-beed-4a88-a77c-144a43a09443"
+      }
+    },
+    "owner": "fcastrorj"
   }
 }

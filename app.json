@@ -25,6 +25,8 @@
       "package": "com.livrux.app",
       "edgeToEdgeEnabled": true,
       "versionCode": 1,
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
       "kotlinVersion": "2.0.21"
     },
     "web": {

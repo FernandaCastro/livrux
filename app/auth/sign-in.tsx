@@ -78,7 +78,7 @@ export default function SignInScreen() {
           {/* Logo / Branding */}
           <View style={styles.header}>
             <Image
-              source={require('../../assets/livrux.png')}
+              source={require('../../assets/adaptive-icon.png')}
               style={styles.logo}
               resizeMode="contain"
             />

@@ -91,7 +91,7 @@ export default function SignUpScreen() {
         >
           <View style={styles.header}>
             <Image
-              source={require('../../assets/livrux.png')}
+              source={require('../../assets/adaptive-icon.png')}
               style={styles.logo}
               resizeMode="contain"
             />

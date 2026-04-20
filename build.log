@@ -1,0 +1,152 @@
+Resolved "preview" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+No environment variables with visibility "Plain text" and "Sensitive" found for the "preview" environment on EAS.
+
+android.versionCode field in app config is ignored when version source is set to remote, but this value will still be in the manifest available via expo-constants. It's recommended to remove this value from app config.
+✔ Using remote Android credentials (Expo server)
+✔ Using Keystore from configuration: Build Credentials mVJtpws3Hp (default)
+⠋ Computing project fingerprint⠙ Computing project fingerprint⠹ Computing project fingerprint⠸ Computing project fingerprint⠼ Computing project fingerprint⠴ Computing project fingerprint⠦ Computing project fingerprint⠧ Computing project fingerprint⠇ Computing project fingerprint⠏ Computing project fingerprint⠋ Computing project fingerprint⠙ Computing project fingerprint⠹ Computing project fingerprint⠸ Computing project fingerprint⠼ Computing project fingerprint⠴ Computing project fingerprint⠦ Computing project fingerprint⠧ Computing project fingerprint⠇ Computing project fingerprint⠏ Computing project fingerprint⠋ Computing project fingerprint⠙ Computing project fingerprint⠹ Computing project fingerprint⠸ Computing project fingerprint⠼ Computing project fingerprint⠴ Computing project fingerprint✔ Computed project fingerprint
+ANDROID_NDK_HOME environment variable was not specified, continuing build without NDK
+[SETUP_WORKINGDIR] Preparing workingdir /var/folders/pv/73xrwqqs3tl5yyscygprr4jr0000gp/T/eas-build-local-nodejs/351806f8-a48d-4e63-8d9c-8af844a3bf1a
+[START_BUILD] Starting build
+  "job": {
+    "type": "managed",
+    "platform": "android",
+    "projectRootDirectory": ".",
+    "projectArchive": {
+      "type": "PATH",
+      "path": "/var/folders/pv/73xrwqqs3tl5yyscygprr4jr0000gp/T/eas-cli-nodejs/04bb666d-879a-440e-801d-59d52448833a.tar.gz"
+    },
+    "builderEnvironment": {
+      "env": {}
+    },
+    "cache": {
+      "disabled": false,
+      "paths": [],
+      "clear": false
+    },
+    "updates": {},
+    "buildType": "apk",
+    "username": "fcastrorj",
+    "version": {
+      "versionCode": "1"
+    },
+    "experimental": {},
+    "mode": "build",
+    "triggeredBy": "EAS_CLI",
+    "appId": "2817e5d9-beed-4a88-a77c-144a43a09443",
+    "initiatingUserId": "b8608922-b915-42bb-b644-004336c20dae"
+  }
+Local build, skipping project archive refresh
+[READ_EAS_JSON] Using eas.json:
+[READ_EAS_JSON] {
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./google-play-service-account.json",
+        "track": "internal"
+      }
+    }
+  }
+}
+
+[READ_PACKAGE_JSON] Using package.json:
+[READ_PACKAGE_JSON] {
+  "name": "livrux",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build:preview": "eas build --profile preview --platform android",
+    "build:production": "eas build --profile production --platform android",
+    "submit:production": "eas submit --profile production --platform android"
+  },
+  "dependencies": {
+    "@expo-google-fonts/fredoka-one": "^0.2.3",
+    "@expo-google-fonts/nunito": "^0.4.2",
+    "@expo/metro-config": "~54.0.14",
+    "@expo/metro-runtime": "~6.1.2",
+    "@hookform/resolvers": "^5.2.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "^2.101.1",
+    "babel-preset-expo": "~54.0.10",
+    "date-fns": "^4.1.0",
+    "expo": "~54.0.33",
+    "expo-camera": "~16.0.18",
+    "expo-constants": "~18.0.13",
+    "expo-crypto": "~15.0.8",
+    "expo-font": "~14.0.11",
+    "expo-image-manipulator": "~14.0.8",
+    "expo-image-picker": "~17.0.10",
+    "expo-linking": "~8.0.11",
+    "expo-localization": "~17.0.8",
+    "expo-router": "~6.0.23",
+    "expo-secure-store": "~15.0.8",
+    "expo-status-bar": "~3.0.9",
+    "i18next": "^26.0.3",
+    "react": "19.2.5",
+    "react-hook-form": "^7.72.0",
+    "react-i18next": "^17.0.2",
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-reanimated": "~4.1.1",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-worklets": "~0.5.1",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.0",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}
+[INSTALL_DEPENDENCIES] Running "yarn install --frozen-lockfile --production false" in /var/folders/pv/73xrwqqs3tl5yyscygprr4jr0000gp/T/eas-build-local-nodejs/351806f8-a48d-4e63-8d9c-8af844a3bf1a/build directory
+[INSTALL_DEPENDENCIES] 
+Error: spawn yarn ENOENT
+    at ChildProcess._handle.onexit (node:internal/child_process:285:19)
+    at onErrorNT (node:internal/child_process:483:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+
+Build failed
+Unknown error. See logs of the Install dependencies build phase for more information.
+Error: Unknown error. See logs of the Install dependencies build phase for more information.
+    at resolveBuildPhaseErrorAsync (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/@expo/build-tools/dist/buildErrors/detectError.js:61:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async BuildContext.handleBuildPhaseErrorAsync (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/@expo/build-tools/dist/context.js:192:28)
+    at async BuildContext.runBuildPhase (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/@expo/build-tools/dist/context.js:137:35)
+    at async setupAsync (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/@expo/build-tools/dist/common/setup.js:73:5)
+    at async buildAsync (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/@expo/build-tools/dist/builders/android.js:41:5)
+    at async runBuilderWithHooksAsync (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/@expo/build-tools/dist/builders/common.js:12:13)
+    at async Object.androidBuilder (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/@expo/build-tools/dist/builders/android.js:28:16)
+    at async buildAndroidAsync (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/eas-cli-local-build-plugin/dist/android.js:43:12)
+    at async buildAsync (/Users/fernandacastro/.npm/_npx/5e0da6277f4839b1/node_modules/eas-cli-local-build-plugin/dist/build.js:54:29)
+npx -y eas-cli-local-build-plugin@18.6.0 eyJqb2IiOnsidHlwZSI6Im1hbmFnZWQiLCJwbGF0Zm9ybSI6ImFuZHJvaWQiLCJwcm9qZWN0Um9vdERpcmVjdG9yeSI6Ii4iLCJwcm9qZWN0QXJjaGl2ZSI6eyJ0eXBlIjoiUEFUSCIsInBhdGgiOiIvdmFyL2ZvbGRlcnMvcHYvNzN4cndxcXMzdGw1eXlzY3lncHJyNGpyMDAwMGdwL1QvZWFzLWNsaS1ub2RlanMvMDRiYjY2NmQtODc5YS00NDBlLTgwMWQtNTlkNTI0NDg4MzNhLnRhci5neiJ9LCJidWlsZGVyRW52aXJvbm1lbnQiOnsiZW52Ijp7fX0sImNhY2hlIjp7ImRpc2FibGVkIjpmYWxzZSwicGF0aHMiOltdLCJjbGVhciI6ZmFsc2V9LCJzZWNyZXRzIjp7ImJ1aWxkQ3JlZGVudGlhbHMiOnsia2V5c3RvcmUiOnsiZGF0YUJhc2U2NCI6Ii91Mys3UUFBQUFJQUFBQUJBQUFBQVFBZ05qbGhZVFpoWXpRNU1HUTRNakl5TnpjMU1HSTFZek15TjJRME1tRmhORFlBQUFHZHF3eU5NUUFBQlA4d2dnVDdNQXdHQ2lzR0FRUUJLZ0lSQVFFRWdnVHB5aE15NllLelA1bXBMdFhBWS9LTk9rUVhZUmptaG04Q1RMSzAvWCtGRTlocndxUG5IUGdBckU3ZFRSL25OenpDYzYwazVtbkx1UStvdlVtUkxONmU0ZzRuckFwNUJoNGpyMklzNDRzR2xPTUNDSEpwVmtjUGlkWFNPU2dka2Y5c2xqUUJ2emVuUDNsWDlFNVFyczBITFlsR3VGYno0NWZsa2QwcjRyZEJLOEtOUmdNK0ZBMy9pNUszV1oydllYbElPK3ppTkFmVFlRZHZ0Y2MzMkMxWDFLaUNpLzhQN1VncjFodVozZkNmY2p3Z25vbE9XeCsxblRkR01GdkFiRnFOdzhaOWZTRnhCeGJWSHFGYWJZckJaNEFaM3l2bFJRa3J1VWgxeUtQQ1laZlh5blZDQUhiYTVraE5LWjRjeU9FK2xoaU5uWHNUck9JQW9kNEJrWTdCN3dGRFI2VnFoa3BCUTlNRSsyU1BKbUpWT0d3RUdGR20xNGd2THNDeEZyUVdreFdMblBtWmxheW9HcFNlTzdhNEVZSEo0S25vR2hiT1loYzB1V0xjNmtWMkhZRUNldTl4bUdlZHlaaCs2bGg5MnNIbzhFb3o1aExxUTR5dElUcUttRkxKcU9ianZjRnEvd3d6R0lKK0JhSVF4MVdsa3BwYXFaSWc1THdXbDJIMGwyTGZNR2FRZ1hDVEthS2crQnhUWFhtbVAvREszY2RveS9SSkZtMExFYmlHVjZNRkt2S09CMVNoRUU3L3RtaTN2Mkd4NDNiR3RrbjYwUXllMTBCcGF5MEErVHBmMURKYXgxN1JnY0RIYnNqY2c3QUwwMVlnTXNIV0k5UGRMc1lEV0hEeXAvS0tqeEtNWGpsWlc0SjBFa2hXbG1penhIcnFvMHZvdVZjQkNva2N4Z0ZuaXBqOTlXZ1ZCT3pkcWhaOXJUUEg2SjlwRHZHcGs1Uks4MjlPT2FSMkFRa1VwRlFoemdqVm4vVVFIMHFzVUJwMkVrZHVGZzR2TDVpRWVFTFdxYkdCdytwYk1JMi9WKzNPWHRNdHQvTStKT3gyeUxKOXlrYklOdjluS2Q4ajl4b21xbHRJeHo1TWt5a1pLM1J3c3FJeGVaVEtid2hNbmZFMXhLdVdra3NZV1pMamVSNklkMmZvb01qUWJSc1MvWWpxcmdBS2JESk01a1VvTlJZYTJNSmlaVmY5VVd2WWdneUlOUUwwL2RBbTNTa2Y4cnZ0TDEwUXRleFZJam5ZTzhGWmswWnJ0WkUzNjFpb3Zjcmhjd3F0dklLQlQ3QXF3K0ppK3dVV1NqUlRiVyt0UjM0UjVuZ0FDKy9GNEtXSFlJS1FtZ3p3SUY2SVVMOStldnkxdDVjaWMzMHBwcTZKUVVSRHU1aVBuK2Y4WjN2SEZ3ZVc2OFQ2OXJqaDBqN3FTR0JzNDBOU2ZJcVdwOWFLZGxKL2RXbkZHOFlRamhNR2NDWUEzRE1DNlVNclp4UlRweW0yTTNqTkl0UVlSb3l2SHdJNGs0UVRnV2hISjlUOG1yV242dnA1UlkvYVFTdDA0aStvbHdlQTRTZU81R1YxNEZzdU40L3hvQm80aC83ZHQ1VUNCZkEvNUp0M1dUS0piT2hnbGRxZ3o3NXFlREQzUVJyV2QvQTJFdlpiMGdVblBXZVpJODJOV0w5QXFlN0ZhOHZjeDRWOUgzeWlJZDlsSmx2Vi84RzN3ckFqelNBaGJxMUEySERpYjJsbVpFeHJjV2JjRzJJYmdDamROL3ZaZlpmc2xjUWJISEtVNkxDT0ZqS2FkK3dwQnRyT1BrV25ydmc1cWlDOURHQStOZUplbFRMZGpNWm55MDQzVVF0OVJDTFZXNWJDRVprRVBpUUxUMkdTWUpxMXdjRUoycXJHTnhZd2dtZnJiWmFpNURjeDBXU1pSL3hSV3RyM3lwcS91RXZPbitBeHVtQXNrY2ZQc2lWL2lhL2lxTDZUMmx3UkVtREdoSHJWUVE2RWdqM2R5R1RKQUZlSS9OVFNhWmtqcTNmMXZTb2hlN0xkelFHclVvRmVqM3h5dmRnQ3dtTkdhUklhVFVqbzVZWkhneUFVR0I3WkpXVk1hcitBTW8rQk5SNEFhblJvMUVsdE02alhyK1plTHQ2ZXJYeEM2V3d6c0VBNzdxa0ljYks3TXlxQVNjVURLbWM0Yzc2UGtsQzE4MWhBYnFTTmx4bUR4LzZHWUVLVFVQaVZrQXVwc0w5a0FBQUFBUUFGV0M0MU1Ea0FBQU14TUlJRExUQ0NBaFdnQXdJQkFnSUlUM200bStpWlhXSXdEUVlKS29aSWh2Y05BUUVNQlFBd1JERUxNQWtHQTFVRUJoTUNWVk14Q1RBSEJnTlZCQWdUQURFSk1BY0dBMVVFQnhNQU1Ra3dCd1lEVlFRS0V3QXhDVEFIQmdOVkJBc1RBREVKTUFjR0ExVUVBeE1BTUNBWERUSTJNRFF5TURFek1qQXhPVm9ZRHpJd05UTXdPVEExTVRNeU1ERTVXakJFTVFzd0NRWURWUVFHRXdKVlV6RUpNQWNHQTFVRUNCTUFNUWt3QndZRFZRUUhFd0F4Q1RBSEJnTlZCQW9UQURFSk1BY0dBMVVFQ3hNQU1Ra3dCd1lEVlFRREV3QXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCQVFDNDhQSGh3czhxd1ZHM0xQUzB6Q0VXdXB5K0JNSnIrck9odnhSZWUyaSttQWlxZ1ZTL3V6Rllvam9KU0FNTWd3Skw0MTFNQUx0TmFJRmRzQm1IZGh6czkzWW10b3pJdE1kTVJtUmwrcW5LQjJyb0tIWHAxQ0hES3Y2b1ZPUWVCYm95ZEtXeGxzVmw1ME1wSEtPNVZHSDIremptS3Blc1ZlZ005amVmMGJmb2RVbDcxcEVWNEx5NmVZMHVpWkZ3dWFXSC81ZUE1Z0dzenYrYjN0ZnNRTk95UVpMd09jRFNvODVXNXM4N0oxdmNBdTA2YzBVbkFGdUkrWjdrbHgzR2tRRWR3Nk1Vd2Rwdml2bnBhaWtPcG1HTzdic2NGT2NNeEt2RWs4bEV3NVZGQStKY0dHakZRdmdIR2l6NzdBZHI1bCtWYi8yRW55UDI4MlpMSkgrVWVlZWJBZ01CQUFHaklUQWZNQjBHQTFVZERnUVdCQlJ1bndja2RET2c3NkdqSVhFU2w4Wi9PTGc2M1RBTkJna3Foa2lHOXcwQkFRd0ZBQU9DQVFFQXQ5YVlHK3FYL0tDaUNtMm0xbDgwd3EwOEZCdzZjb1IxazdCU1ppbFBuYlI0Z2tmcmJieWZpa0FQNFcvM1ZOOThCVUNjRjRTUGFIdktKbEtBRk9XcC9qb0RJVEl6QlFxZE5teVpLWkpOYVYxNjRPYmF1NjdpUkkvTitnRWhtdzBpV0c1bjN3cHYrbWdYTlRpOU1FanZmUTVnK1hHeTZYa21FUXhIWjM5WG5oZ2w0b2tOVVV4WHNHdGRmY2VLWjFaaGowcXYwbUNPNFZvYTdPbjdndGl5SFhuaWNBVGZ4Tis1UU1iOE1CWEtRbThrT1pwMVhqWjYxM3VVVlJmWUFrd3U0d21hSXc5M1ROOVphay9EWjdzQXlVT0twRjNMcU02Z3R6Vi9WdTlXSXdtNmlVL2FTMnBmMWtEeUt3UG1ONFd6bHVDSlQ0QTZkbElSQ1M2L3h0N01mb0tYcElKeFNSV2FNdnNOK2dWN1lqVlBpWFpCIiwia2V5c3RvcmVQYXNzd29yZCI6IjY5YjI5ZmU5Zjc1NmZkMTE1YTQxMmZmNjU1YTBkNmUyIiwia2V5QWxpYXMiOiI2OWFhNmFjNDkwZDgyMjI3NzUwYjVjMzI3ZDQyYWE0NiIsImtleVBhc3N3b3JkIjoiYTM3ZTIzMDAxYmQzMDkxNzRhZjJlZDhmN2U0MzVmYzgifX19LCJ1cGRhdGVzIjp7fSwiYnVpbGRUeXBlIjoiYXBrIiwidXNlcm5hbWUiOiJmY2FzdHJvcmoiLCJ2ZXJzaW9uIjp7InZlcnNpb25Db2RlIjoiMSJ9LCJleHBlcmltZW50YWwiOnt9LCJtb2RlIjoiYnVpbGQiLCJ0cmlnZ2VyZWRCeSI6IkVBU19DTEkiLCJhcHBJZCI6IjI4MTdlNWQ5LWJlZWQtNGE4OC1hNzdjLTE0NGE0M2EwOTQ0MyIsImluaXRpYXRpbmdVc2VySWQiOiJiODYwODkyMi1iOTE1LTQyYmItYjY0NC0wMDQzMzZjMjBkYWUifSwibWV0YWRhdGEiOnsidHJhY2tpbmdDb250ZXh0Ijp7InRyYWNraW5nX2lkIjoiZDk5NTQzYTYtOWJiNC00N2VlLWIxMWItZmE4NTc4M2I0NTFkIiwicGxhdGZvcm0iOiJhbmRyb2lkIiwic2RrX3ZlcnNpb24iOiI1NC4wLjAiLCJhY2NvdW50X2lkIjoiNWIzODFhNmUtYTRhNC00ZjljLWE4ZjEtZjg1NjEwYzc4YjE2IiwicHJvamVjdF9pZCI6IjI4MTdlNWQ5LWJlZWQtNGE4OC1hNzdjLTE0NGE0M2EwOTQ0MyIsInByb2plY3RfdHlwZSI6Im1hbmFnZWQiLCJkZXZfY2xpZW50IjpmYWxzZSwibm9fd2FpdCI6ZmFsc2UsInJ1bl9mcm9tX2NpIjpmYWxzZSwibG9jYWwiOnRydWV9LCJhcHBCdWlsZFZlcnNpb24iOiIxIiwiYXBwVmVyc2lvbiI6IjEuMC4wIiwiY2xpVmVyc2lvbiI6IjE4LjcuMCIsIndvcmtmbG93IjoibWFuYWdlZCIsImNyZWRlbnRpYWxzU291cmNlIjoicmVtb3RlIiwic2RrVmVyc2lvbiI6IjU0LjAuMCIsImZpbmdlcnByaW50SGFzaCI6IjViNTI2ZDA4ZDI5ZjI0ZGRmZDE4Y2E1MTZjZWQwYjk3YzQ1NzkwYWEiLCJyZWFjdE5hdGl2ZVZlcnNpb24iOiIwLjgxLjUiLCJkaXN0cmlidXRpb24iOiJpbnRlcm5hbCIsImFwcE5hbWUiOiJMaXZydXgiLCJhcHBJZGVudGlmaWVyIjoiY29tLmxpdnJ1eC5hcHAiLCJidWlsZFByb2ZpbGUiOiJwcmV2aWV3IiwiZ2l0Q29tbWl0SGFzaCI6IjAxZjBlNWNmNDIxNjRjMGY2ODhjOTJmOTY0YzcyNDBmZjA3N2ZhNDAiLCJnaXRDb21taXRNZXNzYWdlIjoiTWVyZ2UgYnJhbmNoICdjbGF1ZGUvZWFzLWJ1aWxkLWdvb2dsZS1wbGF5LVdGbVlzJyBvZiBnaXRodWIuY29tOkZlcm5hbmRhQ2FzdHJvL2xpdnJ1eCBpbnRvIGNsYXVkZS9lYXMtYnVpbGQtZ29vZ2xlLXBsYXktV0ZtWXMiLCJpc0dpdFdvcmtpbmdUcmVlRGlydHkiOnRydWUsInVzZXJuYW1lIjoiZmNhc3Ryb3JqIiwicnVuV2l0aE5vV2FpdEZsYWciOmZhbHNlLCJydW5Gcm9tQ0kiOmZhbHNlLCJkZXZlbG9wbWVudENsaWVudCI6ZmFsc2UsInNpbXVsYXRvciI6ZmFsc2V9fQ== exited with non-zero code: 1
+    Error: build command failed.

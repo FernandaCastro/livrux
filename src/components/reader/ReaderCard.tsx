@@ -3,10 +3,10 @@ import {
   TouchableOpacity,
   View,
   Text,
-  Image,
   StyleSheet,
 } from 'react-native';
 import type { Reader } from '../../types';
+import { MultiavatarView } from './MultiavatarView';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
 
 interface ReaderCardProps {
@@ -34,15 +34,12 @@ export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardP
 
       {/* Avatar */}
       <View style={styles.avatarContainer}>
-        {reader.avatar_url ? (
-          <Image source={{ uri: reader.avatar_url }} style={styles.avatar} />
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarInitial}>
-              {reader.name.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
+        <MultiavatarView
+          seed={reader.avatar_seed}
+          size={AVATAR_SIZE}
+          borderColor={Colors.primaryLight}
+          borderWidth={3}
+        />
       </View>
 
       {/* Name */}
@@ -69,7 +66,6 @@ export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardP
   );
 }
 
-const CARD_SIZE = 140;
 const AVATAR_SIZE = 72;
 
 const styles = StyleSheet.create({
@@ -93,28 +89,6 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginBottom: Spacing.sm,
-  },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    borderWidth: 3,
-    borderColor: Colors.primaryLight,
-  },
-  avatarPlaceholder: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: Colors.surfaceVariant,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: Colors.primaryLight,
-  },
-  avatarInitial: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['2xl'],
-    color: Colors.secondary,
   },
   name: {
     fontFamily: Fonts.bodyBold,

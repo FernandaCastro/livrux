@@ -58,7 +58,7 @@ export default function HomeScreen() {
   };
 
   const handleEditReader = (reader: Reader) => {
-    requireParentPin(() => {
+    requireReaderPin(reader, () => {
       setSelectedReader(reader);
       router.push(`/app/reader/add?editId=${reader.id}`);
     });

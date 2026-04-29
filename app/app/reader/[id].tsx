@@ -6,15 +6,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Image,
   Alert,
-  Modal,
-  Pressable,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -23,6 +20,7 @@ import { useParentalStore } from '../../../src/stores/parentalStore';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
+import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
@@ -34,7 +32,6 @@ export default function ReaderDashboardScreen() {
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
   const { canEditReader } = useParentalStore();
-  const [avatarModalVisible, setAvatarModalVisible] = useState(false);
 
   const canEdit = canEditReader();
 
@@ -90,7 +87,7 @@ export default function ReaderDashboardScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            await deleteReader(reader.id, reader.avatar_url);
+            await deleteReader(reader.id);
             router.replace('/app');
           },
         },
@@ -118,33 +115,14 @@ export default function ReaderDashboardScreen() {
         )}
       </View>
 
-      {/* Avatar full-screen modal */}
-      {reader.avatar_url && (
-        <Modal
-          visible={avatarModalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setAvatarModalVisible(false)}
-        >
-          <Pressable style={styles.modalOverlay} onPress={() => setAvatarModalVisible(false)}>
-            <Image source={{ uri: reader.avatar_url }} style={styles.modalAvatar} resizeMode="contain" />
-          </Pressable>
-        </Modal>
-      )}
-
       {/* Reader hero */}
       <View style={styles.hero}>
-        {reader.avatar_url ? (
-          <TouchableOpacity onPress={() => setAvatarModalVisible(true)} activeOpacity={0.85}>
-            <Image source={{ uri: reader.avatar_url }} style={styles.avatar} />
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarInitial}>
-              {reader.name.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
+        <MultiavatarView
+          seed={reader.avatar_seed}
+          size={AVATAR_SIZE}
+          borderColor={Colors.primaryLight}
+          borderWidth={3}
+        />
         <Text style={styles.readerName}>{reader.name}</Text>
       </View>
 
@@ -247,8 +225,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-    borderBottomWidth: 0,
-    borderBottomColor: Colors.divider,
   },
   heroBalance: {
     flexDirection: 'row',
@@ -256,30 +232,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
-  },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    borderWidth: 3,
-    borderColor: Colors.primaryLight,
-    marginBottom: Spacing.sm,
-  },
-  avatarPlaceholder: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: Colors.surfaceVariant,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: Colors.primaryLight,
-    marginBottom: Spacing.sm,
-  },
-  avatarInitial: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['3xl'],
-    color: Colors.secondary,
   },
   readerName: {
     fontFamily: Fonts.heading,
@@ -353,19 +305,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.85)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalAvatar: {
-    width: '80%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    borderWidth: 4,
-    borderColor: Colors.primaryLight,
   },
   addBookButton: {
     alignSelf: 'center',

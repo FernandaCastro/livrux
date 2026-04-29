@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { deleteImage } from '../lib/storage';
 import { useAuthStore } from '../stores/authStore';
 import type { Reader } from '../types';
 
@@ -9,9 +8,9 @@ interface UseReadersResult {
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
-  createReader: (name: string, avatarUrl?: string) => Promise<Reader>;
-  updateReader: (id: string, updates: Partial<Pick<Reader, 'name' | 'avatar_url'>>) => Promise<void>;
-  deleteReader: (id: string, avatarUrl?: string | null) => Promise<void>;
+  createReader: (name: string, avatarSeed?: string | null) => Promise<Reader>;
+  updateReader: (id: string, updates: Partial<Pick<Reader, 'name' | 'avatar_seed' | 'old_avatar_seed'>>) => Promise<void>;
+  deleteReader: (id: string) => Promise<void>;
 }
 
 export function useReaders(): UseReadersResult {
@@ -27,7 +26,7 @@ export function useReaders(): UseReadersResult {
 
     const { data, error: dbError } = await supabase
       .from('readers')
-      .select('id, user_id, name, avatar_url, pin, livrux_balance, created_at, updated_at, books(count)')
+      .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, created_at, updated_at, books(count)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true });
 
@@ -46,12 +45,12 @@ export function useReaders(): UseReadersResult {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const createReader = async (name: string, avatarUrl?: string): Promise<Reader> => {
+  const createReader = async (name: string, avatarSeed?: string | null): Promise<Reader> => {
     if (!user) throw new Error('Not authenticated');
 
     const { data, error: dbError } = await supabase
       .from('readers')
-      .insert({ user_id: user.id, name, avatar_url: avatarUrl ?? null })
+      .insert({ user_id: user.id, name, avatar_seed: avatarSeed ?? null })
       .select()
       .single();
 
@@ -63,7 +62,7 @@ export function useReaders(): UseReadersResult {
 
   const updateReader = async (
     id: string,
-    updates: Partial<Pick<Reader, 'name' | 'avatar_url'>>
+    updates: Partial<Pick<Reader, 'name' | 'avatar_seed' | 'old_avatar_seed'>>
   ): Promise<void> => {
     const { error: dbError } = await supabase
       .from('readers')
@@ -76,7 +75,7 @@ export function useReaders(): UseReadersResult {
     );
   };
 
-  const deleteReader = async (id: string, avatarUrl?: string | null): Promise<void> => {
+  const deleteReader = async (id: string): Promise<void> => {
     const { error: dbError } = await supabase
       .from('readers')
       .delete()
@@ -84,10 +83,6 @@ export function useReaders(): UseReadersResult {
 
     if (dbError) throw dbError;
     setReaders((prev) => prev.filter((r) => r.id !== id));
-
-    if (avatarUrl && user) {
-      await deleteImage('avatars', user.id, id).catch(() => {});
-    }
   };
 
   return { readers, isLoading, error, refresh: fetch, createReader, updateReader, deleteReader };

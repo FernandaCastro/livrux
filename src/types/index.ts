@@ -30,7 +30,8 @@ export interface Reader {
   id: string;
   user_id: string;
   name: string;
-  avatar_url: string | null;
+  avatar_seed: string | null;
+  old_avatar_seed: string | null;
   pin: string | null; // SHA-256 hash; null = no PIN required for this reader
   livrux_balance: number;
   created_at: string;

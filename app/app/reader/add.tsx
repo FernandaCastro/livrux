@@ -5,28 +5,24 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useReaders } from '../../../src/hooks/useReaders';
 import { useReaderStore } from '../../../src/stores/readerStore';
-import { useAuthStore } from '../../../src/stores/authStore';
-import { uploadImage } from '../../../src/lib/storage';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
+import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
-const AVATAR_SIZE = 100;
+const AVATAR_DISPLAY_SIZE = 100;
 
 function useReaderSchema() {
   const { t } = useTranslation();
@@ -37,6 +33,13 @@ function useReaderSchema() {
 
 type FormData = { name: string };
 
+function generateAvatarSeed(readerId?: string): string {
+  const base = readerId ?? Math.random().toString(36).slice(2, 10);
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).slice(2, 8);
+  return `${base}_${timestamp}_${random}`;
+}
+
 // This screen handles both "add new reader" and "edit existing reader".
 // When an editId query param is present, it switches to edit mode.
 export default function AddReaderScreen() {
@@ -45,12 +48,10 @@ export default function AddReaderScreen() {
   const { editId } = useLocalSearchParams<{ editId?: string }>();
   const isEditing = !!editId;
 
-  const { user } = useAuthStore();
   const { createReader, updateReader } = useReaders();
   const { selectedReader } = useReaderStore();
 
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [avatarSeed, setAvatarSeed] = useState<string>(() => generateAvatarSeed());
 
   const schema = useReaderSchema();
   const { control, handleSubmit, setValue, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -58,64 +59,43 @@ export default function AddReaderScreen() {
     defaultValues: { name: '' },
   });
 
-  // Reset form and avatar when the screen gains focus in add mode.
-  // Needed because this is a Tab screen (cached) so it never unmounts.
+  // Reset form and generate fresh seed when entering add mode.
   useFocusEffect(
     useCallback(() => {
       if (!isEditing) {
         reset({ name: '' });
-        setAvatarUri(null);
+        setAvatarSeed(generateAvatarSeed());
       }
     }, [isEditing])
   );
 
-  // Pre-fill the form when editing.
+  // Pre-fill form and load existing seed when editing.
   useEffect(() => {
     if (isEditing && selectedReader) {
       setValue('name', selectedReader.name);
-      setAvatarUri(selectedReader.avatar_url);
+      setAvatarSeed(selectedReader.avatar_seed ?? generateAvatarSeed(selectedReader.id));
     }
   }, [isEditing, selectedReader]);
 
-  const pickAvatar = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setAvatarUri(result.assets[0].uri);
-    }
+  const refreshAvatar = () => {
+    const readerId = isEditing ? editId : undefined;
+    setAvatarSeed(generateAvatarSeed(readerId));
   };
 
   const onSubmit = async (data: FormData) => {
-    if (!user) return;
-    setIsUploading(true);
-
     try {
       if (isEditing && editId) {
-        // Keep existing avatar unless the user picked a new one.
-        let finalAvatarUrl = selectedReader?.avatar_url ?? null;
-        if (avatarUri && avatarUri.startsWith('file')) {
-          finalAvatarUrl = await uploadImage('avatars', user.id, editId, avatarUri);
-        }
-        await updateReader(editId, { name: data.name, avatar_url: finalAvatarUrl });
+        await updateReader(editId, {
+          name: data.name,
+          old_avatar_seed: selectedReader?.avatar_seed ?? null,
+          avatar_seed: avatarSeed,
+        });
       } else {
-        // Create the reader first to obtain its ID, then upload the avatar using
-        // that ID so the storage path is always {userId}/{readerId}.jpg.
-        const created = await createReader(data.name);
-        if (avatarUri && avatarUri.startsWith('file')) {
-          const avatarUrl = await uploadImage('avatars', user.id, created.id, avatarUri);
-          await updateReader(created.id, { avatar_url: avatarUrl });
-        }
+        await createReader(data.name, avatarSeed);
       }
-
       router.back();
-    } catch (err) {
+    } catch {
       Alert.alert(t('common.error'), t('common.error'));
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -136,21 +116,19 @@ export default function AddReaderScreen() {
           <View style={{ width: 24 }} />
         </View>
 
-        {/* Avatar picker */}
-        <TouchableOpacity onPress={pickAvatar} style={styles.avatarButton} activeOpacity={0.8}>
-          {avatarUri ? (
-            <Image source={{ uri: avatarUri }} style={styles.avatar} />
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarIcon}>📷</Text>
-            </View>
-          )}
-          <View style={styles.avatarBadge}>
-            <Text style={styles.avatarBadgeText}>
-              {avatarUri ? t('reader.changePhoto') : t('reader.addPhoto')}
-            </Text>
-          </View>
-        </TouchableOpacity>
+        {/* Avatar with refresh button */}
+        <View style={styles.avatarSection}>
+          <MultiavatarView
+            seed={avatarSeed}
+            size={AVATAR_DISPLAY_SIZE}
+            borderColor={Colors.primaryLight}
+            borderWidth={3}
+          />
+          <TouchableOpacity onPress={refreshAvatar} style={styles.refreshButton} activeOpacity={0.75}>
+            <Text style={styles.refreshIcon}>🔄</Text>
+            <Text style={styles.refreshLabel}>{t('reader.refreshAvatar')}</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Name input */}
         <Controller
@@ -172,7 +150,7 @@ export default function AddReaderScreen() {
         <Button
           label={t('common.save')}
           onPress={handleSubmit(onSubmit)}
-          loading={isSubmitting || isUploading}
+          loading={isSubmitting}
           fullWidth
           style={styles.saveButton}
         />
@@ -205,38 +183,24 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
   },
-  avatarButton: {
+  avatarSection: {
     alignItems: 'center',
     marginBottom: Spacing['2xl'],
     marginTop: Spacing.md,
+    gap: Spacing.sm,
   },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    borderWidth: 3,
-    borderColor: Colors.primaryLight,
-  },
-  avatarPlaceholder: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: Colors.surfaceVariant,
+  refreshButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: Colors.border,
-    ...Shadows.sm,
-  },
-  avatarIcon: { fontSize: 36 },
-  avatarBadge: {
-    marginTop: Spacing.sm,
+    gap: Spacing.xs,
     backgroundColor: Colors.surfaceVariant,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
+    ...Shadows.sm,
   },
-  avatarBadgeText: {
+  refreshIcon: { fontSize: 16 },
+  refreshLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
     color: Colors.secondary,

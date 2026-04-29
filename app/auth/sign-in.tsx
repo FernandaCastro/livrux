@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
@@ -76,8 +77,11 @@ export default function SignInScreen() {
         >
           {/* Logo / Branding */}
           <View style={styles.header}>
-            <Text style={styles.coin}>📚</Text>
-            <Text style={styles.appName}>{t('common.appName')}</Text>
+            <Image
+              source={require('../../assets/adaptive-icon.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <Text style={styles.tagline}>{t('auth.signIn')}</Text>
           </View>
 
@@ -185,15 +189,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing['2xl'],
   },
-  coin: {
-    fontSize: 64,
+  logo: {
+    width: 180,
+    height: 180,
     marginBottom: Spacing.sm,
-  },
-  appName: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['4xl'],
-    color: Colors.primary,
-    letterSpacing: 1,
   },
   tagline: {
     fontFamily: Fonts.bodySemiBold,

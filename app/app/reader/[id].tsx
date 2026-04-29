@@ -142,8 +142,8 @@ export default function ReaderDashboardScreen() {
         {/* Stats */}
         <View style={styles.statsRow}>
           <View style={styles.stat}>
-            <Text style={styles.statValue}>{books.length}</Text>
             <Text style={styles.statLabel}>{t('reader.books')}</Text>
+            <Text style={styles.statValue}>{books.length}</Text>
           </View>
         </View>
 
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingBottom: Spacing.lg,
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.sm,
   },
   readerName: {
     fontFamily: Fonts.heading,
@@ -296,18 +296,27 @@ const styles = StyleSheet.create({
   },
   statsRow: {
     flexDirection: 'row',
-    gap: Spacing.xl,
+    gap: Spacing.xs,
   },
-  stat: { alignItems: 'center' },
+  stat: {
+    alignItems: 'center',
+    backgroundColor: Colors.surfaceVariant,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing['2xl'],
+    paddingVertical: Spacing.md,
+    ...Shadows.md,
+    marginBottom: Spacing.xs,
+  },
   statValue: {
     fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
+    fontSize: FontSizes['4xl'],
     color: Colors.secondary,
   },
   statLabel: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.secondaryLight,
+    marginBottom: 4,
   },
   list: {
     paddingHorizontal: Spacing.xl,

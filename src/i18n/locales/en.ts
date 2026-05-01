@@ -187,6 +187,7 @@ const en = {
     title: 'Friends',
     myCode: 'My code',
     shareCodeHint: 'Share with friends to connect',
+    codeCopied: '✓ Copied!',
     myFriends: 'My friends',
     pendingRequests: 'Friend requests',
     noFriends: 'No friends yet',

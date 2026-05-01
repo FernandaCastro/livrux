@@ -63,14 +63,6 @@ export default function FriendProfileScreen() {
     <SafeAreaView style={styles.safe}>
       {/* Hero banner — back button + avatar + name + stats */}
       <View style={styles.heroBanner}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          style={styles.backBtn}
-        >
-          <Text style={styles.backText}>←</Text>
-        </TouchableOpacity>
-
         {friendReader && (
           <View style={styles.heroContent}>
             <View style={styles.avatarRing}>
@@ -126,7 +118,7 @@ export default function FriendProfileScreen() {
         renderItem={({ item }) => <FriendBookCard book={item} />}
       />
 
-      <BottomMenu showWallet showFriends readerId={fromReaderId} />
+      <BottomMenu showReader showWallet showFriends readerId={fromReaderId} />
     </SafeAreaView>
   );
 }
@@ -140,28 +132,16 @@ const styles = StyleSheet.create({
   heroBanner: {
     backgroundColor: Colors.friendEmerald,
     alignItems: 'center',
-    justifyContent: 'space-between',
     borderRadius: Radius.xl,
-    paddingBottom: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.xl,
     marginHorizontal: Spacing.md,
     marginTop: Spacing.xs,
     marginBottom: Spacing.md,
     ...Shadows.lg,
   },
-  backBtn: {
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.xs,
-    alignSelf: 'flex-start',
-  },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: 'rgba(255,255,255,0.85)',
-  },
   heroContent: {
     alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
     gap: Spacing.sm,
   },
   avatarRing: {

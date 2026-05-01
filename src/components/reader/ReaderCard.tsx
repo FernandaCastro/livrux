@@ -37,7 +37,7 @@ export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardP
         <MultiavatarView
           seed={reader.avatar_seed}
           size={AVATAR_SIZE}
-          borderColor={Colors.primaryLight}
+          borderColor={Colors.readerBlueLight}
           borderWidth={3}
         />
       </View>
@@ -73,6 +73,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
+    borderWidth: 2,
+    borderColor: Colors.readerBlue,
     padding: Spacing.md,
     alignItems: 'center',
     margin: Spacing.sm,

@@ -16,6 +16,7 @@ import { useLivrux } from '../../../src/hooks/useLivrux';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import type { LivruxTransaction } from '../../../src/types';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
+import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 function TransactionRow({ tx }: { tx: LivruxTransaction }) {
@@ -28,6 +29,7 @@ function TransactionRow({ tx }: { tx: LivruxTransaction }) {
           : 'rewards.reasonManualSpend';
   return (
     <View style={styles.txRow}>
+      <View style={[styles.txAccent, isEarned ? styles.txAccentEarned : styles.txAccentSpent]} />
       <Text style={styles.txIcon}>{isEarned ? '🪙' : '💸'}</Text>
       <View style={styles.txInfo}>
         <Text style={styles.txDescription} numberOfLines={1}>
@@ -55,29 +57,20 @@ export default function RewardsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.backText}>←</Text>
-        </TouchableOpacity>
-      </View>
-      {/* Balance hero */}
-      <View style={styles.hero}>
+      {/* Gold banner */}
+      <View style={styles.heroBanner}>
         {selectedReader ? (
           <>
-            <Text style={styles.readerName}>{selectedReader.name}</Text>
-            <View style={styles.balanceCard}>
-              <Text style={styles.balanceLabel}>{t('rewards.totalBalance')}</Text>
-              <View style={styles.balanceRow}>
-                <Text style={styles.balanceCoin}>🪙</Text>
-                <Text style={styles.balanceAmount}>{totalBalance.toFixed(2)}</Text>
-              </View>
+            <View style={styles.bannerAvatar}>
+              <MultiavatarView seed={selectedReader.avatar_seed} size={38} borderColor="rgba(255,255,255,0.6)" borderWidth={2} />
+            </View>
+            <Text style={styles.title}>{t('rewards.title')}</Text>
+            <Text style={styles.balanceLabel}>{t('rewards.totalBalance')}</Text>
+            <View style={styles.balanceRow}>
+              <Text style={styles.balanceCoin}>🪙</Text>
+              <Text style={styles.balanceAmount}>{totalBalance.toFixed(2)}</Text>
               <Text style={styles.balanceCurrency}>Livrux</Text>
             </View>
-
-            {/* Spend button */}
             <TouchableOpacity
               style={styles.spendButton}
               onPress={() => router.push(`/app/spend?readerId=${selectedReader.id}`)}
@@ -87,9 +80,7 @@ export default function RewardsScreen() {
             </TouchableOpacity>
           </>
         ) : (
-          <Text style={styles.noReaderText}>
-            {t('home.emptyTitle')}
-          </Text>
+          <Text style={styles.noReaderText}>{t('home.emptyTitle')}</Text>
         )}
       </View>
 
@@ -121,48 +112,34 @@ export default function RewardsScreen() {
           renderItem={({ item }) => <TransactionRow tx={item} />}
         />
       )}
-      <BottomMenu showWallet showFriends readerId={selectedReader?.id} />
+      <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
-  hero: {
-    alignItems: 'center',
+  heroBanner: {
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.xl,
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.lg,
-    paddingBottom: Spacing.xl,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+    ...Shadows.lg,
+  },
+  bannerAvatar: {
+    position: 'absolute',
+    top: Spacing.md,
+    left: Spacing.md,
   },
   readerName: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.xl,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.md,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
-  },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: Colors.secondary,
-  },
-  balanceCard: {
-    backgroundColor: Colors.primary,
-    borderRadius: Radius.xl,
-    paddingHorizontal: Spacing['2xl'],
-    paddingVertical: Spacing.lg,
-    alignItems: 'center',
-    ...Shadows.md,
-    marginBottom: Spacing.md,
+    color: Colors.textOnPrimary,
+    marginBottom: Spacing.sm,
   },
   balanceLabel: {
     fontFamily: Fonts.bodySemiBold,
@@ -188,11 +165,14 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   spendButton: {
-    backgroundColor: Colors.secondary,
+    alignSelf: 'stretch',
+    marginTop: Spacing.lg,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     borderRadius: Radius.xl,
-    paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.sm,
-    ...Shadows.sm,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.6)',
   },
   spendButtonText: {
     fontFamily: Fonts.bodyBold,
@@ -215,15 +195,32 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
   },
+  title: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes['2xl'],
+    color: Colors.textOnPrimary,
+    marginBottom: Spacing.sm,
+  },
   txRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: Radius.md,
     padding: Spacing.md,
+    paddingLeft: Spacing.md + 4,
     marginBottom: Spacing.sm,
+    overflow: 'hidden',
     ...Shadows.sm,
   },
+  txAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+  },
+  txAccentEarned: { backgroundColor: Colors.success },
+  txAccentSpent: { backgroundColor: Colors.error },
   txIcon: { fontSize: 24, marginRight: Spacing.md },
   txInfo: { flex: 1 },
   txDescription: {

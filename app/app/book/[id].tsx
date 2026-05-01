@@ -53,11 +53,7 @@ export default function BookDetailScreen() {
   if (!book) {
     return (
       <SafeAreaView style={styles.safe}>
-        <View style={styles.container}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
-        </View>
+        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
@@ -89,9 +85,6 @@ export default function BookDetailScreen() {
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack}>
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
           <View style={styles.headerActions}>
             <TouchableOpacity onPress={() => router.push(`/app/book/edit?bookId=${book.id}`)}>
               <Text style={styles.editText}>{t('book.editBook')}</Text>
@@ -200,7 +193,7 @@ export default function BookDetailScreen() {
           </View>
         )}
       </ScrollView>
-      <BottomMenu />
+      <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
     </SafeAreaView>
   );
 }
@@ -230,12 +223,6 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.secondary,
   },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: Colors.secondary,
-  },
-  backButton: { paddingVertical: Spacing.lg },
   deleteText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,

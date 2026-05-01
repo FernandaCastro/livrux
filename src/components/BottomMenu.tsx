@@ -11,10 +11,11 @@ export const BOTTOM_MENU_HEIGHT = 54;
 interface BottomMenuProps {
   showWallet?: boolean;
   showFriends?: boolean;
+  showReader?: boolean;
   readerId?: string;
 }
 
-export function BottomMenu({ showWallet = false, showFriends = false, readerId }: BottomMenuProps) {
+export function BottomMenu({ showWallet = false, showFriends = false, showReader = false, readerId }: BottomMenuProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
@@ -25,11 +26,12 @@ export function BottomMenu({ showWallet = false, showFriends = false, readerId }
   const isSettings = pathname.startsWith('/app/settings');
   const isWallet = pathname.startsWith('/app/rewards');
   const isFriends = pathname.startsWith('/app/friends') || pathname.startsWith('/app/friend/');
-  const isHome = !isSettings && !isWallet && !isFriends;
+  const isReader = pathname.startsWith('/app/reader') || pathname.startsWith('/app/book');
+  const isHome = !isSettings && !isWallet && !isFriends && !isReader;
 
   return (
     <View style={styles.container}>
-      {/* Readers — always first */}
+      {/* Home — always first */}
       <TouchableOpacity
         style={styles.tab}
         onPress={() => router.push('/app')}
@@ -38,6 +40,18 @@ export function BottomMenu({ showWallet = false, showFriends = false, readerId }
         <Text style={styles.icon}>🏠</Text>
         <Text style={[styles.label, isHome && styles.activeLabel]}>{t('home.title')}</Text>
       </TouchableOpacity>
+
+      {/* Reader / Books */}
+      {showReader && readerId && (
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => router.push(`/app/reader/${readerId}`)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.icon}>📖</Text>
+          <Text style={[styles.label, isReader && styles.activeReaderLabel]}>{t('reader.books')}</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Wallet */}
       <View style={styles.tab}>
@@ -53,7 +67,7 @@ export function BottomMenu({ showWallet = false, showFriends = false, readerId }
         )}
       </View>
 
-      {/* Friends — only in reader context */}
+      {/* Friends */}
       {showFriends && readerId && (
         <TouchableOpacity
           style={styles.tab}
@@ -61,7 +75,7 @@ export function BottomMenu({ showWallet = false, showFriends = false, readerId }
           activeOpacity={0.7}
         >
           <Text style={styles.icon}>👦👧</Text>
-          <Text style={[styles.label, isFriends && styles.activeLabel]}>{t('friends.title')}</Text>
+          <Text style={[styles.label, isFriends && styles.activeFriendsLabel]}>{t('friends.title')}</Text>
         </TouchableOpacity>
       )}
 
@@ -110,5 +124,11 @@ const styles = StyleSheet.create({
   },
   activeLabel: {
     color: Colors.primary,
+  },
+  activeReaderLabel: {
+    color: Colors.readerBlue,
+  },
+  activeFriendsLabel: {
+    color: Colors.friendEmerald,
   },
 });

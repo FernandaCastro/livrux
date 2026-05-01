@@ -95,37 +95,33 @@ export default function ReaderDashboardScreen() {
     <SafeAreaView style={styles.safe}>
       {/* ── Hero banner ── */}
       <View style={styles.heroBanner}>
-        {/* Top bar: back + actions */}
-        <View style={styles.bannerHeader}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
-          <View style={styles.bannerActions}>
-            {canEdit && (
-              <TouchableOpacity
-                onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                style={styles.actionBtn}
-              >
-                <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
-              </TouchableOpacity>
-            )}
-            {canDelete && (
-              <TouchableOpacity
-                onPress={handleDelete}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                style={[styles.actionBtn, styles.actionBtnDelete]}
-              >
-                <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
-              </TouchableOpacity>
-            )}
+        {/* Actions row — only rendered when at least one action is available */}
+        {(canEdit || canDelete) && (
+          <View style={styles.bannerHeader}>
+            <View style={styles.bannerActions}>
+              {canEdit && (
+                <TouchableOpacity
+                  onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={styles.actionBtn}
+                >
+                  <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
+                </TouchableOpacity>
+              )}
+              {canDelete && (
+                <TouchableOpacity
+                  onPress={handleDelete}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={[styles.actionBtn, styles.actionBtnDelete]}
+                >
+                  <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-        </View>
+        )}
 
-        {/* Avatar + name */}
+        {/* Avatar (left) + Name aligned to avatar bottom (right) */}
         <View style={styles.heroContent}>
           <View style={styles.avatarRing}>
             <MultiavatarView
@@ -135,7 +131,9 @@ export default function ReaderDashboardScreen() {
               borderWidth={4}
             />
           </View>
-          <Text style={styles.readerName}>{reader.name}</Text>
+          <View style={styles.heroRight}>
+            <Text style={styles.readerName} numberOfLines={2}>{reader.name}</Text>
+          </View>
         </View>
 
         {/* Balance + books badges */}
@@ -151,16 +149,16 @@ export default function ReaderDashboardScreen() {
             <Text style={styles.booksLabel}>{t('reader.books')}</Text>
           </View>
         </View>
-      </View>
 
-      {/* ── Add book button ── */}
-      <TouchableOpacity
-        style={styles.addBookBtn}
-        onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.addBookBtnText}>📖 + {t('book.logBook')}</Text>
-      </TouchableOpacity>
+        {/* ── Add book button ── */}
+        <TouchableOpacity
+          style={styles.addBookBtn}
+          onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.addBookBtnText}>📖 + {t('book.logBook')}</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* ── Books list ── */}
       <FlatList
@@ -201,7 +199,7 @@ export default function ReaderDashboardScreen() {
         )}
       />
 
-      <BottomMenu showWallet showFriends readerId={id} />
+      <BottomMenu showReader showWallet showFriends readerId={id} />
     </SafeAreaView>
   );
 }
@@ -220,27 +218,20 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.md,
     marginTop: Spacing.xs,
     marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.xl,
     ...Shadows.lg,
   },
   bannerHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignSelf: 'stretch',
-    paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
     paddingBottom: Spacing.xs,
   },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: 'rgba(255,255,255,0.85)',
-  },
   bannerActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: Spacing.lg,
+    gap: Spacing.sm,
   },
   actionBtn: {
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -262,28 +253,33 @@ const styles = StyleSheet.create({
     color: '#FFB3B3',
   },
   heroContent: {
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
-    gap: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    alignSelf: 'stretch',
+    gap: Spacing.md,
     marginBottom: Spacing.lg,
+  },
+  heroRight: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 20,
   },
   avatarRing: {
     borderRadius: Radius.full,
     padding: 4,
     backgroundColor: 'rgba(255,255,255,0.15)',
     ...Shadows.md,
+    marginTop: -10,
   },
   readerName: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
     color: Colors.textOnPrimary,
-    textAlign: 'center',
   },
   heroBadgesRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: Spacing.md,
-    paddingHorizontal: Spacing.xl,
   },
   balanceBadge: {
     flexDirection: 'row',
@@ -329,14 +325,16 @@ const styles = StyleSheet.create({
 
   /* ── Add book ── */
   addBookBtn: {
-    marginHorizontal: Spacing.xl,
-    marginBottom: Spacing.md,
-    backgroundColor: Colors.accent,
+    alignSelf: 'stretch',
+    marginTop: Spacing.lg,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     borderRadius: Radius.xl,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
     alignItems: 'center',
-    ...Shadows.md,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.6)',
   },
+
   addBookBtnText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,

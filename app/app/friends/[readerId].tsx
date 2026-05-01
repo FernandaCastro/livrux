@@ -16,8 +16,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
+import * as Clipboard from 'expo-clipboard';
 
 import { useFriends } from '../../../src/hooks/useFriends';
+import { useReaderStore } from '../../../src/stores/readerStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { FriendCard } from '../../../src/components/friends/FriendCard';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
@@ -29,7 +31,7 @@ export default function FriendsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { readerId } = useLocalSearchParams<{ readerId: string }>();
-
+  const { selectedReader } = useReaderStore();
 
   const {
     friends,
@@ -54,6 +56,14 @@ export default function FriendsScreen() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [requestSent, setRequestSent] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  const handleCopyCode = async () => {
+    if (!friendCode) return;
+    await Clipboard.setStringAsync(friendCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
 
   const closeAddModal = () => {
     setAddModalVisible(false);
@@ -108,23 +118,22 @@ export default function FriendsScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={styles.backText}>←</Text>
-        </TouchableOpacity>
+      {/* Hero banner */}
+      <View style={styles.heroBanner}>
+        {selectedReader && (
+          <View style={styles.bannerAvatar}>
+            <MultiavatarView seed={selectedReader.avatar_seed} size={38} borderColor="rgba(255,255,255,0.6)" borderWidth={2} />
+          </View>
+        )}
         <Text style={styles.title}>{t('friends.title')}</Text>
-        <View style={{ width: 32 }} />
-      </View>
-
-      {/* Own friend code card + add button */}
-      <View style={styles.topSection}>
         {friendCode && (
-          <View style={styles.codeCard}>
+          <TouchableOpacity onPress={handleCopyCode} activeOpacity={0.75} style={styles.codeBlock}>
             <Text style={styles.codeLabel}>{t('friends.myCode')}</Text>
             <Text style={styles.codeValue}>{friendCode}</Text>
-            <Text style={styles.codeHint}>{t('friends.shareCodeHint')}</Text>
-          </View>
+            <Text style={styles.codeHint}>
+              {codeCopied ? t('friends.codeCopied') : t('friends.shareCodeHint')}
+            </Text>
+          </TouchableOpacity>
         )}
         <TouchableOpacity style={styles.addBtn} onPress={() => setAddModalVisible(true)} activeOpacity={0.85}>
           <Text style={styles.addBtnText}>+ {t('friends.addFriend')}</Text>
@@ -267,58 +276,57 @@ export default function FriendsScreen() {
         </Pressable>
       </Modal>
 
-      <BottomMenu showWallet showFriends readerId={readerId} />
+      <BottomMenu showReader showWallet showFriends readerId={readerId} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  heroBanner: {
+    backgroundColor: Colors.friendEmerald,
+    borderRadius: Radius.xl,
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+    ...Shadows.lg,
   },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: Colors.secondary,
+  bannerAvatar: {
+    position: 'absolute',
+    top: Spacing.md,
+    left: Spacing.md,
   },
   title: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
-    color: Colors.textPrimary,
+    color: Colors.textOnPrimary,
+    marginBottom: Spacing.sm,
   },
-  codeCard: {
-    backgroundColor: Colors.friendEmerald,
-    borderRadius: Radius.lg,
-    marginHorizontal: Spacing.xl,
-    marginBottom: Spacing.lg,
-    padding: Spacing.lg,
+  codeBlock: {
     alignItems: 'center',
-    ...Shadows.md,
   },
   codeLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.8)',
-    marginBottom: Spacing.xs,
+    color: 'white',
+    marginBottom: 4,
   },
   codeValue: {
     fontFamily: Fonts.heading,
-    fontSize: FontSizes['3xl'],
+    fontSize: FontSizes['4xl'],
     color: Colors.textOnPrimary,
     letterSpacing: 6,
   },
   codeHint: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: Spacing.xs,
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: 'white',
     textAlign: 'center',
+    marginTop: 4,
+    marginBottom: Spacing.sm,
   },
   list: {
     paddingHorizontal: Spacing.xl,
@@ -362,17 +370,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: Spacing.xl,
   },
-  topSection: {
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.md,
-    gap: Spacing.sm,
-  },
   addBtn: {
-    backgroundColor: Colors.friendEmerald,
+    alignSelf: 'stretch',
+    marginTop: Spacing.lg,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     borderRadius: Radius.xl,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
     alignItems: 'center',
-    ...Shadows.md,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.6)',
   },
   addBtnText: {
     fontFamily: Fonts.bodyBold,

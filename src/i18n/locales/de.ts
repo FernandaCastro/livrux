@@ -187,6 +187,7 @@ const de = {
     title: 'Freunde',
     myCode: 'Mein Code',
     shareCodeHint: 'Teile ihn mit Freunden zum Verbinden',
+    codeCopied: '✓ Kopiert!',
     myFriends: 'Meine Freunde',
     pendingRequests: 'Freundschaftsanfragen',
     noFriends: 'Noch keine Freunde',

@@ -145,11 +145,7 @@ export default function AddBookScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
           <Text style={styles.screenTitle}>{t('book.logBook')}</Text>
-          <View style={{ width: 24 }} />
         </View>
 
         {/* Search bar — type or scan to auto-fill */}
@@ -285,7 +281,7 @@ export default function AddBookScreen() {
           style={styles.saveButton}
         />
       </ScrollView>
-      <BottomMenu />
+      <BottomMenu showReader showWallet showFriends readerId={readerId} />
     </SafeAreaView>
   );
 }
@@ -302,11 +298,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: Spacing.lg,
-  },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: Colors.secondary,
   },
   screenTitle: {
     fontFamily: Fonts.heading,

@@ -187,6 +187,7 @@ const pt = {
     title: 'Amigos',
     myCode: 'Meu código',
     shareCodeHint: 'Compartilhe com seus amigos para se conectar',
+    codeCopied: '✓ Copiado!',
     myFriends: 'Meus amigos',
     pendingRequests: 'Pedidos de amizade',
     noFriends: 'Nenhum amigo ainda',

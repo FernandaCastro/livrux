@@ -154,11 +154,7 @@ export default function EditBookScreen() {
   if (!book) {
     return (
       <SafeAreaView style={styles.safe}>
-        <View style={styles.container}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.header}>
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
-        </View>
+        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
       </SafeAreaView>
     );
   }
@@ -172,11 +168,7 @@ export default function EditBookScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
           <Text style={styles.screenTitle}>{t('book.editBook')}</Text>
-          <View style={{ width: 24 }} />
         </View>
 
         {/* Cover — shows the original cover if present */}
@@ -324,7 +316,7 @@ export default function EditBookScreen() {
           style={styles.saveButton}
         />
       </ScrollView>
-      <BottomMenu />
+      <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
     </SafeAreaView>
   );
 }
@@ -341,11 +333,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: Spacing.lg,
-  },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: Colors.secondary,
   },
   screenTitle: {
     fontFamily: Fonts.heading,

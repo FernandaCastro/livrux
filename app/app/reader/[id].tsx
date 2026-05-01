@@ -36,9 +36,6 @@ export default function ReaderDashboardScreen() {
   const canEdit = canEditReader(id);
   const canDelete = isParentUnlocked;
 
-  // Refresh books + reader data whenever a book is successfully persisted to
-  // the DB — the confetti animation plays during this window, so this update
-  // lands right as (or just after) the overlay fades out.
   useEffect(() => {
     if (bookPersistedCount > 0 && id) {
       refresh();
@@ -52,7 +49,6 @@ export default function ReaderDashboardScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookPersistedCount]);
 
-  // Refresh books list and re-fetch the reader from DB to get the latest balance.
   useFocusEffect(
     useCallback(() => {
       refresh();
@@ -67,7 +63,6 @@ export default function ReaderDashboardScreen() {
     }, [id])
   );
 
-  // Use reader data from the store (set when the card was tapped on Home).
   const reader = selectedReader;
 
   if (!reader) {
@@ -98,79 +93,76 @@ export default function ReaderDashboardScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.backText}>←</Text>
-        </TouchableOpacity>
-        <View style={styles.headerActions}>
-          {canEdit && (
-            <TouchableOpacity
-              onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.editText}>{t('reader.editReader')}</Text>
-            </TouchableOpacity>
-          )}
-          {canDelete && (
-            <TouchableOpacity
-              onPress={handleDelete}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.deleteText}>{t('reader.deleteReader')}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-      {/* Reader hero */}
-      <View style={styles.hero}>
-        <MultiavatarView
-          seed={reader.avatar_seed}
-          size={AVATAR_SIZE}
-          borderColor={Colors.primaryLight}
-          borderWidth={3}
-        />
-        <Text style={styles.readerName}>{reader.name}</Text>
-      </View>
-
-      <View style={styles.heroBalance}>
-
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>{books.length}</Text>
-            <Text style={styles.statLabel}>{t('reader.books')}</Text>
+      {/* ── Hero banner ── */}
+      <View style={styles.heroBanner}>
+        {/* Top bar: back + actions */}
+        <View style={styles.bannerHeader}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.backText}>←</Text>
+          </TouchableOpacity>
+          <View style={styles.bannerActions}>
+            {canEdit && (
+              <TouchableOpacity
+                onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.actionBtn}
+              >
+                <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
+              </TouchableOpacity>
+            )}
+            {canDelete && (
+              <TouchableOpacity
+                onPress={handleDelete}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={[styles.actionBtn, styles.actionBtnDelete]}
+              >
+                <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
-        {/* Balance card */}
-        <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>{t('reader.balance')}</Text>
-          <View style={styles.balanceRow}>
-            <Text style={styles.balanceCoin}>🪙</Text>
-            <Text style={styles.balanceAmount}>
-              {reader.livrux_balance.toFixed(2)}
-            </Text>
+        {/* Avatar + name */}
+        <View style={styles.heroContent}>
+          <View style={styles.avatarRing}>
+            <MultiavatarView
+              seed={reader.avatar_seed}
+              size={AVATAR_SIZE}
+              borderColor={Colors.primaryLight}
+              borderWidth={4}
+            />
+          </View>
+          <Text style={styles.readerName}>{reader.name}</Text>
+        </View>
+
+        {/* Balance + books badges */}
+        <View style={styles.heroBadgesRow}>
+          <View style={styles.balanceBadge}>
+            <Text style={styles.badgeCoin}>🪙</Text>
+            <Text style={styles.balanceAmount}>{reader.livrux_balance.toFixed(2)}</Text>
             <Text style={styles.balanceCurrency}>Livrux</Text>
           </View>
+          <View style={styles.booksBadge}>
+            <Text style={styles.badgeIcon}>📚</Text>
+            <Text style={styles.booksCount}>{books.length}</Text>
+            <Text style={styles.booksLabel}>{t('reader.books')}</Text>
+          </View>
         </View>
       </View>
 
-      {/* Add book button — fixed, centered below the stats/balance section */}
+      {/* ── Add book button ── */}
       <TouchableOpacity
-        style={styles.addBookButton}
+        style={styles.addBookBtn}
         onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
         activeOpacity={0.85}
       >
-        <Text style={styles.addBookButtonText}>+ {t('book.logBook')}</Text>
+        <Text style={styles.addBookBtnText}>📖 + {t('book.logBook')}</Text>
       </TouchableOpacity>
-      <View style={styles.addBookButtonDivider} />
 
-      {/* Books list */}
+      {/* ── Books list ── */}
       <FlatList
         data={books}
         keyExtractor={(item) => item.id}
@@ -184,13 +176,19 @@ export default function ReaderDashboardScreen() {
           />
         }
         ListHeaderComponent={
-          <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+          books.length > 0 ? (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionIcon}>📖</Text>
+              <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+            </View>
+          ) : null
         }
         ListEmptyComponent={
           !isLoading ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyIcon}>📚</Text>
-              <Text style={styles.emptyText}>{t('reader.noBooks')}</Text>
+              <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
+              <Text style={styles.emptySubtext}>{t('reader.noBooksHint')}</Text>
             </View>
           ) : null
         }
@@ -208,143 +206,180 @@ export default function ReaderDashboardScreen() {
   );
 }
 
-const AVATAR_SIZE = 88;
+const AVATAR_SIZE = 104;
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+
+  /* ── Hero ── */
+  heroBanner: {
+    backgroundColor: Colors.readerBlue,
     alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
+    justifyContent: 'space-between',
+    borderRadius: Radius.xl,
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+    paddingBottom: Spacing.xl,
+    ...Shadows.lg,
+  },
+  bannerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignSelf: 'stretch',
+    paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
+    paddingBottom: Spacing.xs,
   },
   backText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.xl,
-    color: Colors.secondary,
+    color: 'rgba(255,255,255,0.85)',
   },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.lg,
-  },
-  editText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.md,
-    color: Colors.secondary,
-  },
-  deleteText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.md,
-    color: Colors.error,
-  },
-  hero: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: Spacing.lg,
-    paddingHorizontal: Spacing.xl,
-  },
-  heroBalance: {
+  bannerActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: Spacing.lg,
+  },
+  actionBtn: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+  },
+  actionBtnDelete: {
+    backgroundColor: 'rgba(255,100,100,0.25)',
+  },
+  actionBtnText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textOnPrimary,
+  },
+  actionBtnDeleteText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: '#FFB3B3',
+  },
+  heroContent: {
     alignItems: 'center',
-    paddingBottom: Spacing.lg,
     paddingHorizontal: Spacing.xl,
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  avatarRing: {
+    borderRadius: Radius.full,
+    padding: 4,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...Shadows.md,
   },
   readerName: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
-    color: Colors.textPrimary,
-    marginBottom: Spacing.md,
-    paddingLeft: 10,
+    color: Colors.textOnPrimary,
+    textAlign: 'center',
   },
-  balanceCard: {
-    backgroundColor: Colors.primary,
-    borderRadius: Radius.lg,
+  heroBadgesRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.md,
     paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    alignItems: 'center',
-    ...Shadows.md,
-    marginBottom: Spacing.xs,
   },
-  balanceLabel: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.85)',
-    marginBottom: 4,
-  },
-  balanceRow: {
+  balanceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    ...Shadows.sm,
   },
-  balanceCoin: { fontSize: 28 },
+  badgeCoin: { fontSize: 20 },
   balanceAmount: {
     fontFamily: Fonts.heading,
-    fontSize: FontSizes['4xl'],
+    fontSize: FontSizes.xl,
     color: Colors.textOnPrimary,
   },
   balanceCurrency: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: 'rgba(255,255,255,0.9)',
-    alignSelf: 'flex-end',
-    marginBottom: 4,
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: 'rgba(255,255,255,0.85)',
   },
-  statsRow: {
+  booksBadge: {
     flexDirection: 'row',
-    gap: Spacing.xl,
+    alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
   },
-  stat: { alignItems: 'center' },
-  statValue: {
+  badgeIcon: { fontSize: 18 },
+  booksCount: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.xl,
-    color: Colors.secondary,
+    color: Colors.textOnPrimary,
   },
-  statLabel: {
-    fontFamily: Fonts.body,
+  booksLabel: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: 'rgba(255,255,255,0.85)',
+  },
+
+  /* ── Add book ── */
+  addBookBtn: {
+    marginHorizontal: Spacing.xl,
+    marginBottom: Spacing.md,
+    backgroundColor: Colors.accent,
+    borderRadius: Radius.xl,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    ...Shadows.md,
+  },
+  addBookBtnText: {
+    fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: Colors.textOnPrimary,
   },
+
+  /* ── List ── */
   list: {
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.md,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  sectionIcon: { fontSize: 20 },
   sectionTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.lg,
     color: Colors.textPrimary,
-    marginBottom: Spacing.md,
   },
-  emptyContainer: { alignItems: 'center', paddingTop: Spacing['2xl'] },
-  emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
-  emptyText: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+
+  /* ── Empty ── */
+  emptyContainer: {
+    alignItems: 'center',
+    paddingTop: Spacing['2xl'],
   },
-  addBookButton: {
-    alignSelf: 'center',
-    backgroundColor: Colors.secondary,
-    borderRadius: Radius.xl,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
-    marginTop: 0,
-    marginBottom: Spacing.lg,
-    ...Shadows.md,
-  },
-  addBookButtonDivider: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
+  emptyIcon: { fontSize: 56, marginBottom: Spacing.md },
+  emptyTitle: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes.xl,
+    color: Colors.textPrimary,
     marginBottom: Spacing.xs,
+    textAlign: 'center',
   },
-  addBookButtonText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
+  emptySubtext: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.xl,
+    lineHeight: 20,
   },
 });

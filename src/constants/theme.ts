@@ -14,6 +14,14 @@ export const Colors = {
   accent: '#FF6B6B',        // coral — highlights and CTAs
   accentLight: '#FFA5A5',
 
+  // Reader identity — dusty blue
+  readerBlue: '#7A9CC8',        // hero background for reader screens
+  readerBlueLight: '#D8E5F5',   // chips and surface accents
+
+  // Friend identity — soft jade
+  friendEmerald: '#5FAF8A',         // hero background for friend screens
+  friendEmeraldLight: '#C4E8D8',    // chips and surface accents
+
   // Neutral
   background: '#FAFAF7',    // off-white — softer than pure white
   surface: '#FFFFFF',

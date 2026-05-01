@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   accentStrip: {
     width: 5,
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.friendEmerald,
   },
   coverWrapper: {
     margin: Spacing.md,

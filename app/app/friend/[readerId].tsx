@@ -17,7 +17,7 @@ import { useBooks } from '../../../src/hooks/useBooks';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FriendBookCard } from '../../../src/components/book/FriendBookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/constants/theme';
+import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 interface FriendReader {
   id: string;
@@ -61,31 +61,37 @@ export default function FriendProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      {/* Hero banner — back button + avatar + name + stats */}
+      <View style={styles.heroBanner}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.backBtn}
+        >
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
-        <View style={{ width: 32 }} />
-      </View>
 
-      {/* Hero */}
-      {friendReader && (
-        <View style={styles.hero}>
-          <MultiavatarView
-            seed={friendReader.avatar_seed}
-            size={AVATAR_SIZE}
-            borderColor={Colors.primaryLight}
-            borderWidth={3}
-          />
-          <Text style={styles.readerName}>{friendReader.name}</Text>
-          <View style={styles.booksBadge}>
-            <Text style={styles.booksBadgeIcon}>📚</Text>
-            <Text style={styles.booksBadgeCount}>{books.length}</Text>
-            <Text style={styles.booksBadgeLabel}>{t('reader.books')}</Text>
+        {friendReader && (
+          <View style={styles.heroContent}>
+            <View style={styles.avatarRing}>
+              <MultiavatarView
+                seed={friendReader.avatar_seed}
+                size={AVATAR_SIZE}
+                borderColor={Colors.primaryLight}
+                borderWidth={4}
+              />
+            </View>
+
+            <Text style={styles.readerName}>{friendReader.name}</Text>
+
+            <View style={styles.statsBadge}>
+              <Text style={styles.statsBadgeIcon}>📚</Text>
+              <Text style={styles.statsBadgeCount}>{books.length}</Text>
+              <Text style={styles.statsBadgeLabel}>{t('reader.books')}</Text>
+            </View>
           </View>
-        </View>
-      )}
+        )}
+      </View>
 
       {/* Books list */}
       <FlatList
@@ -101,13 +107,19 @@ export default function FriendProfileScreen() {
           />
         }
         ListHeaderComponent={
-          <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+          books.length > 0 ? (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionIcon}>📖</Text>
+              <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+            </View>
+          ) : null
         }
         ListEmptyComponent={
           !isLoading ? (
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>📖</Text>
-              <Text style={styles.emptyText}>{t('reader.noBooks')}</Text>
+              <Text style={styles.emptyIcon}>🌱</Text>
+              <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
+              <Text style={styles.emptySubtext}>{friendReader?.name} {t('friends.noBooksSub')}</Text>
             </View>
           ) : null
         }
@@ -119,71 +131,112 @@ export default function FriendProfileScreen() {
   );
 }
 
-const AVATAR_SIZE = 88;
+const AVATAR_SIZE = 100;
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+
+  /* ── Hero ── */
+  heroBanner: {
+    backgroundColor: Colors.friendEmerald,
     alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: Radius.xl,
+    paddingBottom: Spacing.xl,
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+    ...Shadows.lg,
+  },
+  backBtn: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
+    paddingBottom: Spacing.xs,
+    alignSelf: 'flex-start',
   },
   backText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.xl,
-    color: Colors.secondary,
+    color: 'rgba(255,255,255,0.85)',
   },
-  hero: {
+  heroContent: {
     alignItems: 'center',
-    paddingBottom: Spacing.xl,
     paddingHorizontal: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  avatarRing: {
+    borderRadius: Radius.full,
+    padding: 4,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    ...Shadows.md,
   },
   readerName: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
-    color: Colors.textPrimary,
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.md,
+    color: Colors.textOnPrimary,
+    textAlign: 'center',
+    marginTop: Spacing.xs,
   },
-  booksBadge: {
+  statsBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceVariant,
+    gap: Spacing.xs,
+    backgroundColor: 'rgba(255,255,255,0.28)',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    gap: Spacing.xs,
+    paddingVertical: Spacing.xs,
+    marginTop: Spacing.xs,
   },
-  booksBadgeIcon: { fontSize: 18 },
-  booksBadgeCount: {
+  statsBadgeIcon: { fontSize: 18 },
+  statsBadgeCount: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.xl,
-    color: Colors.secondary,
+    color: Colors.textOnPrimary,
   },
-  booksBadgeLabel: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+  statsBadgeLabel: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: 'rgba(255,255,255,0.85)',
   },
+
+  /* ── List ── */
   list: {
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.sm,
+    paddingTop: Spacing.lg,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.md,
+  },
+  sectionIcon: { fontSize: 20 },
   sectionTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.lg,
     color: Colors.textPrimary,
-    marginBottom: Spacing.md,
   },
-  emptyContainer: { alignItems: 'center', paddingTop: Spacing['2xl'] },
-  emptyIcon: { fontSize: 40, marginBottom: Spacing.sm },
-  emptyText: {
+
+  /* ── Empty ── */
+  emptyContainer: {
+    alignItems: 'center',
+    paddingTop: Spacing['2xl'],
+  },
+  emptyIcon: { fontSize: 56, marginBottom: Spacing.md },
+  emptyTitle: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes.xl,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
+  },
+  emptySubtext: {
     fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
+    fontSize: FontSizes.sm,
     color: Colors.textSecondary,
+    textAlign: 'center',
+    paddingHorizontal: Spacing.xl,
+    lineHeight: 20,
   },
 });

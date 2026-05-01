@@ -67,7 +67,8 @@ const en = {
     deleteConfirm: 'Delete {{name}}? All their books and Livrux will be lost.',
     balance: 'Balance',
     books: 'Books read',
-    noBooks: 'No books logged yet.',
+    noBooks: 'No books yet!',
+    noBooksHint: 'Log your first book and earn coins! 🪙',
     logFirstBook: 'Log the first book!',
   },
   book: {
@@ -204,6 +205,8 @@ const en = {
     unfriendTitle: 'Unfriend',
     unfriendConfirm: 'Remove {{name}} from friends?',
     parentApprovalNeeded: 'Parent must be unlocked to accept requests.',
+    newRequest: 'New request!',
+    noBooksSub: "hasn't read any books yet. Stay tuned! 🌟",
     friendsAutonomy: 'Friends autonomy',
     friendsAutonomyHint: 'Allows the reader to accept friend requests on their own',
   },

@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   accentStrip: {
     width: 5,
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.readerBlue,
   },
   coverWrapper: {
     margin: Spacing.md,

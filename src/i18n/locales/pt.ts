@@ -67,7 +67,8 @@ const pt = {
     deleteConfirm: 'Excluir {{name}}? Todos os livros e Livrux serão perdidos.',
     balance: 'Saldo',
     books: 'Livros lidos',
-    noBooks: 'Nenhum livro registrado ainda.',
+    noBooks: 'Nenhum livro ainda!',
+    noBooksHint: 'Registre o primeiro livro lido e ganhe moedas! 🪙',
     logFirstBook: 'Registre o primeiro livro!',
   },
   book: {
@@ -204,6 +205,8 @@ const pt = {
     unfriendTitle: 'Desfazer amizade',
     unfriendConfirm: 'Desfazer amizade com {{name}}?',
     parentApprovalNeeded: 'O pai precisa estar desbloqueado para aceitar pedidos.',
+    newRequest: 'Novo pedido!',
+    noBooksSub: 'ainda não leu nenhum livro. Em breve vai ter novidades! 🌟',
     friendsAutonomy: 'Autonomia para amigos',
     friendsAutonomyHint: 'Permite que o leitor aceite pedidos de amizade sozinho',
   },

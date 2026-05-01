@@ -22,9 +22,26 @@ export function FriendCard({ name, avatarSeed, bookCount, onPress, onAccept, onR
       activeOpacity={onPress ? 0.8 : 1}
       style={styles.card}
     >
-      <MultiavatarView seed={avatarSeed} size={AVATAR_SIZE} borderColor={Colors.primaryLight} borderWidth={2} />
+      {/* Accent strip — gold for friends, coral for pending */}
+      <View style={[styles.accentStrip, isPending && styles.accentStripPending]} />
 
+      {/* Avatar */}
+      <View style={styles.avatarWrapper}>
+        <MultiavatarView
+          seed={avatarSeed}
+          size={AVATAR_SIZE}
+          borderColor={Colors.friendEmeraldLight}
+          borderWidth={3}
+        />
+      </View>
+
+      {/* Info */}
       <View style={styles.info}>
+        {isPending && (
+          <View style={styles.newBadge}>
+            <Text style={styles.newBadgeText}>✨ {t('friends.newRequest')}</Text>
+          </View>
+        )}
         <Text style={styles.name} numberOfLines={1}>{name}</Text>
         <View style={styles.bookBadge}>
           <Text style={styles.bookIcon}>📚</Text>
@@ -32,7 +49,8 @@ export function FriendCard({ name, avatarSeed, bookCount, onPress, onAccept, onR
         </View>
       </View>
 
-      {isPending && (
+      {/* Actions or chevron */}
+      {isPending ? (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.acceptBtn} onPress={onAccept} activeOpacity={0.75}>
             <Text style={styles.acceptText}>✓</Text>
@@ -41,16 +59,16 @@ export function FriendCard({ name, avatarSeed, bookCount, onPress, onAccept, onR
             <Text style={styles.rejectText}>✕</Text>
           </TouchableOpacity>
         </View>
-      )}
-
-      {!isPending && onPress && (
-        <Text style={styles.chevron}>›</Text>
-      )}
+      ) : onPress ? (
+        <View style={styles.chevronWrapper}>
+          <Text style={styles.chevron}>›</Text>
+        </View>
+      ) : null}
     </TouchableOpacity>
   );
 }
 
-const AVATAR_SIZE = 52;
+const AVATAR_SIZE = 60;
 
 const styles = StyleSheet.create({
   card: {
@@ -58,17 +76,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
-    padding: Spacing.md,
     marginBottom: Spacing.sm,
-    gap: Spacing.md,
-    ...Shadows.sm,
+    overflow: 'hidden',
+    ...Shadows.md,
+  },
+  accentStrip: {
+    width: 5,
+    alignSelf: 'stretch',
+    backgroundColor: Colors.friendEmerald,
+  },
+  accentStripPending: {
+    backgroundColor: Colors.friendEmeraldLight,
+  },
+  avatarWrapper: {
+    marginVertical: Spacing.md,
+    marginHorizontal: Spacing.md,
   },
   info: {
     flex: 1,
+    paddingVertical: Spacing.md,
+  },
+  newBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.accentLight,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    marginBottom: Spacing.xs,
+  },
+  newBadgeText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.xs,
+    color: Colors.accent,
   },
   name: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes.lg,
     color: Colors.textPrimary,
     marginBottom: Spacing.xs,
   },
@@ -76,35 +119,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: Colors.surfaceVariant,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
   },
   bookIcon: { fontSize: 13 },
   bookCount: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.xs,
+    color: Colors.secondary,
   },
   actions: {
     flexDirection: 'row',
     gap: Spacing.xs,
+    paddingRight: Spacing.md,
   },
   acceptBtn: {
     backgroundColor: Colors.success,
     borderRadius: Radius.full,
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.sm,
   },
   acceptText: {
     fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
+    fontSize: FontSizes.lg,
     color: Colors.textOnPrimary,
   },
   rejectBtn: {
     backgroundColor: Colors.surfaceVariant,
     borderRadius: Radius.full,
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -113,8 +163,11 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
   },
+  chevronWrapper: {
+    paddingRight: Spacing.md,
+  },
   chevron: {
-    fontSize: FontSizes.xl,
-    color: Colors.textDisabled,
+    fontSize: FontSizes['2xl'],
+    color: Colors.secondary,
   },
 });

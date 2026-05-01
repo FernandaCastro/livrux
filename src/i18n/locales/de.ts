@@ -67,7 +67,8 @@ const de = {
     deleteConfirm: '{{name}} löschen? Alle Bücher und Livrux gehen verloren.',
     balance: 'Guthaben',
     books: 'Gelesene Bücher',
-    noBooks: 'Noch keine Bücher erfasst.',
+    noBooks: 'Noch keine Bücher!',
+    noBooksHint: 'Erfasse dein erstes Buch und verdiene Münzen! 🪙',
     logFirstBook: 'Erstes Buch erfassen!',
   },
   book: {
@@ -204,6 +205,8 @@ const de = {
     unfriendTitle: 'Freundschaft beenden',
     unfriendConfirm: '{{name}} aus der Freundesliste entfernen?',
     parentApprovalNeeded: 'Elternteil muss entsperrt sein, um Anfragen anzunehmen.',
+    newRequest: 'Neue Anfrage!',
+    noBooksSub: 'hat noch kein Buch gelesen. Bald gibt es Neuigkeiten! 🌟',
     friendsAutonomy: 'Freunde-Autonomie',
     friendsAutonomyHint: 'Erlaubt dem Leser, Freundschaftsanfragen selbst anzunehmen',
   },

@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   codeCard: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.friendEmerald,
     borderRadius: Radius.lg,
     marginHorizontal: Spacing.xl,
     marginBottom: Spacing.lg,
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   addBtn: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.friendEmerald,
     borderRadius: Radius.xl,
     paddingVertical: Spacing.md,
     alignItems: 'center',

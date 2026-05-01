@@ -34,9 +34,47 @@ export interface Reader {
   old_avatar_seed: string | null;
   pin: string | null; // SHA-256 hash; null = no PIN required for this reader
   livrux_balance: number;
+  friend_code: string | null;
+  friends_autonomy: boolean;
   created_at: string;
   updated_at: string;
   book_count?: number;
+}
+
+export interface ReaderFriendship {
+  id: string;
+  requester_id: string;
+  addressee_id: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FriendData {
+  friendshipId: string;
+  reader: {
+    id: string;
+    name: string;
+    avatar_seed: string | null;
+    book_count: number;
+  };
+}
+
+export interface FriendRequest {
+  friendshipId: string;
+  reader: {
+    id: string;
+    name: string;
+    avatar_seed: string | null;
+    book_count: number;
+  };
+}
+
+export interface FriendSearchResult {
+  id: string;
+  name: string;
+  avatar_seed: string | null;
+  book_count: number;
 }
 
 export interface Book {
@@ -51,6 +89,8 @@ export interface Book {
   date_completed: string;
   notes: string | null;
   is_foreign_language: boolean;
+  rating: 'disliked' | 'liked' | 'loved' | null;
+  review: string | null;
   created_at: string;
 }
 

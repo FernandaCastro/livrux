@@ -63,6 +63,8 @@ export async function logBookRpc(params: {
   dateCompleted: string;
   notes: string | null;
   isForeignLanguage: boolean;
+  rating: 'disliked' | 'liked' | 'loved' | null;
+  review: string | null;
 }): Promise<string> {
   const { data, error } = await supabase.rpc('log_book', {
     p_reader_id: params.readerId,
@@ -74,6 +76,8 @@ export async function logBookRpc(params: {
     p_date_completed: params.dateCompleted,
     p_notes: params.notes,
     p_is_foreign_language: params.isForeignLanguage,
+    p_rating: params.rating,
+    p_review: params.review,
   });
 
   if (error) throw error;
@@ -92,6 +96,8 @@ export async function updateBookRpc(params: {
   dateCompleted: string;
   isForeignLanguage: boolean;
   livruxEarned: number;
+  rating: 'disliked' | 'liked' | 'loved' | null;
+  review: string | null;
 }): Promise<void> {
   const { error } = await supabase.rpc('update_book', {
     p_book_id:             params.bookId,
@@ -102,6 +108,8 @@ export async function updateBookRpc(params: {
     p_date_completed:      params.dateCompleted,
     p_is_foreign_language: params.isForeignLanguage,
     p_livrux_earned:       params.livruxEarned,
+    p_rating:              params.rating,
+    p_review:              params.review,
   });
   if (error) throw error;
 }

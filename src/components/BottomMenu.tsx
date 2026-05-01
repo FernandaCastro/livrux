@@ -10,10 +10,11 @@ export const BOTTOM_MENU_HEIGHT = 54;
 
 interface BottomMenuProps {
   showWallet?: boolean;
+  showFriends?: boolean;
   readerId?: string;
 }
 
-export function BottomMenu({ showWallet = false, readerId }: BottomMenuProps) {
+export function BottomMenu({ showWallet = false, showFriends = false, readerId }: BottomMenuProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
@@ -23,11 +24,22 @@ export function BottomMenu({ showWallet = false, readerId }: BottomMenuProps) {
 
   const isSettings = pathname.startsWith('/app/settings');
   const isWallet = pathname.startsWith('/app/rewards');
-  const isHome = !isSettings && !isWallet;
+  const isFriends = pathname.startsWith('/app/friends') || pathname.startsWith('/app/friend/');
+  const isHome = !isSettings && !isWallet && !isFriends;
 
   return (
     <View style={styles.container}>
-      {/* Left — Wallet when available, otherwise placeholder */}
+      {/* Readers — always first */}
+      <TouchableOpacity
+        style={styles.tab}
+        onPress={() => router.push('/app')}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.icon}>🏠</Text>
+        <Text style={[styles.label, isHome && styles.activeLabel]}>{t('home.title')}</Text>
+      </TouchableOpacity>
+
+      {/* Wallet */}
       <View style={styles.tab}>
         {showWallet && readerId && (
           <TouchableOpacity
@@ -41,17 +53,19 @@ export function BottomMenu({ showWallet = false, readerId }: BottomMenuProps) {
         )}
       </View>
 
-      {/* Centre — always Home */}
-      <TouchableOpacity
-        style={styles.tab}
-        onPress={() => router.push('/app')}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.icon}>🏠</Text>
-        <Text style={[styles.label, isHome && styles.activeLabel]}>{t('home.title')}</Text>
-      </TouchableOpacity>
+      {/* Friends — only in reader context */}
+      {showFriends && readerId && (
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => router.push(`/app/friends/${readerId}`)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.icon}>👦👧</Text>
+          <Text style={[styles.label, isFriends && styles.activeLabel]}>{t('friends.title')}</Text>
+        </TouchableOpacity>
+      )}
 
-      {/* Right — Settings when available, otherwise placeholder */}
+      {/* Settings */}
       <View style={styles.tab}>
         {showSettingsTab && (
           <TouchableOpacity

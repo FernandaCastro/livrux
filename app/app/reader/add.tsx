@@ -51,7 +51,9 @@ export default function AddReaderScreen() {
   const { createReader, updateReader } = useReaders();
   const { selectedReader } = useReaderStore();
 
-  const [avatarSeed, setAvatarSeed] = useState<string>(() => generateAvatarSeed());
+  const [avatarHistory, setAvatarHistory] = useState<string[]>(() => [generateAvatarSeed()]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const avatarSeed = avatarHistory[historyIndex];
 
   const schema = useReaderSchema();
   const { control, handleSubmit, setValue, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -64,7 +66,9 @@ export default function AddReaderScreen() {
     useCallback(() => {
       if (!isEditing) {
         reset({ name: '' });
-        setAvatarSeed(generateAvatarSeed());
+        const seed = generateAvatarSeed();
+        setAvatarHistory([seed]);
+        setHistoryIndex(0);
       }
     }, [isEditing])
   );
@@ -73,13 +77,24 @@ export default function AddReaderScreen() {
   useEffect(() => {
     if (isEditing && selectedReader) {
       setValue('name', selectedReader.name);
-      setAvatarSeed(selectedReader.avatar_seed ?? generateAvatarSeed(selectedReader.id));
+      const seed = selectedReader.avatar_seed ?? generateAvatarSeed(selectedReader.id);
+      setAvatarHistory([seed]);
+      setHistoryIndex(0);
     }
   }, [isEditing, selectedReader]);
 
-  const refreshAvatar = () => {
-    const readerId = isEditing ? editId : undefined;
-    setAvatarSeed(generateAvatarSeed(readerId));
+  const goPrev = () => {
+    if (historyIndex > 0) setHistoryIndex(i => i - 1);
+  };
+
+  const goNext = () => {
+    if (historyIndex < avatarHistory.length - 1) {
+      setHistoryIndex(i => i + 1);
+    } else {
+      const newSeed = generateAvatarSeed(isEditing ? editId : undefined);
+      setAvatarHistory(h => [...h, newSeed]);
+      setHistoryIndex(i => i + 1);
+    }
   };
 
   const onSubmit = async (data: FormData) => {
@@ -116,18 +131,29 @@ export default function AddReaderScreen() {
           <View style={{ width: 24 }} />
         </View>
 
-        {/* Avatar with refresh button */}
+        {/* Avatar with navigation buttons */}
         <View style={styles.avatarSection}>
-          <MultiavatarView
-            seed={avatarSeed}
-            size={AVATAR_DISPLAY_SIZE}
-            borderColor={Colors.primaryLight}
-            borderWidth={3}
-          />
-          <TouchableOpacity onPress={refreshAvatar} style={styles.refreshButton} activeOpacity={0.75}>
-            <Text style={styles.refreshIcon}>🔄</Text>
-            <Text style={styles.refreshLabel}>{t('reader.refreshAvatar')}</Text>
-          </TouchableOpacity>
+          <View style={styles.avatarRow}>
+            <TouchableOpacity
+              onPress={goPrev}
+              disabled={historyIndex === 0}
+              style={[styles.navButton, historyIndex === 0 && styles.navButtonDisabled]}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.navButtonText}>‹</Text>
+            </TouchableOpacity>
+
+            <MultiavatarView
+              seed={avatarSeed}
+              size={AVATAR_DISPLAY_SIZE}
+              borderColor={Colors.primaryLight}
+              borderWidth={3}
+            />
+
+            <TouchableOpacity onPress={goNext} style={styles.navButton} activeOpacity={0.7}>
+              <Text style={styles.navButtonText}>›</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Name input */}
@@ -187,23 +213,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing['2xl'],
     marginTop: Spacing.md,
-    gap: Spacing.sm,
   },
-  refreshButton: {
+  avatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
-    backgroundColor: Colors.surfaceVariant,
+    gap: Spacing.xl,
+  },
+  navButton: {
+    width: 44,
+    height: 44,
     borderRadius: Radius.full,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
+    backgroundColor: Colors.surfaceVariant,
+    alignItems: 'center',
+    justifyContent: 'center',
     ...Shadows.sm,
   },
-  refreshIcon: { fontSize: 16 },
-  refreshLabel: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
+  navButtonDisabled: {
+    opacity: 0.3,
+  },
+  navButtonText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: 28,
     color: Colors.secondary,
+    lineHeight: 32,
   },
   saveButton: { marginTop: Spacing.md },
 });

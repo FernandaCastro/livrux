@@ -81,9 +81,14 @@ export default function BookDetailScreen() {
           <TouchableOpacity onPress={handleBack}>
             <Text style={styles.backText}>←</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleDelete}>
-            <Text style={styles.deleteText}>{t('book.deleteBook')}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={() => router.push(`/app/book/edit?bookId=${book.id}`)}>
+              <Text style={styles.editText}>{t('book.editBook')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDelete}>
+              <Text style={styles.deleteText}>{t('book.deleteBook')}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Cover */}
@@ -135,6 +140,28 @@ export default function BookDetailScreen() {
           </View>
         </View>
 
+        {/* Rating + review */}
+        {book.rating && (
+          <View style={styles.ratingCard}>
+            <Text style={styles.ratingEmoji}>
+              {book.rating === 'disliked' ? '😕' : book.rating === 'liked' ? '😊' : '😍'}
+            </Text>
+            <Text style={styles.ratingText}>
+              {book.rating === 'disliked'
+                ? t('book.ratingDisliked')
+                : book.rating === 'liked'
+                ? t('book.ratingLiked')
+                : t('book.ratingLoved')}
+            </Text>
+          </View>
+        )}
+        {book.review && (
+          <View style={styles.notesCard}>
+            <Text style={styles.notesLabel}>💬</Text>
+            <Text style={styles.notesText}>{book.review}</Text>
+          </View>
+        )}
+
         {/* Notes */}
         {book.notes && (
           <View style={styles.notesCard}>
@@ -162,6 +189,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingVertical: Spacing.lg,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.lg,
+  },
+  editText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.secondary,
   },
   backText: {
     fontFamily: Fonts.bodyBold,
@@ -264,6 +301,22 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginBottom: 4,
   },
+  ratingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Colors.surfaceVariant,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  ratingEmoji: { fontSize: 24 },
+  ratingText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textPrimary,
+  },
   notesCard: {
     width: '100%',
     backgroundColor: Colors.surface,
@@ -272,6 +325,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.sm,
     ...Shadows.sm,
+    marginBottom: Spacing.md,
   },
   notesLabel: { fontSize: 18 },
   notesText: {

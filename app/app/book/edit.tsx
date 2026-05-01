@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  TextInput as RNTextInput,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -72,6 +73,8 @@ export default function EditBookScreen() {
 
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [isForeignLanguage, setIsForeignLanguage] = useState(false);
+  const [rating, setRating] = useState<'disliked' | 'liked' | 'loved' | null>(null);
+  const [review, setReview] = useState('');
   const [initialised, setInitialised] = useState(false);
 
   const { control, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -91,6 +94,8 @@ export default function EditBookScreen() {
       });
       setCoverUri(book.cover_url);
       setIsForeignLanguage(book.is_foreign_language);
+      setRating(book.rating ?? null);
+      setReview(book.review ?? '');
       setInitialised(true);
     }
   }, [book, initialised, reset]);
@@ -131,6 +136,8 @@ export default function EditBookScreen() {
         dateCompleted,
         isForeignLanguage,
         livruxEarned,
+        rating,
+        review: review.trim() || null,
       });
 
       // Optimistically adjust the reader balance by the delta.
@@ -272,6 +279,43 @@ export default function EditBookScreen() {
           </View>
         )}
 
+        {/* Rating picker */}
+        <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>
+        <View style={styles.ratingRow}>
+          {([
+            { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
+            { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
+            { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
+          ] as const).map((opt) => (
+            <TouchableOpacity
+              key={opt.value}
+              style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
+              onPress={() => setRating(rating === opt.value ? null : opt.value)}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
+              <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Review */}
+        <View style={styles.reviewContainer}>
+          <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
+          <RNTextInput
+            style={styles.reviewInput}
+            value={review}
+            onChangeText={setReview}
+            placeholder={t('book.reviewPlaceholder')}
+            placeholderTextColor={Colors.textDisabled}
+            multiline
+            numberOfLines={3}
+            textAlignVertical="top"
+          />
+        </View>
+
         <Button
           label={t('common.save')}
           onPress={handleSubmit(onSubmit)}
@@ -388,6 +432,62 @@ const styles = StyleSheet.create({
   },
   deltaNegative: {
     color: 'rgba(255,200,200,0.95)',
+  },
+  ratingLabel: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  ratingOption: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.lg,
+    backgroundColor: Colors.surfaceVariant,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    gap: 4,
+  },
+  ratingOptionSelected: {
+    borderColor: Colors.secondary,
+    backgroundColor: Colors.surface,
+  },
+  ratingEmoji: { fontSize: 28 },
+  ratingOptionLabel: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+  },
+  ratingOptionLabelSelected: {
+    fontFamily: Fonts.bodyBold,
+    color: Colors.secondary,
+  },
+  reviewContainer: {
+    marginBottom: Spacing.lg,
+  },
+  reviewFieldLabel: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  reviewInput: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.md,
+    color: Colors.textPrimary,
+    minHeight: 80,
   },
   saveButton: { marginTop: Spacing.md },
 });

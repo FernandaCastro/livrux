@@ -26,11 +26,12 @@ export function useReaders(): UseReadersResult {
 
     const { data, error: dbError } = await supabase
       .from('readers')
-      .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, created_at, updated_at, books(count)')
+      .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, friend_code, friends_autonomy, created_at, updated_at, books(count)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true });
 
     if (dbError) {
+      console.error('[useReaders] fetch error:', dbError);
       setError(dbError.message);
     } else {
       const readers = (data ?? []).map((r: any) => ({

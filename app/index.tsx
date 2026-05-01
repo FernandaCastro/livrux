@@ -30,7 +30,7 @@ type GridItem = Reader | AddItem | PhantomItem;
 export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { readers, isLoading, refresh } = useReaders();
+  const { readers, isLoading, error: readersError, refresh } = useReaders();
   const { setSelectedReader, bookPersistedCount } = useReaderStore();
   const { profile } = useAuthStore();
   const { canAccessReader, lockReaders } = useParentalStore();
@@ -154,6 +154,10 @@ export default function HomeScreen() {
             <Text style={styles.confirmationBannerClose}>✕</Text>
           </Pressable>
         </View>
+      )}
+
+      {readersError && (
+        <Text style={{ color: 'red', padding: 12 }}>{readersError}</Text>
       )}
 
       {/* Readers grid — show the full-screen spinner only on the very first

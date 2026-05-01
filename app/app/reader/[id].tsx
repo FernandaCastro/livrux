@@ -31,9 +31,10 @@ export default function ReaderDashboardScreen() {
   const { selectedReader, setSelectedReader, bookPersistedCount } = useReaderStore();
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
-  const { canEditReader } = useParentalStore();
+  const { canEditReader, isParentUnlocked } = useParentalStore();
 
-  const canEdit = canEditReader();
+  const canEdit = canEditReader(id);
+  const canDelete = isParentUnlocked;
 
   // Refresh books + reader data whenever a book is successfully persisted to
   // the DB — the confetti animation plays during this window, so this update
@@ -105,14 +106,24 @@ export default function ReaderDashboardScreen() {
         >
           <Text style={styles.backText}>←</Text>
         </TouchableOpacity>
-        {canEdit && (
-          <TouchableOpacity
-            onPress={handleDelete}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={styles.deleteText}>{t('reader.deleteReader')}</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.headerActions}>
+          {canEdit && (
+            <TouchableOpacity
+              onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.editText}>{t('reader.editReader')}</Text>
+            </TouchableOpacity>
+          )}
+          {canDelete && (
+            <TouchableOpacity
+              onPress={handleDelete}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.deleteText}>{t('reader.deleteReader')}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Reader hero */}
@@ -192,7 +203,7 @@ export default function ReaderDashboardScreen() {
         )}
       />
 
-      <BottomMenu showWallet readerId={id} />
+      <BottomMenu showWallet showFriends readerId={id} />
     </SafeAreaView>
   );
 }
@@ -212,6 +223,16 @@ const styles = StyleSheet.create({
   backText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.xl,
+    color: Colors.secondary,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.lg,
+  },
+  editText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.md,
     color: Colors.secondary,
   },
   deleteText: {

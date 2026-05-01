@@ -17,7 +17,7 @@ interface ParentalState {
   lock: () => void; // call on AppState → background (clears everything)
 
   // --- Helpers ---
-  canEditReader: () => boolean;
+  canEditReader: (readerId?: string) => boolean;
   canAccessReader: (readerId: string) => boolean;
   getReaderAccessMode: (readerId: string) => 'parent' | 'child' | 'none';
 }
@@ -48,7 +48,8 @@ export const useParentalStore = create<ParentalState>((set, get) => ({
     set({ isParentUnlocked: false, unlockedReaders: new Set() });
   },
 
-  canEditReader: () => get().isParentUnlocked,
+  canEditReader: (readerId?) =>
+    get().isParentUnlocked || (!!readerId && get().unlockedReaders.has(readerId)),
 
   canAccessReader: (readerId) => {
     const { isParentUnlocked, unlockedReaders } = get();

@@ -62,6 +62,8 @@ export function useBooks(readerId: string | null): UseBooksResult {
               date_completed: params.dateCompleted,
               is_foreign_language: params.isForeignLanguage,
               livrux_earned: params.livruxEarned,
+              rating: params.rating,
+              review: params.review,
             }
           : b
       )

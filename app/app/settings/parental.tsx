@@ -7,6 +7,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  Switch,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
@@ -177,6 +178,12 @@ export default function ParentalControlsScreen() {
     setSaving(false);
   };
 
+  const toggleFriendsAutonomy = async (reader: Reader) => {
+    const newValue = !reader.friends_autonomy;
+    await supabase.from('readers').update({ friends_autonomy: newValue }).eq('id', reader.id);
+    await refreshReaders();
+  };
+
   // ─── Flow callbacks ───────────────────────────────────────────────────────
 
   const isParentalContext = flow.context === 'parental';
@@ -308,6 +315,18 @@ export default function ParentalControlsScreen() {
                       </>
                     )}
                   </View>
+                </View>
+                <View style={styles.autonomyRow}>
+                  <View style={styles.autonomyTextGroup}>
+                    <Text style={styles.autonomyLabel}>👥 {t('friends.friendsAutonomy')}</Text>
+                    <Text style={styles.autonomyHint}>{t('friends.friendsAutonomyHint')}</Text>
+                  </View>
+                  <Switch
+                    value={reader.friends_autonomy}
+                    onValueChange={() => toggleFriendsAutonomy(reader)}
+                    trackColor={{ false: Colors.border, true: Colors.secondary }}
+                    thumbColor={Colors.surface}
+                  />
                 </View>
                 {i < readers.length - 1 && <View style={styles.divider} />}
               </View>
@@ -510,5 +529,25 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     paddingVertical: Spacing.xl,
+  },
+  autonomyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.surfaceVariant,
+    gap: Spacing.md,
+  },
+  autonomyTextGroup: { flex: 1 },
+  autonomyLabel: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textPrimary,
+    marginBottom: 2,
+  },
+  autonomyHint: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
   },
 });

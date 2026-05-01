@@ -36,6 +36,11 @@ export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
         {book.is_foreign_language && (
           <Text style={styles.foreignTag}>🌍 {t('book.foreignLanguage')}</Text>
         )}
+        {book.rating && (
+          <Text style={styles.ratingTag}>
+            {book.rating === 'disliked' ? '😕' : book.rating === 'liked' ? '😊' : '😍'}
+          </Text>
+        )}
         <View style={styles.badge}>
           <Text style={styles.badgeCoin}>🪙</Text>
           <Text style={styles.badgeAmount}>+{book.livrux_earned}</Text>
@@ -101,6 +106,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
     color: Colors.textDisabled,
+    marginBottom: Spacing.xs,
+  },
+  ratingTag: {
+    fontSize: 16,
     marginBottom: Spacing.xs,
   },
   badge: {

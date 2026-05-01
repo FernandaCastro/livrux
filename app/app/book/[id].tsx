@@ -18,6 +18,17 @@ import { useReaderStore } from '../../../src/stores/readerStore';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
+const RATING_BG: Record<string, string> = {
+  disliked: '#FFE0DE',
+  liked: '#FFF3DC',
+  loved: '#E8F5E9',
+};
+const RATING_FG: Record<string, string> = {
+  disliked: '#C62828',
+  liked: '#E65100',
+  loved: '#2E7D32',
+};
+
 export default function BookDetailScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -140,13 +151,14 @@ export default function BookDetailScreen() {
           </View>
         </View>
 
-        {/* Rating + review */}
-        {book.rating && (
-          <View style={styles.ratingCard}>
+        {/* Rating */}
+        {/* Rating standalone (only when no review) */}
+        {book.rating && !book.review && (
+          <View style={[styles.ratingPill, { backgroundColor: RATING_BG[book.rating] }]}>
             <Text style={styles.ratingEmoji}>
               {book.rating === 'disliked' ? '😕' : book.rating === 'liked' ? '😊' : '😍'}
             </Text>
-            <Text style={styles.ratingText}>
+            <Text style={[styles.ratingText, { color: RATING_FG[book.rating] }]}>
               {book.rating === 'disliked'
                 ? t('book.ratingDisliked')
                 : book.rating === 'liked'
@@ -155,10 +167,28 @@ export default function BookDetailScreen() {
             </Text>
           </View>
         )}
+
+        {/* Review card — rating pill overlaps top-left when present */}
         {book.review && (
-          <View style={styles.notesCard}>
-            <Text style={styles.notesLabel}>💬</Text>
-            <Text style={styles.notesText}>{book.review}</Text>
+          <View style={styles.reviewWrapper}>
+            {book.rating && (
+              <View style={[styles.ratingPillOverlay, { backgroundColor: RATING_BG[book.rating] }]}>
+                <Text style={styles.ratingEmoji}>
+                  {book.rating === 'disliked' ? '😕' : book.rating === 'liked' ? '😊' : '😍'}
+                </Text>
+                <Text style={[styles.ratingText, { color: RATING_FG[book.rating] }]}>
+                  {book.rating === 'disliked'
+                    ? t('book.ratingDisliked')
+                    : book.rating === 'liked'
+                    ? t('book.ratingLiked')
+                    : t('book.ratingLoved')}
+                </Text>
+              </View>
+            )}
+            <View style={[styles.reviewCard, !!book.rating && styles.reviewCardWithPill]}>
+              <Text style={styles.reviewIcon}>💬</Text>
+              <Text style={styles.reviewText}>{book.review}</Text>
+            </View>
           </View>
         )}
 
@@ -301,21 +331,59 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginBottom: 4,
   },
-  ratingCard: {
+  ratingPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
-    backgroundColor: Colors.surfaceVariant,
     borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.sm,
     marginBottom: Spacing.md,
   },
-  ratingEmoji: { fontSize: 24 },
+  ratingEmoji: { fontSize: 28 },
   ratingText: {
     fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.lg,
+  },
+  reviewWrapper: {
+    width: '100%',
+    marginTop: 16,
+    marginBottom: Spacing.md,
+    position: 'relative',
+  },
+  ratingPillOverlay: {
+    position: 'absolute',
+    top: -16,
+    left: Spacing.sm,
+    zIndex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: 5,
+    ...Shadows.sm,
+  },
+  reviewCard: {
+    width: '100%',
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    ...Shadows.sm,
+  },
+  reviewCardWithPill: {
+    paddingTop: Spacing['3xl'],
+  },
+  reviewIcon: { fontSize: 20 },
+  reviewText: {
+    flex: 1,
+    fontFamily: Fonts.body,
     fontSize: FontSizes.md,
     color: Colors.textPrimary,
+    lineHeight: 22,
+    fontStyle: 'italic',
   },
   notesCard: {
     width: '100%',

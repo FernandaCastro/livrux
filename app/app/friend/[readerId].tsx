@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Image,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -16,8 +15,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../src/lib/supabase';
 import { useBooks } from '../../../src/hooks/useBooks';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
+import { FriendBookCard } from '../../../src/components/book/FriendBookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../../src/constants/theme';
 
 interface FriendReader {
   id: string;
@@ -111,36 +111,7 @@ export default function FriendProfileScreen() {
             </View>
           ) : null
         }
-        renderItem={({ item }) => (
-          <View style={styles.bookCard}>
-            <View style={styles.coverContainer}>
-              {item.cover_url ? (
-                <Image source={{ uri: item.cover_url }} style={styles.cover} resizeMode="cover" />
-              ) : (
-                <View style={styles.coverPlaceholder}>
-                  <Text style={styles.coverIcon}>📕</Text>
-                </View>
-              )}
-            </View>
-            <View style={styles.bookInfo}>
-              <View style={styles.bookTitleRow}>
-                <Text style={styles.bookTitle} numberOfLines={2}>{item.title}</Text>
-                {item.rating && (
-                  <Text style={styles.bookRating}>
-                    {item.rating === 'disliked' ? '😕' : item.rating === 'liked' ? '😊' : '😍'}
-                  </Text>
-                )}
-              </View>
-              {item.author && (
-                <Text style={styles.bookAuthor} numberOfLines={1}>{item.author}</Text>
-              )}
-              <Text style={styles.bookPages}>{item.total_pages} {t('book.pagesCount', { count: item.total_pages }).replace(/^\d+ /, '')}</Text>
-              {item.review && (
-                <Text style={styles.bookReview} numberOfLines={2}>{item.review}</Text>
-              )}
-            </View>
-          </View>
-        )}
+        renderItem={({ item }) => <FriendBookCard book={item} />}
       />
 
       <BottomMenu showWallet showFriends readerId={fromReaderId} />
@@ -149,8 +120,6 @@ export default function FriendProfileScreen() {
 }
 
 const AVATAR_SIZE = 88;
-const COVER_WIDTH = 56;
-const COVER_HEIGHT = 80;
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
@@ -216,61 +185,5 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
-  },
-  bookCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    ...Shadows.sm,
-  },
-  coverContainer: { marginRight: Spacing.md },
-  cover: {
-    width: COVER_WIDTH,
-    height: COVER_HEIGHT,
-    borderRadius: Radius.sm,
-  },
-  coverPlaceholder: {
-    width: COVER_WIDTH,
-    height: COVER_HEIGHT,
-    borderRadius: Radius.sm,
-    backgroundColor: Colors.surfaceVariant,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  coverIcon: { fontSize: 28 },
-  bookInfo: { flex: 1 },
-  bookTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.xs,
-    marginBottom: 2,
-  },
-  bookTitle: {
-    flex: 1,
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textPrimary,
-  },
-  bookRating: { fontSize: 16 },
-  bookAuthor: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  bookPages: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textDisabled,
-  },
-  bookReview: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
-    marginTop: 2,
-    fontStyle: 'italic',
   },
 });

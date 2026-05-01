@@ -11,12 +11,21 @@ interface BookCardProps {
   onLongPress?: () => void;
 }
 
+const RATING_EMOJI: Record<string, string> = {
+  disliked: '😕',
+  liked: '😊',
+  loved: '😍',
+};
+
 export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
   const { t } = useTranslation();
   return (
     <TouchableOpacity onPress={onPress} onLongPress={onLongPress} activeOpacity={0.8} style={styles.card}>
-      {/* Cover thumbnail */}
-      <View style={styles.coverContainer}>
+      {/* Accent strip */}
+      <View style={styles.accentStrip} />
+
+      {/* Cover with rating badge */}
+      <View style={styles.coverWrapper}>
         {book.cover_url ? (
           <Image source={{ uri: book.cover_url }} style={styles.cover} resizeMode="cover" />
         ) : (
@@ -24,51 +33,69 @@ export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
             <Text style={styles.coverIcon}>📕</Text>
           </View>
         )}
+        {book.rating && (
+          <View style={styles.ratingBadge}>
+            <Text style={styles.ratingEmoji}>{RATING_EMOJI[book.rating]}</Text>
+          </View>
+        )}
       </View>
 
-      {/* Metadata */}
+      {/* Info */}
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={2}>{book.title}</Text>
         {book.author && (
           <Text style={styles.author} numberOfLines={1}>{book.author}</Text>
         )}
-        <Text style={styles.pages}>{book.total_pages} p.</Text>
-        {book.is_foreign_language && (
-          <Text style={styles.foreignTag}>🌍 {t('book.foreignLanguage')}</Text>
-        )}
-        {book.rating && (
-          <Text style={styles.ratingTag}>
-            {book.rating === 'disliked' ? '😕' : book.rating === 'liked' ? '😊' : '😍'}
+
+        <View style={styles.chips}>
+          <View style={styles.pageChip}>
+            <Text style={styles.pageChipText}>📄 {book.total_pages} p.</Text>
+          </View>
+          {book.is_foreign_language && (
+            <View style={styles.foreignChip}>
+              <Text style={styles.pageChipText}>🌍</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Footer: coins + date */}
+        <View style={styles.footer}>
+          <View style={styles.coinBadge}>
+            <Text style={styles.coinEmoji}>🪙</Text>
+            <Text style={styles.coinAmount}>+{book.livrux_earned}</Text>
+          </View>
+          <Text style={styles.date}>
+            {format(new Date(book.date_completed), 'dd/MM/yy')}
           </Text>
-        )}
-        <View style={styles.badge}>
-          <Text style={styles.badgeCoin}>🪙</Text>
-          <Text style={styles.badgeAmount}>+{book.livrux_earned}</Text>
         </View>
       </View>
-
-      {/* Date */}
-      <Text style={styles.date}>
-        {format(new Date(book.date_completed), 'dd/MM/yy')}
-      </Text>
     </TouchableOpacity>
   );
 }
 
-const COVER_WIDTH = 56;
-const COVER_HEIGHT = 80;
+const COVER_WIDTH = 64;
+const COVER_HEIGHT = 92;
 
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
-    padding: Spacing.md,
     marginBottom: Spacing.sm,
-    ...Shadows.sm,
+    overflow: 'hidden',
+    ...Shadows.md,
   },
-  coverContainer: { marginRight: Spacing.md },
+  accentStrip: {
+    width: 5,
+    backgroundColor: Colors.secondary,
+  },
+  coverWrapper: {
+    margin: Spacing.md,
+    marginRight: Spacing.sm,
+    position: 'relative',
+    alignSelf: 'center',
+  },
   cover: {
     width: COVER_WIDTH,
     height: COVER_HEIGHT,
@@ -82,57 +109,85 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  coverIcon: { fontSize: 28 },
-  info: { flex: 1 },
+  coverIcon: { fontSize: 30 },
+  ratingBadge: {
+    position: 'absolute',
+    bottom: -6,
+    right: -6,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.full,
+    width: 26,
+    height: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.sm,
+  },
+  ratingEmoji: { fontSize: 15 },
+  info: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    paddingRight: Spacing.md,
+    justifyContent: 'space-between',
+  },
   title: {
-    fontFamily: Fonts.bodyBold,
+    fontFamily: Fonts.heading,
     fontSize: FontSizes.md,
     color: Colors.textPrimary,
+    lineHeight: 20,
     marginBottom: 2,
   },
   author: {
     fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
+    fontSize: FontSizes.xs,
     color: Colors.textSecondary,
     marginBottom: Spacing.xs,
   },
-  pages: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textDisabled,
-    marginBottom: Spacing.xs,
-  },
-  foreignTag: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textDisabled,
-    marginBottom: Spacing.xs,
-  },
-  ratingTag: {
-    fontSize: 16,
-    marginBottom: Spacing.xs,
-  },
-  badge: {
+  chips: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    alignSelf: 'flex-start',
+    gap: Spacing.xs,
+    marginBottom: Spacing.sm,
+    flexWrap: 'wrap',
+  },
+  pageChip: {
     backgroundColor: Colors.surfaceVariant,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
   },
-  badgeCoin: { fontSize: 12 },
-  badgeAmount: {
+  foreignChip: {
+    backgroundColor: Colors.surfaceVariant,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+  },
+  pageChipText: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  coinBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+  },
+  coinEmoji: { fontSize: 13 },
+  coinAmount: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.xs,
-    color: Colors.secondary,
+    color: Colors.textOnPrimary,
   },
   date: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
     color: Colors.textDisabled,
-    marginLeft: Spacing.sm,
-    alignSelf: 'flex-start',
   },
 });

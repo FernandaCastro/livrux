@@ -156,7 +156,7 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
                   {item.author && (
                     <Text style={styles.resultAuthor} numberOfLines={1}>{item.author}</Text>
                   )}
-                  {item.totalPages && (
+                  {!!item.totalPages && (
                     <Text style={styles.resultPages}>
                       {t('book.pagesCount', { count: item.totalPages })}
                     </Text>

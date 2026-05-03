@@ -17,12 +17,25 @@ const TIER_COLORS: Record<BadgeTier, string> = {
 export default function BadgesScreen() {
   const { t } = useTranslation();
   const { selectedReader } = useReaderStore();
-  const { earnedBadges, pendingBadges, isLoading } = useBadges(selectedReader?.id ?? null);
+  const { earnedBadges, pendingBadges, isLoading, error } = useBadges(selectedReader?.id ?? null);
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safe}>
         <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>⚠️</Text>
+          <Text style={styles.emptyText}>{t('common.error')}</Text>
+          <Text style={styles.emptySubtext}>{error}</Text>
+        </View>
+        <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
       </SafeAreaView>
     );
   }
@@ -34,6 +47,14 @@ export default function BadgesScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.heading}>{t('badges.title')}</Text>
+
+        {/* Empty state — catalog not loaded (migrations pending) */}
+        {earnedBadges.length === 0 && pendingBadges.length === 0 && (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>🏅</Text>
+            <Text style={styles.emptyText}>{t('badges.empty')}</Text>
+          </View>
+        )}
 
         {/* Earned */}
         {earnedBadges.length > 0 && (
@@ -160,6 +181,27 @@ const styles = StyleSheet.create({
   badgeDesc: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing['2xl'],
+  },
+  emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
+  emptyText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textPrimary,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+  },
+  emptySubtext: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
     color: Colors.textSecondary,
     textAlign: 'center',
   },

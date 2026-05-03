@@ -237,6 +237,7 @@ const de = {
     pending: 'Zu verdienen',
     bonusEarned: '+{{amount}} Livrux',
     unlocked: 'Du hast einen Erfolg erhalten!',
+    empty: 'Erfolge erscheinen hier, nachdem du deine ersten Bücher eingetragen hast!',
     first_book: { name: 'Erstes Buch', description: 'Erstes Buch eingetragen' },
     bookworm_5: { name: 'Bücherfreund', description: '5 Bücher gelesen' },
     bookworm_25: { name: 'Bibliophil', description: '25 Bücher gelesen' },

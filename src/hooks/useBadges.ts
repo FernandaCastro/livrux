@@ -13,6 +13,7 @@ interface UseBadgesResult {
   earnedBadges: BadgeWithStatus[];
   pendingBadges: BadgeWithStatus[];
   isLoading: boolean;
+  error: string | null;
   checkAndAward: () => Promise<BadgeSlug[]>;
   refresh: () => Promise<void>;
 }
@@ -21,6 +22,7 @@ export function useBadges(readerId: string | null): UseBadgesResult {
   const [allBadges, setAllBadges] = useState<Badge[]>([]);
   const [readerBadges, setReaderBadges] = useState<ReaderBadge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetch = useCallback(async () => {
     if (!readerId) {
@@ -30,11 +32,24 @@ export function useBadges(readerId: string | null): UseBadgesResult {
       return;
     }
     setIsLoading(true);
+    setError(null);
 
-    const [{ data: catalogData }, { data: earnedData }] = await Promise.all([
+    const [
+      { data: catalogData, error: catalogError },
+      { data: earnedData, error: earnedError },
+    ] = await Promise.all([
       supabase.from('badges').select('*').order('tier'),
       supabase.from('reader_badges').select('*').eq('reader_id', readerId),
     ]);
+
+    if (catalogError) {
+      console.error('[useBadges] catalog error:', catalogError.message);
+      setError(catalogError.message);
+    }
+    if (earnedError) {
+      console.error('[useBadges] reader_badges error:', earnedError.message);
+      setError(earnedError.message);
+    }
 
     setAllBadges((catalogData ?? []) as Badge[]);
     setReaderBadges((earnedData ?? []) as ReaderBadge[]);
@@ -71,5 +86,5 @@ export function useBadges(readerId: string | null): UseBadgesResult {
   const earnedBadges = badges.filter((b) => b.earned);
   const pendingBadges = badges.filter((b) => !b.earned);
 
-  return { badges, earnedBadges, pendingBadges, isLoading, checkAndAward, refresh: fetch };
+  return { badges, earnedBadges, pendingBadges, isLoading, error, checkAndAward, refresh: fetch };
 }

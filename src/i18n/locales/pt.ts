@@ -204,6 +204,7 @@ const pt = {
     pending: 'Para conquistar',
     bonusEarned: '+{{amount}} Livrux',
     unlocked: 'Você ganhou uma conquista!',
+    empty: 'As conquistas aparecem aqui depois de registrar seus primeiros livros!',
     first_book: { name: 'Primeiro Livro', description: 'Registrou o primeiro livro' },
     bookworm_5: { name: 'Amigo dos Livros', description: 'Leu 5 livros' },
     bookworm_25: { name: 'Bibliófilo', description: 'Leu 25 livros' },

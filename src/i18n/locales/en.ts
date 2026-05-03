@@ -204,6 +204,7 @@ const en = {
     pending: 'To earn',
     bonusEarned: '+{{amount}} Livrux',
     unlocked: 'You earned an achievement!',
+    empty: 'Achievements will appear here after you log your first books!',
     first_book: { name: 'First Book', description: 'Logged the first book' },
     bookworm_5: { name: 'Book Friend', description: 'Read 5 books' },
     bookworm_25: { name: 'Bibliophile', description: 'Read 25 books' },

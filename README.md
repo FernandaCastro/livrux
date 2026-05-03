@@ -19,7 +19,8 @@ Children spend their Livrux coins in real life (a treat, a trip, an activity) an
 - **Profile photos** — readers and books have photo support via device camera or gallery
 - **Secure authentication** — email/password sign-up with Supabase Auth (Google & Apple OAuth ready)
 - **3 languages** — English, German, and Portuguese; auto-detected from device locale, switchable in-app
-- **Modern design** — warm, playful UI designed for families, with custom fonts and smooth interactions
+- **Friends** — readers connect via unique 6-character codes; send, accept, and reject friend requests; browse a friend's public book list; parental controls let parents decide whether a reader can manage friendships independently
+- **Modern design** — warm, playful UI designed for families, with custom fonts and smooth interactions; visual identity distinguishes reader screens (dusty blue) from friend screens (soft jade)
 
 ---
 
@@ -116,9 +117,10 @@ livrux/
 auth.users              ← managed by Supabase Auth
 user_profiles           ← display name, avatar
 reward_formulas         ← base_reward + per_page_rate + bonus_rules (JSON)
-readers                 ← name, avatar_url, livrux_balance
+readers                 ← name, avatar_url, livrux_balance, friend_code, friends_autonomy
 books                   ← title, author, total_pages, cover_url, livrux_earned, date_completed, is_foreign_language
 livrux_transactions     ← immutable audit log of every coin credit/debit
+friendships             ← reader_id, friend_id, status (pending/accepted); enforced unique pairs via RLS
 ```
 
 All tables are protected by **Row-Level Security** — users can only access their own data. Three atomic RPC functions keep data consistent: `log_book` (insert book + earn coins), `delete_book` (remove book + deduct coins), and `spend_livrux` (record a real-life expense + deduct coins). Each one records a human-readable `description` on the transaction — the book title for book events, or the user's own text for expenses.
@@ -225,6 +227,7 @@ To add a new language:
 - [x] Real-life Livrux spending — log expenses with amount and description
 - [x] Bonus rules — min pages threshold and foreign language bonuses configurable per account
 - [x] Milestone celebrations — confetti animation with animated book-count flip after each book is logged
+- [x] **Friends** — connect readers via unique 6-character codes; send/accept/reject friend requests; browse a friend's public book list; parental autonomy setting controls whether a reader manages friendships independently
 - [ ] Reading streaks and badges
 - [ ] Dark mode
 - [ ] Push notifications for reading reminders

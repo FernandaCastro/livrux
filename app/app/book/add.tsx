@@ -57,6 +57,8 @@ export default function AddBookScreen() {
   const [isForeignLanguage, setIsForeignLanguage] = useState(false);
   const [rating, setRating] = useState<'disliked' | 'liked' | 'loved' | null>(null);
   const [review, setReview] = useState('');
+  const [bookStatus, setBookStatus] = useState<'completed' | 'reading'>('completed');
+  const [dateStart, setDateStart] = useState(format(new Date(), 'dd/MM/yyyy'));
 
   const activeFormula = formula ?? getDefaultFormula();
   const hasForeignLanguageBonus = activeFormula.bonus_rules.some(r => r.type === 'foreign_language');
@@ -77,6 +79,8 @@ export default function AddBookScreen() {
       setIsForeignLanguage(false);
       setRating(null);
       setReview('');
+      setBookStatus('completed');
+      setDateStart(format(new Date(), 'dd/MM/yyyy'));
     }, [reset])
   );
 
@@ -105,9 +109,11 @@ export default function AddBookScreen() {
     const originalBalance = selectedReader?.livrux_balance ?? 0;
 
     // Optimistic mutations fire immediately — no waiting for the network.
-    // This matches the same pattern used for balance updates throughout the app.
-    updateBalance(originalBalance + livruxEarned);
-    triggerConfetti(prevBookCount, prevBookCount + 1);
+    // Only award balance/confetti when the book is completed immediately.
+    if (bookStatus === 'completed') {
+      updateBalance(originalBalance + livruxEarned);
+      triggerConfetti(prevBookCount, prevBookCount + 1);
+    }
     router.back();
     // onSubmit returns here synchronously so react-hook-form sets
     // isSubmitting=false immediately — the button re-enables right away.
@@ -115,23 +121,34 @@ export default function AddBookScreen() {
     // Persist to the DB in the background. On failure, roll back all state.
     // Access the store directly (not via hook) since the component may have
     // already unmounted after router.back().
+    const isCompleted = bookStatus === 'completed';
+    const todayIso = new Date().toISOString().split('T')[0];
+    const parseDateInput = (val: string) => {
+      const [d, m, y] = val.split('/');
+      return y && m && d ? `${y}-${m}-${d}` : todayIso;
+    };
+
     logBookRpc({
       readerId,
       title: data.title,
       author: data.author || null,
       totalPages: pages,
       coverUrl: coverUri,
-      livruxEarned,
-      dateCompleted: new Date().toISOString(),
+      livruxEarned: isCompleted ? livruxEarned : 0,
+      status: bookStatus,
+      dateStart: parseDateInput(dateStart),
+      dateCompleted: isCompleted ? todayIso : null,
       notes: data.notes || null,
       isForeignLanguage,
-      rating,
-      review: review.trim() || null,
+      rating: isCompleted ? rating : null,
+      review: isCompleted ? (review.trim() || null) : null,
     }).then(() => {
       useReaderStore.getState().notifyBookPersisted();
     }).catch(() => {
-      useReaderStore.getState().updateBalance(originalBalance);
-      useReaderStore.getState().clearConfetti();
+      if (bookStatus === 'completed') {
+        useReaderStore.getState().updateBalance(originalBalance);
+        useReaderStore.getState().clearConfetti();
+      }
       Alert.alert(t('common.error'), t('common.error'));
     });
   };
@@ -146,6 +163,22 @@ export default function AddBookScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.screenTitle}>{t('book.logBook')}</Text>
+        </View>
+
+        {/* Status toggle */}
+        <View style={styles.statusToggle}>
+          {(['completed', 'reading'] as const).map((s) => (
+            <TouchableOpacity
+              key={s}
+              style={[styles.statusOption, bookStatus === s && styles.statusOptionActive]}
+              onPress={() => setBookStatus(s)}
+              activeOpacity={0.75}
+            >
+              <Text style={[styles.statusOptionText, bookStatus === s && styles.statusOptionTextActive]}>
+                {s === 'completed' ? `✅ ${t('book.statusCompleted')}` : `📖 ${t('book.statusReading')}`}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Search bar — type or scan to auto-fill */}
@@ -210,6 +243,15 @@ export default function AddBookScreen() {
           )}
         />
 
+        {/* Date start */}
+        <TextInput
+          label={t('book.dateStart')}
+          placeholder="DD/MM/AAAA"
+          value={dateStart}
+          onChangeText={setDateStart}
+          keyboardType="number-pad"
+        />
+
         {/* Foreign language checkbox — only shown when the bonus rule is configured */}
         {hasForeignLanguageBonus && (
           <TouchableOpacity
@@ -224,8 +266,8 @@ export default function AddBookScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Live Livrux preview */}
-        {previewPages > 0 && (
+        {/* Live Livrux preview — only when completing */}
+        {bookStatus === 'completed' && previewPages > 0 && (
           <View style={styles.previewCard}>
             <Text style={styles.previewLabel}>{t('book.willEarn')}</Text>
             <View style={styles.previewRow}>
@@ -236,45 +278,48 @@ export default function AddBookScreen() {
           </View>
         )}
 
-        {/* Rating picker */}
-        <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>
-        <View style={styles.ratingRow}>
-          {([
-            { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
-            { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
-            { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
-          ] as const).map((opt) => (
-            <TouchableOpacity
-              key={opt.value}
-              style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
-              onPress={() => setRating(rating === opt.value ? null : opt.value)}
-              activeOpacity={0.75}
-            >
-              <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
-              <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
-                {opt.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {/* Rating and review — only when completing */}
+        {bookStatus === 'completed' && <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>}
+        {bookStatus === 'completed' && (
+          <View style={styles.ratingRow}>
+            {([
+              { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
+              { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
+              { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
+            ] as const).map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
+                onPress={() => setRating(rating === opt.value ? null : opt.value)}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
+                <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
-        {/* Review */}
-        <View style={styles.reviewContainer}>
-          <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
-          <RNTextInput
-            style={styles.reviewInput}
-            value={review}
-            onChangeText={setReview}
-            placeholder={t('book.reviewPlaceholder')}
-            placeholderTextColor={Colors.textDisabled}
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-          />
-        </View>
+        {bookStatus === 'completed' && (
+          <View style={styles.reviewContainer}>
+            <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
+            <RNTextInput
+              style={styles.reviewInput}
+              value={review}
+              onChangeText={setReview}
+              placeholder={t('book.reviewPlaceholder')}
+              placeholderTextColor={Colors.textDisabled}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+          </View>
+        )}
 
         <Button
-          label={t('book.logBook')}
+          label={bookStatus === 'completed' ? t('book.logBook') : t('book.logReading')}
           onPress={handleSubmit(onSubmit)}
           loading={isSubmitting}
           fullWidth
@@ -447,4 +492,31 @@ const styles = StyleSheet.create({
     minHeight: 80,
   },
   saveButton: { marginTop: Spacing.md },
+  statusToggle: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surfaceVariant,
+    borderRadius: Radius.lg,
+    padding: 4,
+    marginBottom: Spacing.lg,
+    gap: 4,
+  },
+  statusOption: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+    borderRadius: Radius.md,
+  },
+  statusOptionActive: {
+    backgroundColor: Colors.surface,
+    ...Shadows.sm,
+  },
+  statusOptionText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+  },
+  statusOptionTextActive: {
+    color: Colors.secondary,
+    fontFamily: Fonts.bodyBold,
+  },
 });

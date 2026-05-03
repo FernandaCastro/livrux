@@ -17,6 +17,7 @@ import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReaders } from '../../../src/hooks/useReaders';
 import { useParentalStore } from '../../../src/stores/parentalStore';
+import { useStreak } from '../../../src/hooks/useStreak';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -31,6 +32,10 @@ export default function ReaderDashboardScreen() {
   const { selectedReader, setSelectedReader, bookPersistedCount } = useReaderStore();
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
+  const { streak } = useStreak(id ?? null);
+
+  const readingNow = books.filter((b) => b.status === 'reading');
+  const completedBooks = books.filter((b) => b.status === 'completed');
   const { canEditReader, isParentUnlocked } = useParentalStore();
 
   const canEdit = canEditReader(id);
@@ -150,6 +155,26 @@ export default function ReaderDashboardScreen() {
           </View>
         </View>
 
+        {/* ── Streak + badges row ── */}
+        <View style={styles.streakRow}>
+          <View style={styles.streakChip}>
+            <Text style={styles.streakText}>
+              {streak.current_streak > 0
+                ? t(streak.current_streak === 1 ? 'streak.current' : 'streak.current_plural', { count: streak.current_streak })
+                : '🔥 0'}
+            </Text>
+            {streak.best_streak > 0 && (
+              <Text style={styles.streakBest}>{t('streak.best', { count: streak.best_streak })}</Text>
+            )}
+          </View>
+          <TouchableOpacity
+            style={styles.badgesBtn}
+            onPress={() => router.push('/app/badges')}
+          >
+            <Text style={styles.badgesBtnText}>🏅 {t('badges.title')}</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* ── Add book button ── */}
         <TouchableOpacity
           style={styles.addBookBtn}
@@ -162,7 +187,7 @@ export default function ReaderDashboardScreen() {
 
       {/* ── Books list ── */}
       <FlatList
-        data={books}
+        data={completedBooks}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
@@ -174,15 +199,34 @@ export default function ReaderDashboardScreen() {
           />
         }
         ListHeaderComponent={
-          books.length > 0 ? (
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionIcon}>📖</Text>
-              <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
-            </View>
-          ) : null
+          <>
+            {/* Currently reading section */}
+            {readingNow.length > 0 && (
+              <>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionIcon}>📖</Text>
+                  <Text style={styles.sectionTitle}>{t('reader.readingNow')}</Text>
+                </View>
+                {readingNow.map((item) => (
+                  <BookCard
+                    key={item.id}
+                    book={item}
+                    onPress={() => router.push(`/app/book/${item.id}`)}
+                    onLongPress={canEdit ? () => router.push(`/app/book/edit?bookId=${item.id}`) : undefined}
+                  />
+                ))}
+              </>
+            )}
+            {completedBooks.length > 0 && (
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionIcon}>✅</Text>
+                <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+              </View>
+            )}
+          </>
         }
         ListEmptyComponent={
-          !isLoading ? (
+          !isLoading && readingNow.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyIcon}>📚</Text>
               <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
@@ -321,6 +365,47 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
     color: 'rgba(255,255,255,0.85)',
+  },
+
+  /* ── Streak ── */
+  streakRow: {
+    flexDirection: 'row',
+    alignSelf: 'stretch',
+    gap: Spacing.sm,
+    marginTop: Spacing.md,
+  },
+  streakChip: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+  },
+  streakText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textOnPrimary,
+  },
+  streakBest: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: 'rgba(255,255,255,0.75)',
+    marginTop: 2,
+  },
+  badgesBtn: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgesBtnText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textOnPrimary,
   },
 
   /* ── Add book ── */

@@ -53,6 +53,7 @@ export async function deleteBookRpc(bookId: string): Promise<void> {
 
 // Calls the atomic log_book RPC which inserts the book, creates a transaction,
 // and updates the reader balance in a single database transaction.
+// When status = 'reading', dateCompleted should be null and livruxEarned = 0.
 export async function logBookRpc(params: {
   readerId: string;
   title: string;
@@ -60,28 +61,50 @@ export async function logBookRpc(params: {
   totalPages: number;
   coverUrl: string | null;
   livruxEarned: number;
-  dateCompleted: string;
+  status: 'reading' | 'completed';
+  dateStart: string;
+  dateCompleted: string | null;
   notes: string | null;
   isForeignLanguage: boolean;
   rating: 'disliked' | 'liked' | 'loved' | null;
   review: string | null;
 }): Promise<string> {
   const { data, error } = await supabase.rpc('log_book', {
-    p_reader_id: params.readerId,
-    p_title: params.title,
-    p_author: params.author,
-    p_total_pages: params.totalPages,
-    p_cover_url: params.coverUrl,
-    p_livrux_earned: params.livruxEarned,
-    p_date_completed: params.dateCompleted,
-    p_notes: params.notes,
+    p_reader_id:           params.readerId,
+    p_title:               params.title,
+    p_author:              params.author,
+    p_total_pages:         params.totalPages,
+    p_cover_url:           params.coverUrl,
+    p_livrux_earned:       params.livruxEarned,
+    p_status:              params.status,
+    p_date_start:          params.dateStart,
+    p_date_completed:      params.dateCompleted,
+    p_notes:               params.notes,
     p_is_foreign_language: params.isForeignLanguage,
-    p_rating: params.rating,
-    p_review: params.review,
+    p_rating:              params.rating,
+    p_review:              params.review,
   });
 
   if (error) throw error;
   return data as string;
+}
+
+// Transitions a 'reading' book to 'completed', awarding Livrux atomically.
+export async function completeBookRpc(params: {
+  bookId: string;
+  dateCompleted: string;
+  livruxEarned: number;
+  rating: 'disliked' | 'liked' | 'loved' | null;
+  review: string | null;
+}): Promise<void> {
+  const { error } = await supabase.rpc('complete_book', {
+    p_book_id:        params.bookId,
+    p_date_completed: params.dateCompleted,
+    p_livrux_earned:  params.livruxEarned,
+    p_rating:         params.rating,
+    p_review:         params.review,
+  });
+  if (error) throw error;
 }
 
 // Calls the atomic update_book RPC which updates all editable book fields,

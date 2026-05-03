@@ -20,6 +20,8 @@ import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReadingSession } from '../../../src/hooks/useReadingSession';
 import { completeBookRpc } from '../../../src/hooks/useLivrux';
+import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
+import type { AwardedBadge } from '../../../src/hooks/useLivrux';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -51,6 +53,7 @@ export default function BookDetailScreen() {
   const [completeRating, setCompleteRating] = useState<'disliked' | 'liked' | 'loved' | null>(null);
   const [completeReview, setCompleteReview] = useState('');
   const [isCompleting, setIsCompleting] = useState(false);
+  const [awardedBadges, setAwardedBadges] = useState<AwardedBadge[]>([]);
 
   const handleBack = () => {
     router.back();
@@ -292,7 +295,7 @@ export default function BookDetailScreen() {
                   const activeFormula = formula ?? getDefaultFormula();
                   const livruxEarned = calculateLivrux(book.total_pages, activeFormula, { isForeignLanguage: book.is_foreign_language });
                   try {
-                    await completeBookRpc({
+                    const { awardedBadges: badges } = await completeBookRpc({
                       bookId: book.id,
                       dateCompleted: new Date().toISOString().split('T')[0],
                       livruxEarned,
@@ -301,6 +304,7 @@ export default function BookDetailScreen() {
                     });
                     updateBalance(selectedReader.livrux_balance + livruxEarned);
                     setCompleteModalVisible(false);
+                    if (badges.length > 0) setAwardedBadges(badges);
                     router.back();
                   } catch {
                     Alert.alert(t('common.error'), t('common.error'));
@@ -355,6 +359,7 @@ export default function BookDetailScreen() {
       </Modal>
 
       <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
+      <BadgeUnlockToast badges={awardedBadges} onDone={() => setAwardedBadges([])} />
     </SafeAreaView>
   );
 }

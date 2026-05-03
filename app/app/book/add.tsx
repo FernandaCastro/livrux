@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { logBookRpc } from '../../../src/hooks/useLivrux';
+import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
+import type { AwardedBadge } from '../../../src/hooks/useLivrux';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
@@ -59,6 +61,7 @@ export default function AddBookScreen() {
   const [review, setReview] = useState('');
   const [bookStatus, setBookStatus] = useState<'completed' | 'reading'>('completed');
   const [dateStart, setDateStart] = useState(format(new Date(), 'dd/MM/yyyy'));
+  const [awardedBadges, setAwardedBadges] = useState<AwardedBadge[]>([]);
 
   const activeFormula = formula ?? getDefaultFormula();
   const hasForeignLanguageBonus = activeFormula.bonus_rules.some(r => r.type === 'foreign_language');
@@ -142,8 +145,11 @@ export default function AddBookScreen() {
       isForeignLanguage,
       rating: isCompleted ? rating : null,
       review: isCompleted ? (review.trim() || null) : null,
-    }).then(() => {
+    }).then(({ awardedBadges: badges }) => {
       useReaderStore.getState().notifyBookPersisted();
+      if (badges.length > 0) {
+        setAwardedBadges(badges);
+      }
     }).catch(() => {
       if (bookStatus === 'completed') {
         useReaderStore.getState().updateBalance(originalBalance);
@@ -327,6 +333,7 @@ export default function AddBookScreen() {
         />
       </ScrollView>
       <BottomMenu showReader showWallet showFriends readerId={readerId} />
+      <BadgeUnlockToast badges={awardedBadges} onDone={() => setAwardedBadges([])} />
     </SafeAreaView>
   );
 }

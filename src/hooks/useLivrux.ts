@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
-import type { LivruxTransaction } from '../types';
+import type { LivruxTransaction, BadgeSlug } from '../types';
+
+export interface AwardedBadge {
+  slug: BadgeSlug;
+  bonus_livrux: number;
+}
 
 interface UseLivruxResult {
   transactions: LivruxTransaction[];
@@ -68,7 +73,7 @@ export async function logBookRpc(params: {
   isForeignLanguage: boolean;
   rating: 'disliked' | 'liked' | 'loved' | null;
   review: string | null;
-}): Promise<string> {
+}): Promise<{ bookId: string; awardedBadges: AwardedBadge[] }> {
   const { data, error } = await supabase.rpc('log_book', {
     p_reader_id:           params.readerId,
     p_title:               params.title,
@@ -86,18 +91,20 @@ export async function logBookRpc(params: {
   });
 
   if (error) throw error;
-  return data as string;
+  const result = data as { book_id: string; awarded_badges: AwardedBadge[] };
+  return { bookId: result.book_id, awardedBadges: result.awarded_badges ?? [] };
 }
 
 // Transitions a 'reading' book to 'completed', awarding Livrux atomically.
+// Returns the list of badges just earned so the UI can trigger animations.
 export async function completeBookRpc(params: {
   bookId: string;
   dateCompleted: string;
   livruxEarned: number;
   rating: 'disliked' | 'liked' | 'loved' | null;
   review: string | null;
-}): Promise<void> {
-  const { error } = await supabase.rpc('complete_book', {
+}): Promise<{ awardedBadges: AwardedBadge[] }> {
+  const { data, error } = await supabase.rpc('complete_book', {
     p_book_id:        params.bookId,
     p_date_completed: params.dateCompleted,
     p_livrux_earned:  params.livruxEarned,
@@ -105,6 +112,8 @@ export async function completeBookRpc(params: {
     p_review:         params.review,
   });
   if (error) throw error;
+  const result = data as { awarded_badges: AwardedBadge[] };
+  return { awardedBadges: result?.awarded_badges ?? [] };
 }
 
 // Calls the atomic update_book RPC which updates all editable book fields,

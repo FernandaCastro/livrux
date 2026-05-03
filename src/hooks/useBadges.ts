@@ -38,7 +38,7 @@ export function useBadges(readerId: string | null): UseBadgesResult {
       { data: catalogData, error: catalogError },
       { data: earnedData, error: earnedError },
     ] = await Promise.all([
-      supabase.from('badges').select('*').order('tier'),
+      supabase.from('badges').select('*').order('sort_order'),
       supabase.from('reader_badges').select('*').eq('reader_id', readerId),
     ]);
 

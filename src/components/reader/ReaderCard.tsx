@@ -62,6 +62,14 @@ export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardP
           {reader.book_count ?? 0}
         </Text>
       </View>
+
+      {/* XP badge */}
+      {reader.xp > 0 && (
+        <View style={[styles.badge, styles.xpBadge]}>
+          <Text style={styles.badgeCoin}>⭐</Text>
+          <Text style={styles.xpAmount}>{reader.xp} XP</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 }
@@ -110,6 +118,15 @@ const styles = StyleSheet.create({
   },
   booksBadge: {
     marginTop: Spacing.xs,
+  },
+  xpBadge: {
+    marginTop: Spacing.xs,
+    backgroundColor: '#FFF8E1',
+  },
+  xpAmount: {
+    fontFamily: Fonts.bodyExtraBold,
+    fontSize: FontSizes.sm,
+    color: '#F59E0B',
   },
   badgeCoin: {
     fontSize: 14,

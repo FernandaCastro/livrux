@@ -44,8 +44,8 @@ export function useFriends(readerId: string | null): UseFriendsResult {
       .from('reader_friendships')
       .select(`
         id, requester_id, addressee_id,
-        requester:requester_id(id, name, avatar_seed, books(count)),
-        addressee:addressee_id(id, name, avatar_seed, books(count))
+        requester:requester_id(id, name, avatar_seed, xp, books(count)),
+        addressee:addressee_id(id, name, avatar_seed, xp, books(count))
       `)
       .or(`requester_id.eq.${readerId},addressee_id.eq.${readerId}`)
       .eq('status', 'accepted');
@@ -62,6 +62,7 @@ export function useFriends(readerId: string | null): UseFriendsResult {
               name: friend.name,
               avatar_seed: friend.avatar_seed ?? null,
               book_count: (friend.books?.[0]?.count ?? 0) as number,
+              xp: (friend.xp ?? 0) as number,
             },
           } satisfies FriendData;
         })
@@ -73,7 +74,7 @@ export function useFriends(readerId: string | null): UseFriendsResult {
       .from('reader_friendships')
       .select(`
         id, requester_id,
-        requester:requester_id(id, name, avatar_seed, books(count))
+        requester:requester_id(id, name, avatar_seed, xp, books(count))
       `)
       .eq('addressee_id', readerId)
       .eq('status', 'pending');
@@ -87,6 +88,7 @@ export function useFriends(readerId: string | null): UseFriendsResult {
             name: rf.requester.name,
             avatar_seed: rf.requester.avatar_seed ?? null,
             book_count: (rf.requester.books?.[0]?.count ?? 0) as number,
+            xp: (rf.requester.xp ?? 0) as number,
           },
         } satisfies FriendRequest))
       );
@@ -108,6 +110,7 @@ export function useFriends(readerId: string | null): UseFriendsResult {
       name: r.name,
       avatar_seed: r.avatar_seed ?? null,
       book_count: Number(r.book_count ?? 0),
+      xp: Number(r.xp ?? 0),
     };
   };
 

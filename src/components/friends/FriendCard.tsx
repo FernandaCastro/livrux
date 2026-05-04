@@ -7,12 +7,13 @@ interface FriendCardProps {
   name: string;
   avatarSeed: string | null;
   bookCount: number;
+  xp?: number;
   onPress?: () => void;
   onAccept?: () => void;
   onReject?: () => void;
 }
 
-export function FriendCard({ name, avatarSeed, bookCount, onPress, onAccept, onReject }: FriendCardProps) {
+export function FriendCard({ name, avatarSeed, bookCount, xp, onPress, onAccept, onReject }: FriendCardProps) {
   const { t } = useTranslation();
   const isPending = !!onAccept && !!onReject;
 
@@ -43,9 +44,17 @@ export function FriendCard({ name, avatarSeed, bookCount, onPress, onAccept, onR
           </View>
         )}
         <Text style={styles.name} numberOfLines={1}>{name}</Text>
-        <View style={styles.bookBadge}>
-          <Text style={styles.bookIcon}>📚</Text>
-          <Text style={styles.bookCount}>{bookCount} {t('friends.booksRead')}</Text>
+        <View style={styles.statsRow}>
+          <View style={styles.bookBadge}>
+            <Text style={styles.bookIcon}>📚</Text>
+            <Text style={styles.bookCount}>{bookCount} {t('friends.booksRead')}</Text>
+          </View>
+          {xp !== undefined && xp > 0 && (
+            <View style={styles.xpBadge}>
+              <Text style={styles.xpIcon}>⭐</Text>
+              <Text style={styles.xpCount}>{xp} XP</Text>
+            </View>
+          )}
         </View>
       </View>
 
@@ -115,6 +124,11 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     marginBottom: Spacing.xs,
   },
+  statsRow: {
+    flexDirection: 'row',
+    gap: Spacing.xs,
+    flexWrap: 'wrap',
+  },
   bookBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -130,6 +144,22 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,
     color: Colors.secondary,
+  },
+  xpBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFF8E1',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+  },
+  xpIcon: { fontSize: 11 },
+  xpCount: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.xs,
+    color: '#F59E0B',
   },
   actions: {
     flexDirection: 'row',

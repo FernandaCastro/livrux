@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ActivityIndicator,
   TextInput as RNTextInput,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';

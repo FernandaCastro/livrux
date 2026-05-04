@@ -5,7 +5,7 @@ import type { LivruxTransaction, BadgeSlug } from '../types';
 
 export interface AwardedBadge {
   slug: BadgeSlug;
-  bonus_livrux: number;
+  bonus_xp: number;
 }
 
 interface UseLivruxResult {
@@ -49,11 +49,19 @@ export function useLivrux(readerId: string | null): UseLivruxResult {
   return { transactions, isLoading, error, refresh: fetch };
 }
 
-// Calls the atomic delete_book RPC which deletes the book, records a negative
-// transaction, and subtracts the reader balance in a single database transaction.
-export async function deleteBookRpc(bookId: string): Promise<void> {
-  const { error } = await supabase.rpc('delete_book', { p_book_id: bookId });
+export interface RevokedBadge {
+  slug: BadgeSlug;
+  penalty_xp: number;
+}
+
+// Calls the atomic delete_book RPC which deletes the book, its reading sessions
+// (via CASCADE), records a negative transaction, subtracts the reader balance,
+// and revokes any badges the reader no longer qualifies for.
+export async function deleteBookRpc(bookId: string): Promise<{ revokedBadges: RevokedBadge[] }> {
+  const { data, error } = await supabase.rpc('delete_book', { p_book_id: bookId });
   if (error) throw error;
+  const result = data as { revoked_badges: RevokedBadge[] };
+  return { revokedBadges: result?.revoked_badges ?? [] };
 }
 
 // Calls the atomic log_book RPC which inserts the book, creates a transaction,

@@ -101,29 +101,21 @@ export default function AddBookScreen() {
     if (book.coverUrl) setCoverUri(book.coverUrl);
   };
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     if (!user || !readerId) return;
 
     const pages = Number(data.totalPages);
     const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
 
-    // Snapshot current balance for rollback on failure.
     const { selectedReader, triggerConfetti } = useReaderStore.getState();
     const originalBalance = selectedReader?.livrux_balance ?? 0;
 
-    // Optimistic mutations fire immediately — no waiting for the network.
-    // Only award balance/confetti when the book is completed immediately.
+    // Optimistic balance + confetti fire before the network call.
     if (bookStatus === 'completed') {
       updateBalance(originalBalance + livruxEarned);
       triggerConfetti(prevBookCount, prevBookCount + 1);
     }
-    router.back();
-    // onSubmit returns here synchronously so react-hook-form sets
-    // isSubmitting=false immediately — the button re-enables right away.
 
-    // Persist to the DB in the background. On failure, roll back all state.
-    // Access the store directly (not via hook) since the component may have
-    // already unmounted after router.back().
     const isCompleted = bookStatus === 'completed';
     const todayIso = new Date().toISOString().split('T')[0];
     const parseDateInput = (val: string) => {
@@ -131,32 +123,36 @@ export default function AddBookScreen() {
       return y && m && d ? `${y}-${m}-${d}` : todayIso;
     };
 
-    logBookRpc({
-      readerId,
-      title: data.title,
-      author: data.author || null,
-      totalPages: pages,
-      coverUrl: coverUri,
-      livruxEarned: isCompleted ? livruxEarned : 0,
-      status: bookStatus,
-      dateStart: parseDateInput(dateStart),
-      dateCompleted: isCompleted ? todayIso : null,
-      notes: data.notes || null,
-      isForeignLanguage,
-      rating: isCompleted ? rating : null,
-      review: isCompleted ? (review.trim() || null) : null,
-    }).then(({ awardedBadges: badges }) => {
+    try {
+      const { awardedBadges: badges } = await logBookRpc({
+        readerId,
+        title: data.title,
+        author: data.author || null,
+        totalPages: pages,
+        coverUrl: coverUri,
+        livruxEarned: isCompleted ? livruxEarned : 0,
+        status: bookStatus,
+        dateStart: parseDateInput(dateStart),
+        dateCompleted: isCompleted ? todayIso : null,
+        notes: data.notes || null,
+        isForeignLanguage,
+        rating: isCompleted ? rating : null,
+        review: isCompleted ? (review.trim() || null) : null,
+      });
       useReaderStore.getState().notifyBookPersisted();
       if (badges.length > 0) {
         setAwardedBadges(badges);
+        // navigation is deferred to the toast's onDone so the animation plays
+      } else {
+        router.back();
       }
-    }).catch(() => {
+    } catch {
       if (bookStatus === 'completed') {
-        useReaderStore.getState().updateBalance(originalBalance);
+        updateBalance(originalBalance);
         useReaderStore.getState().clearConfetti();
       }
       Alert.alert(t('common.error'), t('common.error'));
-    });
+    }
   };
 
   return (
@@ -333,7 +329,7 @@ export default function AddBookScreen() {
         />
       </ScrollView>
       <BottomMenu showReader showWallet showFriends readerId={readerId} />
-      <BadgeUnlockToast badges={awardedBadges} onDone={() => setAwardedBadges([])} />
+      <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
     </SafeAreaView>
   );
 }

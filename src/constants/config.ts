@@ -1,7 +1,7 @@
 // App-wide configuration constants.
 
 export const DEFAULT_FORMULA = {
-  base_reward: 5,
+  base_reward: 2,
   per_page_rate: 0.1,
   bonus_rules: [],
 } as const;

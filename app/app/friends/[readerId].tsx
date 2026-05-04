@@ -161,6 +161,7 @@ export default function FriendsScreen() {
                       name={req.reader.name}
                       avatarSeed={req.reader.avatar_seed}
                       bookCount={req.reader.book_count}
+                      xp={req.reader.xp}
                       onAccept={() => acceptRequest(req.friendshipId)}
                       onReject={() => rejectRequest(req.friendshipId)}
                     />
@@ -170,6 +171,7 @@ export default function FriendsScreen() {
                       name={req.reader.name}
                       avatarSeed={req.reader.avatar_seed}
                       bookCount={req.reader.book_count}
+                      xp={req.reader.xp}
                     />
                   )
                 )}
@@ -199,6 +201,7 @@ export default function FriendsScreen() {
             name={item.reader.name}
             avatarSeed={item.reader.avatar_seed}
             bookCount={item.reader.book_count}
+            xp={item.reader.xp}
             onPress={() => router.push(`/app/friend/${item.reader.id}?fromReaderId=${readerId}`)}
             onReject={
               canManageFriends
@@ -255,6 +258,9 @@ export default function FriendsScreen() {
                 <View style={styles.searchResultInfo}>
                   <Text style={styles.searchResultName}>{searchResult.name}</Text>
                   <Text style={styles.searchResultBooks}>📚 {searchResult.book_count} {t('friends.booksRead')}</Text>
+                  {searchResult.xp > 0 && (
+                    <Text style={styles.searchResultBooks}>⭐ {searchResult.xp} XP</Text>
+                  )}
                 </View>
                 <TouchableOpacity style={styles.sendBtn} onPress={handleSendRequest} activeOpacity={0.8}>
                   <Text style={styles.sendBtnText}>{t('friends.sendRequest')}</Text>

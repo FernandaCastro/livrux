@@ -6,7 +6,8 @@ interface UseReadingSessionResult {
   sessions: ReadingSession[];
   isLoading: boolean;
   loggedToday: boolean;
-  logSession: (pagesRead: number) => Promise<void>;
+  lastPageRead: number;
+  logSession: (lastPage: number) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -37,31 +38,22 @@ export function useReadingSession(readerId: string | null, bookId: string | null
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const logSession = useCallback(async (pagesRead: number) => {
+  const logSession = useCallback(async (lastPage: number) => {
     if (!readerId || !bookId) return;
 
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData.user?.id;
-    if (!userId) return;
+    await supabase.rpc('log_reading_session', {
+      p_reader_id: readerId,
+      p_book_id:   bookId,
+      p_last_page: lastPage,
+      p_date:      today,
+    });
 
-    const { data, error } = await supabase
-      .from('reading_sessions')
-      .upsert(
-        { reader_id: readerId, book_id: bookId, user_id: userId, session_date: today, pages_read: pagesRead },
-        { onConflict: 'reader_id,book_id,session_date' }
-      )
-      .select()
-      .single();
-
-    if (!error && data) {
-      setSessions((prev) => {
-        const without = prev.filter((s) => s.session_date !== today);
-        return [data as ReadingSession, ...without];
-      });
-    }
-  }, [readerId, bookId, today]);
+    // Refresh sessions to reflect the upserted row
+    await fetch();
+  }, [readerId, bookId, today, fetch]);
 
   const loggedToday = sessions.some((s) => s.session_date === today);
+  const lastPageRead = sessions[0]?.last_page ?? 0;
 
-  return { sessions, isLoading, loggedToday, logSession, refresh: fetch };
+  return { sessions, isLoading, loggedToday, lastPageRead, logSession, refresh: fetch };
 }

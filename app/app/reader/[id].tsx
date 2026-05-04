@@ -141,17 +141,22 @@ export default function ReaderDashboardScreen() {
           </View>
         </View>
 
-        {/* Balance + books badges */}
+        {/* Balance + XP + books badges */}
         <View style={styles.heroBadgesRow}>
           <View style={styles.balanceBadge}>
             <Text style={styles.badgeCoin}>🪙</Text>
             <Text style={styles.balanceAmount}>{reader.livrux_balance.toFixed(2)}</Text>
-            <Text style={styles.balanceCurrency}>Livrux</Text>
+            {/* <Text style={styles.balanceCurrency}>Livrux</Text> */}
+          </View>
+          <View style={styles.xpBadge}>
+            <Text style={styles.badgeCoin}>⭐</Text>
+            <Text style={styles.balanceAmount}>{reader.xp}</Text>
+            <Text style={styles.balanceCurrency}>XP</Text>
           </View>
           <View style={styles.booksBadge}>
             <Text style={styles.badgeIcon}>📚</Text>
             <Text style={styles.booksCount}>{books.length}</Text>
-            <Text style={styles.booksLabel}>{t('reader.books')}</Text>
+            {/* <Text style={styles.booksLabel}>{t('reader.books')}</Text> */}
           </View>
         </View>
 
@@ -346,14 +351,25 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: 'rgba(255,255,255,0.85)',
   },
+  xpBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: '#B45309',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    ...Shadows.sm,
+  },
   booksBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: Colors.secondary,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
+    ...Shadows.sm,
   },
   badgeIcon: { fontSize: 18 },
   booksCount: {

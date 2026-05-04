@@ -5,7 +5,7 @@ import type { Badge, ReaderBadge, BadgeSlug } from '../types';
 interface BadgeWithStatus extends Badge {
   earned: boolean;
   earned_at?: string;
-  bonus_livrux?: number;
+  bonus_xp?: number;
 }
 
 interface UseBadgesResult {
@@ -79,7 +79,7 @@ export function useBadges(readerId: string | null): UseBadgesResult {
       ...b,
       earned: earnedSet.has(b.slug as BadgeSlug),
       earned_at: rb?.earned_at,
-      bonus_livrux: rb?.bonus_livrux,
+      bonus_xp: rb?.bonus_xp,
     };
   });
 

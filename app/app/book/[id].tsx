@@ -46,9 +46,10 @@ export default function BookDetailScreen() {
   const { selectedReader, updateBalance } = useReaderStore();
   const { books, isLoading, deleteBook } = useBooks(selectedReader?.id ?? null);
   const { formula } = useAuthStore();
-  const { loggedToday, logSession } = useReadingSession(selectedReader?.id ?? null, id ?? null);
+  const { loggedToday, lastPageRead, logSession } = useReadingSession(selectedReader?.id ?? null, id ?? null);
   const [sessionModalVisible, setSessionModalVisible] = useState(false);
   const [pagesInput, setPagesInput] = useState('');
+  const [sessionError, setSessionError] = useState<string | null>(null);
   const [completeModalVisible, setCompleteModalVisible] = useState(false);
   const [completeRating, setCompleteRating] = useState<'disliked' | 'liked' | 'loved' | null>(null);
   const [completeReview, setCompleteReview] = useState('');
@@ -87,12 +88,17 @@ export default function BookDetailScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            await deleteBook(book.id);
-            // Revert the balance optimistically.
+            const { revokedBadges } = await deleteBook(book.id);
             if (selectedReader) {
               updateBalance(selectedReader.livrux_balance - book.livrux_earned);
             }
             handleBack();
+            if (revokedBadges.length > 0) {
+              const names = revokedBadges
+                .map((rb) => t(`badges.${rb.slug}.name`))
+                .join(', ');
+              Alert.alert(t('book.badgesRevoked'), t('book.badgesRevokedBody', { names }));
+            }
           },
         },
       ]
@@ -136,7 +142,7 @@ export default function BookDetailScreen() {
             <Text style={styles.detailText}>{book.total_pages} p.</Text>
           </View>
           <View style={styles.detailChip}>
-            <Text style={styles.detailIcon}>🟢</Text>
+            <Text style={styles.detailIcon}>🌱</Text>
             <Text style={styles.detailText}>
               {format(new Date(book.date_start), 'dd/MM/yyyy')}
             </Text>
@@ -159,6 +165,22 @@ export default function BookDetailScreen() {
               <Text style={styles.detailText}>{t('book.foreignLanguage')}</Text>
             </View>
           </View>
+        )}
+
+        {/* Reading session button — only for medium/long books */}
+        {book.total_pages > STREAK_THRESHOLDS.SHORT_BOOK_MAX && (
+          <TouchableOpacity
+            style={styles.sessionBtn}
+            onPress={() => { setSessionError(null); setSessionModalVisible(true); }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.sessionBtnText}>
+              {loggedToday ? t('streak.alreadyLoggedToday') : t('streak.logSession')}
+            </Text>
+            {loggedToday && (
+              <Text style={styles.sessionBtnSub}>{t('streak.tapToUpdate')}</Text>
+            )}
+          </TouchableOpacity>
         )}
 
         {/* Complete book button — only for reading books */}
@@ -184,18 +206,7 @@ export default function BookDetailScreen() {
           </View>
         )}
 
-        {/* Reading session button — only for medium/long books */}
-        {book.total_pages >= STREAK_THRESHOLDS.SHORT_BOOK_MAX && (
-          <TouchableOpacity
-            style={[styles.sessionBtn, loggedToday && styles.sessionBtnDone]}
-            onPress={() => !loggedToday && setSessionModalVisible(true)}
-            activeOpacity={loggedToday ? 1 : 0.7}
-          >
-            <Text style={styles.sessionBtnText}>
-              {loggedToday ? t('streak.alreadyLoggedToday') : t('streak.logSession')}
-            </Text>
-          </TouchableOpacity>
-        )}
+
 
         {/* Rating */}
         {/* Rating standalone (only when no review) */}
@@ -208,8 +219,8 @@ export default function BookDetailScreen() {
               {book.rating === 'disliked'
                 ? t('book.ratingDisliked')
                 : book.rating === 'liked'
-                ? t('book.ratingLiked')
-                : t('book.ratingLoved')}
+                  ? t('book.ratingLiked')
+                  : t('book.ratingLoved')}
             </Text>
           </View>
         )}
@@ -226,8 +237,8 @@ export default function BookDetailScreen() {
                   {book.rating === 'disliked'
                     ? t('book.ratingDisliked')
                     : book.rating === 'liked'
-                    ? t('book.ratingLiked')
-                    : t('book.ratingLoved')}
+                      ? t('book.ratingLiked')
+                      : t('book.ratingLoved')}
                 </Text>
               </View>
             )}
@@ -256,8 +267,8 @@ export default function BookDetailScreen() {
             <View style={styles.ratingModalRow}>
               {([
                 { value: 'disliked', emoji: '😕' },
-                { value: 'liked',    emoji: '😊' },
-                { value: 'loved',    emoji: '😍' },
+                { value: 'liked', emoji: '😊' },
+                { value: 'loved', emoji: '😍' },
               ] as const).map((opt) => (
                 <TouchableOpacity
                   key={opt.value}
@@ -304,8 +315,12 @@ export default function BookDetailScreen() {
                     });
                     updateBalance(selectedReader.livrux_balance + livruxEarned);
                     setCompleteModalVisible(false);
-                    if (badges.length > 0) setAwardedBadges(badges);
-                    router.back();
+                    if (badges.length > 0) {
+                      setAwardedBadges(badges);
+                      // navigation is deferred to onDone so the toast can play
+                    } else {
+                      router.back();
+                    }
                   } catch {
                     Alert.alert(t('common.error'), t('common.error'));
                   } finally {
@@ -325,30 +340,50 @@ export default function BookDetailScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>{t('streak.pagesReadLabel')}</Text>
+            {lastPageRead > 0 && (
+              <Text style={styles.modalHint}>
+                {t('streak.lastPageHint', { page: lastPageRead })}
+              </Text>
+            )}
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, !!sessionError && styles.modalInputError]}
               keyboardType="number-pad"
               placeholder={t('streak.pagesReadPlaceholder')}
               value={pagesInput}
-              onChangeText={setPagesInput}
+              onChangeText={(v) => { setPagesInput(v); setSessionError(null); }}
               autoFocus
             />
+            {sessionError && (
+              <Text style={styles.modalError}>{sessionError}</Text>
+            )}
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.modalCancel}
-                onPress={() => { setSessionModalVisible(false); setPagesInput(''); }}
+                onPress={() => { setSessionModalVisible(false); setPagesInput(''); setSessionError(null); }}
               >
                 <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalConfirm}
                 onPress={async () => {
-                  const pages = parseInt(pagesInput, 10);
-                  if (!isNaN(pages) && pages > 0) {
-                    await logSession(pages);
-                    setSessionModalVisible(false);
-                    setPagesInput('');
+                  const page = parseInt(pagesInput, 10);
+                  if (isNaN(page) || page <= 0) {
+                    setSessionError(t('streak.errorInvalidPage'));
+                    return;
                   }
+                  if (page <= lastPageRead) {
+                    setSessionError(t('streak.errorPageNotAdvanced', { page: lastPageRead }));
+                    return;
+                  }
+                  if (page >= book.total_pages) {
+                    setSessionError(t('streak.errorPageTooHigh', { total: book.total_pages }));
+                    return;
+                  }
+                  await logSession(page);
+                  setSessionModalVisible(false);
+                  setPagesInput('');
+                  setSessionError(null);
+                  router.back();
                 }}
               >
                 <Text style={styles.modalConfirmText}>{t('streak.logSessionConfirm')}</Text>
@@ -359,7 +394,7 @@ export default function BookDetailScreen() {
       </Modal>
 
       <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
-      <BadgeUnlockToast badges={awardedBadges} onDone={() => setAwardedBadges([])} />
+      <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
     </SafeAreaView>
   );
 }
@@ -374,7 +409,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     width: '100%',
     paddingVertical: Spacing.lg,
@@ -595,13 +630,16 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
     ...Shadows.sm,
   },
-  sessionBtnDone: {
-    backgroundColor: Colors.surfaceVariant,
-  },
   sessionBtnText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
     color: Colors.textOnPrimary,
+  },
+  sessionBtnSub: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: 'rgba(255,255,255,0.75)',
+    marginTop: 2,
   },
   modalOverlay: {
     flex: 1,
@@ -621,7 +659,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
     color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
+  },
+  modalHint: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
     marginBottom: Spacing.md,
+  },
+  modalError: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: Colors.error,
+    marginTop: -Spacing.sm,
+    marginBottom: Spacing.sm,
   },
   modalInput: {
     borderWidth: 1,
@@ -631,7 +682,10 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
     color: Colors.textPrimary,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.sm,
+  },
+  modalInputError: {
+    borderColor: Colors.error,
   },
   modalActions: {
     flexDirection: 'row',

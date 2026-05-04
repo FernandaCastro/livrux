@@ -34,6 +34,7 @@ export interface Reader {
   old_avatar_seed: string | null;
   pin: string | null; // SHA-256 hash; null = no PIN required for this reader
   livrux_balance: number;
+  xp: number;
   friend_code: string | null;
   friends_autonomy: boolean;
   created_at: string;
@@ -57,6 +58,7 @@ export interface FriendData {
     name: string;
     avatar_seed: string | null;
     book_count: number;
+    xp: number;
   };
 }
 
@@ -67,6 +69,7 @@ export interface FriendRequest {
     name: string;
     avatar_seed: string | null;
     book_count: number;
+    xp: number;
   };
 }
 
@@ -75,6 +78,7 @@ export interface FriendSearchResult {
   name: string;
   avatar_seed: string | null;
   book_count: number;
+  xp: number;
 }
 
 export type BookStatus = 'reading' | 'completed';
@@ -104,7 +108,7 @@ export interface ReadingSession {
   book_id: string;
   user_id: string;
   session_date: string;
-  pages_read: number;
+  last_page: number;
   created_at: string;
 }
 
@@ -136,7 +140,16 @@ export interface ReaderBadge {
   user_id: string;
   badge_slug: BadgeSlug;
   earned_at: string;
-  bonus_livrux: number;
+  bonus_xp: number;
+}
+
+export interface XpTransaction {
+  id: string;
+  reader_id: string;
+  user_id: string;
+  amount: number;
+  reason: string;
+  created_at: string;
 }
 
 export interface StreakInfo {

@@ -87,9 +87,9 @@ function BadgeCard({ badge, index }: { badge: AwardedBadge; index: number }) {
       <View style={styles.textBlock}>
         <Text style={styles.unlockLabel}>{t('badges.unlocked')}</Text>
         <Text style={styles.badgeName}>{t(`badges.${badge.slug}.name`)}</Text>
-        {badge.bonus_livrux > 0 && (
+        {badge.bonus_xp > 0 && (
           <Text style={[styles.bonus, { color: tierColor }]}>
-            {t('badges.bonusEarned', { amount: badge.bonus_livrux })}
+            {`+${badge.bonus_xp} XP`}
           </Text>
         )}
       </View>

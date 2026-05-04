@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
-  InteractionManager,
   Modal,
   StyleSheet,
   Text,
@@ -350,12 +349,10 @@ export function ConfettiOverlay({ visible, prevCount, newCount, onDone }: Confet
 
       const autoClose = setTimeout(onDone, AUTO_CLOSE_MS);
       // Regenerate the next batch asynchronously while confetti plays.
-      const task = InteractionManager.runAfterInteractions(() => {
-        setParticles(randomParticles());
-      });
+      const task = setTimeout(() => setParticles(randomParticles()), 0);
       return () => {
         clearTimeout(autoClose);
-        task.cancel();
+        clearTimeout(task);
       };
     } else {
       // Fade out, then unmount the Modal so it's fully gone.

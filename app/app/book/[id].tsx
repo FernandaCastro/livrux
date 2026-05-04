@@ -7,16 +7,26 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  TextInput,
+  Modal,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
+import { useReadingSession } from '../../../src/hooks/useReadingSession';
+import { completeBookRpc } from '../../../src/hooks/useLivrux';
+import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
+import type { AwardedBadge } from '../../../src/hooks/useLivrux';
+import { useAuthStore } from '../../../src/stores/authStore';
+import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { STREAK_THRESHOLDS } from '../../../src/constants/config';
 
 const RATING_BG: Record<string, string> = {
   disliked: '#FFE0DE',
@@ -35,6 +45,16 @@ export default function BookDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { selectedReader, updateBalance } = useReaderStore();
   const { books, isLoading, deleteBook } = useBooks(selectedReader?.id ?? null);
+  const { formula } = useAuthStore();
+  const { loggedToday, lastPageRead, logSession } = useReadingSession(selectedReader?.id ?? null, id ?? null);
+  const [sessionModalVisible, setSessionModalVisible] = useState(false);
+  const [pagesInput, setPagesInput] = useState('');
+  const [sessionError, setSessionError] = useState<string | null>(null);
+  const [completeModalVisible, setCompleteModalVisible] = useState(false);
+  const [completeRating, setCompleteRating] = useState<'disliked' | 'liked' | 'loved' | null>(null);
+  const [completeReview, setCompleteReview] = useState('');
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [awardedBadges, setAwardedBadges] = useState<AwardedBadge[]>([]);
 
   const handleBack = () => {
     router.back();
@@ -68,12 +88,17 @@ export default function BookDetailScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            await deleteBook(book.id);
-            // Revert the balance optimistically.
+            const { revokedBadges } = await deleteBook(book.id);
             if (selectedReader) {
               updateBalance(selectedReader.livrux_balance - book.livrux_earned);
             }
             handleBack();
+            if (revokedBadges.length > 0) {
+              const names = revokedBadges
+                .map((rb) => t(`badges.${rb.slug}.name`))
+                .join(', ');
+              Alert.alert(t('book.badgesRevoked'), t('book.badgesRevokedBody', { names }));
+            }
           },
         },
       ]
@@ -110,18 +135,26 @@ export default function BookDetailScreen() {
         <Text style={styles.title}>{book.title}</Text>
         {book.author && <Text style={styles.author}>{book.author}</Text>}
 
-        {/* Details row: pages + date */}
+        {/* Details row: pages + dates */}
         <View style={[styles.detailsRow, !book.is_foreign_language && styles.detailsRowLast]}>
           <View style={styles.detailChip}>
             <Text style={styles.detailIcon}>📄</Text>
             <Text style={styles.detailText}>{book.total_pages} p.</Text>
           </View>
           <View style={styles.detailChip}>
-            <Text style={styles.detailIcon}>📅</Text>
+            <Text style={styles.detailIcon}>🌱</Text>
             <Text style={styles.detailText}>
-              {format(new Date(book.date_completed), 'dd/MM/yyyy')}
+              {format(new Date(book.date_start), 'dd/MM/yyyy')}
             </Text>
           </View>
+          {book.date_completed && (
+            <View style={styles.detailChip}>
+              <Text style={styles.detailIcon}>✅</Text>
+              <Text style={styles.detailText}>
+                {format(new Date(book.date_completed), 'dd/MM/yyyy')}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Foreign language row — second line, only when applicable */}
@@ -134,15 +167,46 @@ export default function BookDetailScreen() {
           </View>
         )}
 
-        {/* Livrux earned card */}
-        <View style={styles.earnedCard}>
-          <Text style={styles.earnedLabel}>{t('book.willEarn')}</Text>
-          <View style={styles.earnedRow}>
-            <Text style={styles.earnedCoin}>🪙</Text>
-            <Text style={styles.earnedAmount}>{book.livrux_earned.toFixed(2)}</Text>
-            <Text style={styles.earnedCurrency}>Livrux</Text>
+        {/* Reading session button — only for medium/long books */}
+        {book.total_pages > STREAK_THRESHOLDS.SHORT_BOOK_MAX && (
+          <TouchableOpacity
+            style={styles.sessionBtn}
+            onPress={() => { setSessionError(null); setSessionModalVisible(true); }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.sessionBtnText}>
+              {loggedToday ? t('streak.alreadyLoggedToday') : t('streak.logSession')}
+            </Text>
+            {loggedToday && (
+              <Text style={styles.sessionBtnSub}>{t('streak.tapToUpdate')}</Text>
+            )}
+          </TouchableOpacity>
+        )}
+
+        {/* Complete book button — only for reading books */}
+        {book.status === 'reading' && (
+          <TouchableOpacity
+            style={styles.completeBtn}
+            onPress={() => setCompleteModalVisible(true)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.completeBtnText}>🏁 {t('book.completeBook')}</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Livrux earned card — only for completed books */}
+        {book.status === 'completed' && (
+          <View style={styles.earnedCard}>
+            <Text style={styles.earnedLabel}>{t('book.willEarn')}</Text>
+            <View style={styles.earnedRow}>
+              <Text style={styles.earnedCoin}>🪙</Text>
+              <Text style={styles.earnedAmount}>{book.livrux_earned.toFixed(2)}</Text>
+              <Text style={styles.earnedCurrency}>Livrux</Text>
+            </View>
           </View>
-        </View>
+        )}
+
+
 
         {/* Rating */}
         {/* Rating standalone (only when no review) */}
@@ -155,8 +219,8 @@ export default function BookDetailScreen() {
               {book.rating === 'disliked'
                 ? t('book.ratingDisliked')
                 : book.rating === 'liked'
-                ? t('book.ratingLiked')
-                : t('book.ratingLoved')}
+                  ? t('book.ratingLiked')
+                  : t('book.ratingLoved')}
             </Text>
           </View>
         )}
@@ -173,8 +237,8 @@ export default function BookDetailScreen() {
                   {book.rating === 'disliked'
                     ? t('book.ratingDisliked')
                     : book.rating === 'liked'
-                    ? t('book.ratingLiked')
-                    : t('book.ratingLoved')}
+                      ? t('book.ratingLiked')
+                      : t('book.ratingLoved')}
                 </Text>
               </View>
             )}
@@ -193,7 +257,144 @@ export default function BookDetailScreen() {
           </View>
         )}
       </ScrollView>
+      {/* Complete book modal */}
+      <Modal visible={completeModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>🏁 {t('book.completeBook')}</Text>
+
+            <Text style={styles.ratingModalLabel}>{t('book.ratingLabel')}</Text>
+            <View style={styles.ratingModalRow}>
+              {([
+                { value: 'disliked', emoji: '😕' },
+                { value: 'liked', emoji: '😊' },
+                { value: 'loved', emoji: '😍' },
+              ] as const).map((opt) => (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[styles.ratingModalOption, completeRating === opt.value && styles.ratingModalOptionSelected]}
+                  onPress={() => setCompleteRating(completeRating === opt.value ? null : opt.value)}
+                >
+                  <Text style={{ fontSize: 28 }}>{opt.emoji}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder={t('book.reviewPlaceholder')}
+              value={completeReview}
+              onChangeText={setCompleteReview}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancel}
+                onPress={() => { setCompleteModalVisible(false); setCompleteRating(null); setCompleteReview(''); }}
+              >
+                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalConfirm, isCompleting && { opacity: 0.6 }]}
+                disabled={isCompleting}
+                onPress={async () => {
+                  if (!book || !selectedReader) return;
+                  setIsCompleting(true);
+                  const activeFormula = formula ?? getDefaultFormula();
+                  const livruxEarned = calculateLivrux(book.total_pages, activeFormula, { isForeignLanguage: book.is_foreign_language });
+                  try {
+                    const { awardedBadges: badges } = await completeBookRpc({
+                      bookId: book.id,
+                      dateCompleted: new Date().toISOString().split('T')[0],
+                      livruxEarned,
+                      rating: completeRating,
+                      review: completeReview.trim() || null,
+                    });
+                    updateBalance(selectedReader.livrux_balance + livruxEarned);
+                    setCompleteModalVisible(false);
+                    if (badges.length > 0) {
+                      setAwardedBadges(badges);
+                      // navigation is deferred to onDone so the toast can play
+                    } else {
+                      router.back();
+                    }
+                  } catch {
+                    Alert.alert(t('common.error'), t('common.error'));
+                  } finally {
+                    setIsCompleting(false);
+                  }
+                }}
+              >
+                <Text style={styles.modalConfirmText}>{t('book.completeBook')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Pages modal */}
+      <Modal visible={sessionModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{t('streak.pagesReadLabel')}</Text>
+            {lastPageRead > 0 && (
+              <Text style={styles.modalHint}>
+                {t('streak.lastPageHint', { page: lastPageRead })}
+              </Text>
+            )}
+            <TextInput
+              style={[styles.modalInput, !!sessionError && styles.modalInputError]}
+              keyboardType="number-pad"
+              placeholder={t('streak.pagesReadPlaceholder')}
+              value={pagesInput}
+              onChangeText={(v) => { setPagesInput(v); setSessionError(null); }}
+              autoFocus
+            />
+            {sessionError && (
+              <Text style={styles.modalError}>{sessionError}</Text>
+            )}
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancel}
+                onPress={() => { setSessionModalVisible(false); setPagesInput(''); setSessionError(null); }}
+              >
+                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalConfirm}
+                onPress={async () => {
+                  const page = parseInt(pagesInput, 10);
+                  if (isNaN(page) || page <= 0) {
+                    setSessionError(t('streak.errorInvalidPage'));
+                    return;
+                  }
+                  if (page <= lastPageRead) {
+                    setSessionError(t('streak.errorPageNotAdvanced', { page: lastPageRead }));
+                    return;
+                  }
+                  if (page >= book.total_pages) {
+                    setSessionError(t('streak.errorPageTooHigh', { total: book.total_pages }));
+                    return;
+                  }
+                  await logSession(page);
+                  setSessionModalVisible(false);
+                  setPagesInput('');
+                  setSessionError(null);
+                  router.back();
+                }}
+              >
+                <Text style={styles.modalConfirmText}>{t('streak.logSessionConfirm')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
+      <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
     </SafeAreaView>
   );
 }
@@ -208,7 +409,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     width: '100%',
     paddingVertical: Spacing.lg,
@@ -381,6 +582,138 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
     ...Shadows.sm,
     marginBottom: Spacing.md,
+  },
+  completeBtn: {
+    width: '100%',
+    backgroundColor: Colors.success,
+    borderRadius: Radius.lg,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+    ...Shadows.md,
+  },
+  completeBtnText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textOnPrimary,
+  },
+  ratingModalLabel: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  ratingModalRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  ratingModalOption: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surfaceVariant,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  ratingModalOptionSelected: {
+    borderColor: Colors.secondary,
+    backgroundColor: Colors.surface,
+  },
+  sessionBtn: {
+    width: '100%',
+    backgroundColor: Colors.secondary,
+    borderRadius: Radius.lg,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    marginBottom: Spacing.lg,
+    ...Shadows.sm,
+  },
+  sessionBtnText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textOnPrimary,
+  },
+  sessionBtnSub: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: 'rgba(255,255,255,0.75)',
+    marginTop: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.xl,
+    padding: Spacing.xl,
+    ...Shadows.lg,
+  },
+  modalTitle: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
+  },
+  modalHint: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.md,
+  },
+  modalError: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: Colors.error,
+    marginTop: -Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: Colors.surfaceVariant,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.md,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
+  },
+  modalInputError: {
+    borderColor: Colors.error,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  modalCancel: {
+    flex: 1,
+    padding: Spacing.md,
+    alignItems: 'center',
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surfaceVariant,
+  },
+  modalCancelText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+  },
+  modalConfirm: {
+    flex: 1,
+    padding: Spacing.md,
+    alignItems: 'center',
+    borderRadius: Radius.md,
+    backgroundColor: Colors.primary,
+  },
+  modalConfirmText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.md,
+    color: Colors.textOnPrimary,
   },
   notesLabel: { fontSize: 18 },
   notesText: {

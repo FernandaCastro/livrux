@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { deleteBookRpc, updateBookRpc } from './useLivrux';
+import type { RevokedBadge } from './useLivrux';
 import type { Book } from '../types';
 
 interface UseBooksResult {
@@ -8,7 +9,7 @@ interface UseBooksResult {
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
-  deleteBook: (bookId: string) => Promise<void>;
+  deleteBook: (bookId: string) => Promise<{ revokedBadges: RevokedBadge[] }>;
   updateBook: (params: Parameters<typeof updateBookRpc>[0]) => Promise<void>;
 }
 
@@ -43,9 +44,10 @@ export function useBooks(readerId: string | null): UseBooksResult {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const deleteBook = async (bookId: string): Promise<void> => {
-    await deleteBookRpc(bookId);
+  const deleteBook = async (bookId: string): Promise<{ revokedBadges: RevokedBadge[] }> => {
+    const result = await deleteBookRpc(bookId);
     setBooks((prev) => prev.filter((b) => b.id !== bookId));
+    return result;
   };
 
   const updateBook = async (params: Parameters<typeof updateBookRpc>[0]): Promise<void> => {

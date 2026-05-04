@@ -18,6 +18,7 @@ import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReaders } from '../../../src/hooks/useReaders';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { useStreak } from '../../../src/hooks/useStreak';
+import { useBadges } from '../../../src/hooks/useBadges';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -33,6 +34,7 @@ export default function ReaderDashboardScreen() {
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
   const { streak } = useStreak(id ?? null);
+  const { earnedBadges } = useBadges(id ?? null);
 
   const readingNow = books.filter((b) => b.status === 'reading');
   const completedBooks = books.filter((b) => b.status === 'completed');
@@ -141,26 +143,28 @@ export default function ReaderDashboardScreen() {
           </View>
         </View>
 
-        {/* Balance + XP + books badges */}
+        {/* Livrux + XP + Conquistas */}
         <View style={styles.heroBadgesRow}>
           <View style={styles.balanceBadge}>
             <Text style={styles.badgeCoin}>🪙</Text>
             <Text style={styles.balanceAmount}>{reader.livrux_balance.toFixed(2)}</Text>
-            {/* <Text style={styles.balanceCurrency}>Livrux</Text> */}
           </View>
           <View style={styles.xpBadge}>
             <Text style={styles.badgeCoin}>⭐</Text>
             <Text style={styles.balanceAmount}>{reader.xp}</Text>
             <Text style={styles.balanceCurrency}>XP</Text>
           </View>
-          <View style={styles.booksBadge}>
-            <Text style={styles.badgeIcon}>📚</Text>
-            <Text style={styles.booksCount}>{books.length}</Text>
-            {/* <Text style={styles.booksLabel}>{t('reader.books')}</Text> */}
-          </View>
+          <TouchableOpacity
+            style={styles.badgesBadge}
+            onPress={() => router.push('/app/badges')}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.badgeIcon}>🏅</Text>
+            <Text style={styles.booksCount}>{earnedBadges.length}</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* ── Streak + badges row ── */}
+        {/* ── Streak + books row ── */}
         <View style={styles.streakRow}>
           <View style={styles.streakChip}>
             <Text style={styles.streakText}>
@@ -172,12 +176,10 @@ export default function ReaderDashboardScreen() {
               <Text style={styles.streakBest}>{t('streak.best', { count: streak.best_streak })}</Text>
             )}
           </View>
-          <TouchableOpacity
-            style={styles.badgesBtn}
-            onPress={() => router.push('/app/badges')}
-          >
-            <Text style={styles.badgesBtnText}>🏅 {t('badges.title')}</Text>
-          </TouchableOpacity>
+          <View style={styles.booksChip}>
+            <Text style={styles.booksCount}>📚 {completedBooks.length} </Text>
+            <Text style={styles.booksChipText}>{t('reader.books')}</Text>
+          </View>
         </View>
 
         {/* ── Add book button ── */}
@@ -276,7 +278,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignSelf: 'stretch',
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.xs,
   },
   bannerActions: {
     flexDirection: 'row',
@@ -361,11 +362,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     ...Shadows.sm,
   },
-  booksBadge: {
+  badgesBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.secondary,
+    backgroundColor: '#2D6A4F',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
@@ -386,7 +387,7 @@ const styles = StyleSheet.create({
   /* ── Streak ── */
   streakRow: {
     flexDirection: 'row',
-    alignSelf: 'stretch',
+    justifyContent: 'space-around',
     gap: Spacing.sm,
     marginTop: Spacing.md,
   },
@@ -409,18 +410,22 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.75)',
     marginTop: 2,
   },
-  badgesBtn: {
+  booksChip: {
     flex: 1,
     backgroundColor: 'rgba(255,255,255,0.18)',
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   badgesBtnText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
+    color: Colors.textOnPrimary,
+  },
+  booksChipText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.xs,
     color: Colors.textOnPrimary,
   },
 

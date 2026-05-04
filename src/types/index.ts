@@ -40,6 +40,7 @@ export interface Reader {
   created_at: string;
   updated_at: string;
   book_count?: number;
+  badge_count?: number;
 }
 
 export interface ReaderFriendship {

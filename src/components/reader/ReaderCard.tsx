@@ -16,7 +16,6 @@ interface ReaderCardProps {
   locked?: boolean;
 }
 
-// Displays a single reader as a tappable card in the home grid.
 export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardProps) {
   return (
     <TouchableOpacity
@@ -25,7 +24,6 @@ export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardP
       activeOpacity={0.8}
       style={styles.card}
     >
-      {/* Lock badge — shown when reader has a PIN and isn't unlocked this session */}
       {locked && (
         <View style={styles.lockBadge}>
           <Text style={styles.lockIcon}>🔒</Text>
@@ -42,50 +40,55 @@ export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardP
         />
       </View>
 
-      {/* Name */}
-      <Text style={styles.name} numberOfLines={1}>
-        {reader.name}
-      </Text>
-
-      {/* Balance badge */}
-      <View style={styles.badge}>
-        <Text style={styles.badgeCoin}>🪙</Text>
-        <Text style={styles.badgeAmount}>
-          {reader.livrux_balance.toFixed(2)}
+      {/* Right side: name + chips */}
+      <View style={styles.content}>
+        <Text style={styles.name} numberOfLines={1}>
+          {reader.name}
         </Text>
-      </View>
 
-      {/* Books read badge */}
-      <View style={[styles.badge, styles.booksBadge]}>
-        <Text style={styles.badgeCoin}>📚</Text>
-        <Text style={styles.badgeAmount}>
-          {reader.book_count ?? 0}
-        </Text>
-      </View>
-
-      {/* XP badge */}
-      {reader.xp > 0 && (
-        <View style={[styles.badge, styles.xpBadge]}>
-          <Text style={styles.badgeCoin}>⭐</Text>
-          <Text style={styles.xpAmount}>{reader.xp} XP</Text>
+        <View style={styles.chipsGrid}>
+          <View style={styles.chipsRow}>
+            <View style={[styles.chip, styles.livruxChip]}>
+              <Text style={styles.chipEmoji}>🪙</Text>
+              <Text style={styles.chipValue} numberOfLines={1}>{reader.livrux_balance.toFixed(2)}</Text>
+            </View>
+            <View style={[styles.chip, styles.xpChip]}>
+              <Text style={styles.chipEmoji}>⭐</Text>
+              <Text style={styles.chipValue} numberOfLines={1}>{reader.xp}</Text>
+              <Text style={styles.chipLabel}>XP</Text>
+            </View>
+          </View>
+          <View style={styles.chipsRow}>
+            <View style={[styles.chip, styles.badgesChip]}>
+              <Text style={styles.chipEmoji}>🏅</Text>
+              <Text style={styles.chipValue} numberOfLines={1}>{reader.badge_count ?? 0}</Text>
+            </View>
+            <View style={[styles.chip, styles.booksChip]}>
+              <Text style={styles.chipEmoji}>📚</Text>
+              <Text style={styles.chipValue} numberOfLines={1}>{reader.book_count ?? 0}</Text>
+            </View>
+          </View>
         </View>
-      )}
+      </View>
     </TouchableOpacity>
   );
 }
 
-const AVATAR_SIZE = 72;
+const AVATAR_SIZE = 64;
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     borderWidth: 2,
     borderColor: Colors.readerBlue,
-    padding: Spacing.md,
-    alignItems: 'center',
-    margin: Spacing.sm,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    marginHorizontal: Spacing.md,
+    marginVertical: Spacing.xs,
+    gap: Spacing.md,
     ...Shadows.md,
   },
   lockBadge: {
@@ -94,46 +97,50 @@ const styles = StyleSheet.create({
     right: Spacing.xs,
     zIndex: 1,
   },
-  lockIcon: {
-    fontSize: 16,
-  },
+  lockIcon: { fontSize: 14 },
   avatarContainer: {
-    marginBottom: Spacing.sm,
+    flexShrink: 0,
+  },
+  content: {
+    flex: 1,
+    gap: Spacing.sm,
   },
   name: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
     color: Colors.textPrimary,
-    marginBottom: Spacing.sm,
-    textAlign: 'center',
   },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surfaceVariant,
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
+  chipsGrid: {
     gap: 4,
   },
-  booksBadge: {
-    marginTop: Spacing.xs,
+  chipsRow: {
+    flexDirection: 'row',
+    gap: 4,
   },
-  xpBadge: {
-    marginTop: Spacing.xs,
-    backgroundColor: '#FFF8E1',
+  chip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 3,
+    gap: 3,
+    overflow: 'hidden',
   },
-  xpAmount: {
+  livruxChip: { backgroundColor: Colors.primary },
+  xpChip: { backgroundColor: '#B45309' },
+  badgesChip: { backgroundColor: '#2D6A4F' },
+  booksChip: { backgroundColor: Colors.secondary },
+  chipEmoji: { fontSize: 11 },
+  chipValue: {
     fontFamily: Fonts.bodyExtraBold,
     fontSize: FontSizes.sm,
-    color: '#F59E0B',
+    color: Colors.textOnPrimary,
   },
-  badgeCoin: {
-    fontSize: 14,
-  },
-  badgeAmount: {
-    fontFamily: Fonts.bodyExtraBold,
-    fontSize: FontSizes.sm,
-    color: Colors.secondary,
+  chipLabel: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.xs,
+    color: 'rgba(255,255,255,0.85)',
   },
 });

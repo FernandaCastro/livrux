@@ -26,7 +26,7 @@ export function useReaders(): UseReadersResult {
 
     const { data, error: dbError } = await supabase
       .from('readers')
-      .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, friend_code, friends_autonomy, created_at, updated_at, books(count)')
+      .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, xp, friend_code, friends_autonomy, created_at, updated_at, books(count), reader_badges(count)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true });
 
@@ -37,7 +37,9 @@ export function useReaders(): UseReadersResult {
       const readers = (data ?? []).map((r: any) => ({
         ...r,
         book_count: (r.books?.[0]?.count ?? 0) as number,
+        badge_count: (r.reader_badges?.[0]?.count ?? 0) as number,
         books: undefined,
+        reader_badges: undefined,
       })) as Reader[];
       setReaders(readers);
     }

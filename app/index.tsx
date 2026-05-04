@@ -24,8 +24,7 @@ import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../src/const
 import type { Reader } from '../src/types';
 
 type AddItem = { __isAdd: true };
-type PhantomItem = { __isPhantom: true };
-type GridItem = Reader | AddItem | PhantomItem;
+type GridItem = Reader | AddItem;
 
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -76,13 +75,9 @@ export default function HomeScreen() {
   const gridData: GridItem[] = [
     ...readers,
     { __isAdd: true },
-    ...(readers.length % 2 === 0 ? [{ __isPhantom: true } as PhantomItem] : []),
   ];
 
   const renderItem = ({ item }: { item: GridItem }) => {
-    if ('__isPhantom' in item) {
-      return <View style={styles.phantom} />;
-    }
     if ('__isAdd' in item) {
       return (
         <TouchableOpacity
@@ -175,8 +170,6 @@ export default function HomeScreen() {
           keyExtractor={(item) =>
             '__isAdd' in item ? '__add__' : '__isPhantom' in item ? '__phantom__' : item.id
           }
-          numColumns={2}
-          columnWrapperStyle={styles.row}
           contentContainerStyle={styles.list}
           ListHeaderComponent={renderEmptyHeader}
           refreshControl={
@@ -255,9 +248,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.xl,
   },
-  row: {
-    justifyContent: 'flex-start',
-  },
   emptyContainer: {
     alignItems: 'center',
     paddingTop: Spacing['4xl'],
@@ -277,13 +267,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: Spacing.sm,
   },
-  phantom: {
-    flex: 1,
-    margin: Spacing.sm,
-  },
   addCard: {
-    flex: 1,
-    height: CARD_SIZE + 20,
+    height: CARD_SIZE,
     backgroundColor: Colors.surfaceVariant,
     borderRadius: Radius.lg,
     borderWidth: 2,

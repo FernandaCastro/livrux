@@ -21,7 +21,8 @@ import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReadingSession } from '../../../src/hooks/useReadingSession';
 import { completeBookRpc } from '../../../src/hooks/useLivrux';
 import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
-import type { AwardedBadge } from '../../../src/hooks/useLivrux';
+import { BadgeRevokedModal } from '../../../src/components/BadgeRevokedModal';
+import type { AwardedBadge, RevokedBadge } from '../../../src/hooks/useLivrux';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -55,6 +56,7 @@ export default function BookDetailScreen() {
   const [completeReview, setCompleteReview] = useState('');
   const [isCompleting, setIsCompleting] = useState(false);
   const [awardedBadges, setAwardedBadges] = useState<AwardedBadge[]>([]);
+  const [revokedBadges, setRevokedBadges] = useState<RevokedBadge[]>([]);
 
   const handleBack = () => {
     router.back();
@@ -74,6 +76,7 @@ export default function BookDetailScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
+        <BadgeRevokedModal badges={revokedBadges} onClose={() => { setRevokedBadges([]); handleBack(); }} />
       </SafeAreaView>
     );
   }
@@ -88,16 +91,15 @@ export default function BookDetailScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            const { revokedBadges } = await deleteBook(book.id);
+            const { revokedBadges: revoked } = await deleteBook(book.id);
             if (selectedReader) {
               updateBalance(selectedReader.livrux_balance - book.livrux_earned);
             }
-            handleBack();
-            if (revokedBadges.length > 0) {
-              const names = revokedBadges
-                .map((rb) => t(`badges.${rb.slug}.name`))
-                .join(', ');
-              Alert.alert(t('book.badgesRevoked'), t('book.badgesRevokedBody', { names }));
+            if (revoked.length > 0) {
+              setRevokedBadges(revoked);
+              // navigation deferred to modal's onClose
+            } else {
+              handleBack();
             }
           },
         },
@@ -167,8 +169,8 @@ export default function BookDetailScreen() {
           </View>
         )}
 
-        {/* Reading session button — only for medium/long books */}
-        {book.total_pages > STREAK_THRESHOLDS.SHORT_BOOK_MAX && (
+        {/* Reading session button — only for books still being read */}
+        {book.status === 'reading' && book.total_pages > STREAK_THRESHOLDS.SHORT_BOOK_MAX && (
           <TouchableOpacity
             style={styles.sessionBtn}
             onPress={() => { setSessionError(null); setSessionModalVisible(true); }}
@@ -395,6 +397,7 @@ export default function BookDetailScreen() {
 
       <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
       <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
+      <BadgeRevokedModal badges={revokedBadges} onClose={() => { setRevokedBadges([]); handleBack(); }} />
     </SafeAreaView>
   );
 }

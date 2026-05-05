@@ -34,7 +34,7 @@ export default function ReaderDashboardScreen() {
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
   const { streak } = useStreak(id ?? null);
-  const { earnedBadges } = useBadges(id ?? null);
+  const { earnedBadges, refresh: refreshBadges } = useBadges(id ?? null);
 
   const readingNow = books.filter((b) => b.status === 'reading');
   const completedBooks = books.filter((b) => b.status === 'completed');
@@ -46,6 +46,7 @@ export default function ReaderDashboardScreen() {
   useEffect(() => {
     if (bookPersistedCount > 0 && id) {
       refresh();
+      refreshBadges();
       supabase
         .from('readers')
         .select('*')
@@ -59,6 +60,7 @@ export default function ReaderDashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       refresh();
+      refreshBadges();
       if (id) {
         supabase
           .from('readers')
@@ -255,7 +257,7 @@ export default function ReaderDashboardScreen() {
   );
 }
 
-const AVATAR_SIZE = 104;
+const AVATAR_SIZE = 80;
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
@@ -269,8 +271,8 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.md,
     marginTop: Spacing.xs,
     marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.lg,
     ...Shadows.lg,
   },
   bannerHeader: {
@@ -306,8 +308,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'stretch',
     alignSelf: 'stretch',
-    gap: Spacing.md,
-    marginBottom: Spacing.lg,
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   heroRight: {
     flex: 1,
@@ -319,7 +321,7 @@ const styles = StyleSheet.create({
     padding: 4,
     backgroundColor: 'rgba(255,255,255,0.15)',
     ...Shadows.md,
-    marginTop: -10,
+    marginTop: -20,
   },
   readerName: {
     fontFamily: Fonts.heading,

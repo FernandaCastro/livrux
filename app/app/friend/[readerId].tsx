@@ -179,7 +179,7 @@ export default function FriendProfileScreen() {
   );
 }
 
-const AVATAR_SIZE = 96;
+const AVATAR_SIZE = 80;
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },

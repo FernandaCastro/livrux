@@ -51,8 +51,8 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
       } catch (e) {
         console.error('[BookSearch]', e);
         setResults([]);
-        const isRateLimit = e instanceof GoogleBooksError && e.status === 429;
-        setSearchError(isRateLimit ? t('book.errors.searchUnavailable') : t('book.errors.searchFailed'));
+        const isTransient = e instanceof GoogleBooksError && [429, 500, 502, 503, 504].includes(e.status);
+        setSearchError(isTransient ? t('book.errors.searchUnavailable') : t('book.errors.searchFailed'));
       } finally {
         setLoading(false);
       }
@@ -95,8 +95,8 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
       console.error('[ISBNScan]', e);
       setScanLoading(false);
       setScannerOpen(false);
-      const isRateLimit = e instanceof GoogleBooksError && e.status === 429;
-      setScanError(isRateLimit ? t('book.errors.searchUnavailable') : t('book.errors.searchFailed'));
+      const isTransient = e instanceof GoogleBooksError && [429, 500, 502, 503, 504].includes(e.status);
+      setScanError(isTransient ? t('book.errors.searchUnavailable') : t('book.errors.searchFailed'));
     }
   };
 

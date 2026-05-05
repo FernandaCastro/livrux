@@ -94,9 +94,11 @@ export default function BookDetailScreen() {
             if (selectedReader) {
               updateBalance(selectedReader.livrux_balance - book.livrux_earned);
             }
-            handleBack();
             if (revoked.length > 0) {
               setRevokedBadges(revoked);
+              // navigation deferred to modal's onClose
+            } else {
+              handleBack();
             }
           },
         },
@@ -394,7 +396,7 @@ export default function BookDetailScreen() {
 
       <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
       <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
-      <BadgeRevokedModal badges={revokedBadges} onClose={() => setRevokedBadges([])} />
+      <BadgeRevokedModal badges={revokedBadges} onClose={() => { setRevokedBadges([]); handleBack(); }} />
     </SafeAreaView>
   );
 }

@@ -190,6 +190,9 @@ interface Props {
 export function BadgeUnlockToast({ badges, onDone }: Props) {
   // Index of the badge currently being shown (-1 = waiting for initial delay).
   const [currentIndex, setCurrentIndex] = useState(-1);
+  // Refs avoid stale-closure bugs in callbacks that fire long after render.
+  const badgesRef = useRef(badges);
+  badgesRef.current = badges;
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
@@ -201,20 +204,22 @@ export function BadgeUnlockToast({ badges, onDone }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [badges.length]);
 
-  const handleCardDone = () => {
-    setCurrentIndex(prev => {
-      const next = prev + 1;
-      if (next >= badges.length) {
-        onDoneRef.current();
-        return prev;
-      }
-      return next;
-    });
-  };
+  // Advance to the next badge or finish — runs after state is committed,
+  // keeping side effects out of the setState updater.
+  useEffect(() => {
+    if (currentIndex < 0) return;
+    if (currentIndex >= badgesRef.current.length) {
+      onDoneRef.current();
+    }
+  }, [currentIndex]);
+
+  const handleCardDone = () => setCurrentIndex(prev => prev + 1);
 
   if (badges.length === 0) return null;
 
-  const badge = currentIndex >= 0 ? badges[currentIndex] : null;
+  const badge = currentIndex >= 0 && currentIndex < badges.length
+    ? badges[currentIndex]
+    : null;
 
   return (
     <Modal transparent animationType="none" statusBarTranslucent>

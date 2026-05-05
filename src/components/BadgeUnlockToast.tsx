@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
   Easing,
@@ -41,7 +41,6 @@ interface TierTheme {
   glow: string;
   iconBg: string;
   nameColor: string;
-  xpColor: string;
 }
 
 const TIER_THEME: Record<BadgeTier, TierTheme> = {
@@ -51,7 +50,6 @@ const TIER_THEME: Record<BadgeTier, TierTheme> = {
     glow:      '#E07B00',
     iconBg:    '#FFF3E0',
     nameColor: '#4E2600',
-    xpColor:   '#BF360C',
   },
   silver: {
     border:    '#5C6BC0',
@@ -59,7 +57,6 @@ const TIER_THEME: Record<BadgeTier, TierTheme> = {
     glow:      '#3949AB',
     iconBg:    '#E8EAF6',
     nameColor: '#1A237E',
-    xpColor:   '#283593',
   },
   gold: {
     border:    '#F9A825',
@@ -67,107 +64,110 @@ const TIER_THEME: Record<BadgeTier, TierTheme> = {
     glow:      '#F57F17',
     iconBg:    '#FFFDE7',
     nameColor: '#33180A',
-    xpColor:   '#E65100',
   },
 };
 
 // ---------------------------------------------------------------------------
 // Timing constants
-// Per-badge sequence: wait for counter (~1350ms) + small gap, then animate in.
 // ---------------------------------------------------------------------------
-const INITIAL_DELAY_MS = 1700; // waits for the ConfettiOverlay counter to finish
+// Time to wait before showing the first badge (lets the counter animation finish).
+const INITIAL_DELAY_MS = 1700;
 const REVEAL_MS        = 600;
 const SETTLE_MS        = 150;
 const HOLD_MS          = 2500;
 const DISMISS_MS       = 380;
-const BETWEEN_MS       = 300;  // gap between consecutive badges
+// Gap between consecutive badges (after dismiss animation ends).
+const BETWEEN_MS       = 400;
 
-const PER_BADGE_MS = REVEAL_MS + SETTLE_MS + HOLD_MS + DISMISS_MS + BETWEEN_MS;
+const CARD_TOTAL_MS = REVEAL_MS + SETTLE_MS + HOLD_MS + DISMISS_MS;
 
 // ---------------------------------------------------------------------------
-// Decorative sparkles positioned around the card
+// Decorative sparkles
 // ---------------------------------------------------------------------------
 const SPARKLES = [
-  { top: -22, left: 10,  label: '✨' },
-  { top: -22, right: 10, label: '🌟' },
-  { top: 20,  left: -22, label: '⭐' },
-  { top: 20,  right: -22,label: '✨' },
-  { bottom: -20, left: 30, label: '🌟' },
-  { bottom: -20, right: 30, label: '✨' },
+  { top: -22,    left: 10,   label: '✨' },
+  { top: -22,    right: 10,  label: '🌟' },
+  { top: 20,     left: -22,  label: '⭐' },
+  { top: 20,     right: -22, label: '✨' },
+  { bottom: -20, left: 30,   label: '🌟' },
+  { bottom: -20, right: 30,  label: '✨' },
 ];
 
 // ---------------------------------------------------------------------------
-// Single animated badge card
+// Single badge card — rendered alone, calls onDone when its animation finishes
 // ---------------------------------------------------------------------------
-function BadgeCard({ badge, index }: { badge: AwardedBadge; index: number }) {
+function BadgeCard({
+  badge,
+  initialDelay,
+  onAnimationDone,
+}: {
+  badge: AwardedBadge;
+  initialDelay: number;
+  onAnimationDone: () => void;
+}) {
   const { t } = useTranslation();
   const meta  = BADGE_CATALOG[badge.slug] ?? { icon: '🏅', tier: 'bronze' as BadgeTier };
   const theme = TIER_THEME[meta.tier];
-  const delay = INITIAL_DELAY_MS + index * PER_BADGE_MS;
 
-  const opacity  = useSharedValue(0);
-  const scale    = useSharedValue(0.15);
-  const rotate   = useSharedValue(180);
+  const opacity = useSharedValue(0);
+  const scale   = useSharedValue(0.15);
+  const rotate  = useSharedValue(180);
 
   useEffect(() => {
-    // Reveal: fade + spin + scale bounce
-    opacity.value = withDelay(delay, withSequence(
-      withTiming(1, { duration: REVEAL_MS, easing: Easing.out(Easing.cubic) }),
-      withTiming(1, { duration: HOLD_MS }),
-      withTiming(0, { duration: DISMISS_MS, easing: Easing.in(Easing.quad) }),
+    opacity.value = withDelay(initialDelay, withSequence(
+      withTiming(1,    { duration: REVEAL_MS,  easing: Easing.out(Easing.cubic) }),
+      withTiming(1,    { duration: HOLD_MS }),
+      withTiming(0,    { duration: DISMISS_MS, easing: Easing.in(Easing.quad) }),
     ));
-    scale.value = withDelay(delay, withSequence(
+    scale.value = withDelay(initialDelay, withSequence(
       withTiming(1.12, { duration: REVEAL_MS,  easing: Easing.out(Easing.back(1.6)) }),
       withTiming(1,    { duration: SETTLE_MS,  easing: Easing.out(Easing.quad) }),
       withTiming(1,    { duration: HOLD_MS }),
       withTiming(0.85, { duration: DISMISS_MS, easing: Easing.in(Easing.quad) }),
     ));
-    rotate.value = withDelay(delay, withSequence(
-      withTiming(0, { duration: REVEAL_MS + SETTLE_MS, easing: Easing.out(Easing.back(1.2)) }),
-      withTiming(0, { duration: HOLD_MS }),
+    rotate.value = withDelay(initialDelay, withSequence(
+      withTiming(0,  { duration: REVEAL_MS + SETTLE_MS, easing: Easing.out(Easing.back(1.2)) }),
+      withTiming(0,  { duration: HOLD_MS }),
       withTiming(-8, { duration: DISMISS_MS }),
     ));
+
+    const timer = setTimeout(onAnimationDone, initialDelay + CARD_TOTAL_MS + BETWEEN_MS);
+    return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const animStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [
-      { scale:   scale.value },
+      { scale:  scale.value },
       { rotate: `${rotate.value}deg` },
     ],
   }));
 
   return (
     <Animated.View style={[styles.cardWrapper, animStyle]}>
-      {/* Decorative sparkles */}
       {SPARKLES.map((s, i) => (
         <Text key={i} style={[styles.sparkle, s as object]}>{s.label}</Text>
       ))}
 
-      {/* Glow halo behind the card */}
+      {/* Glow halo */}
       <View style={[styles.glow, { backgroundColor: theme.glow }]} />
 
       {/* Card */}
       <View style={[styles.card, { borderColor: theme.border }]}>
-        {/* Coloured header strip */}
         <View style={[styles.header, { backgroundColor: theme.headerBg }]}>
           <Text style={styles.headerText}>{t('badges.unlocked')}</Text>
         </View>
 
-        {/* Content */}
         <View style={[styles.content, { backgroundColor: theme.iconBg }]}>
-          {/* Icon circle */}
           <View style={[styles.iconCircle, { borderColor: theme.border, shadowColor: theme.glow }]}>
             <Text style={styles.icon}>{meta.icon}</Text>
           </View>
 
-          {/* Badge name */}
           <Text style={[styles.badgeName, { color: theme.nameColor }]}>
             {t(`badges.${badge.slug}.name`)}
           </Text>
 
-          {/* XP pill */}
           {badge.bonus_xp > 0 && (
             <View style={[styles.xpPill, { backgroundColor: theme.border }]}>
               <Text style={styles.xpText}>{`⭐ +${badge.bonus_xp} XP`}</Text>
@@ -180,7 +180,7 @@ function BadgeCard({ badge, index }: { badge: AwardedBadge; index: number }) {
 }
 
 // ---------------------------------------------------------------------------
-// Public component
+// Public component — sequences badges one at a time
 // ---------------------------------------------------------------------------
 interface Props {
   badges: AwardedBadge[];
@@ -188,24 +188,46 @@ interface Props {
 }
 
 export function BadgeUnlockToast({ badges, onDone }: Props) {
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Index of the badge currently being shown (-1 = waiting for initial delay).
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
 
+  // Wait for the counter animation before showing the first badge.
   useEffect(() => {
     if (badges.length === 0) return;
-    const total = INITIAL_DELAY_MS + badges.length * PER_BADGE_MS;
-    timer.current = setTimeout(onDone, total);
-    return () => { if (timer.current) clearTimeout(timer.current); };
+    const timer = setTimeout(() => setCurrentIndex(0), INITIAL_DELAY_MS);
+    return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [badges]);
+  }, [badges.length]);
+
+  const handleCardDone = () => {
+    setCurrentIndex(prev => {
+      const next = prev + 1;
+      if (next >= badges.length) {
+        onDoneRef.current();
+        return prev;
+      }
+      return next;
+    });
+  };
 
   if (badges.length === 0) return null;
 
+  const badge = currentIndex >= 0 ? badges[currentIndex] : null;
+
   return (
     <Modal transparent animationType="none" statusBarTranslucent>
-      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onDone}>
-        {badges.map((b, i) => (
-          <BadgeCard key={b.slug} badge={b} index={i} />
-        ))}
+      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onDoneRef.current}>
+        {badge && (
+          // key forces a full remount (fresh animation) for each new badge.
+          <BadgeCard
+            key={badge.slug}
+            badge={badge}
+            initialDelay={0}
+            onAnimationDone={handleCardDone}
+          />
+        )}
       </TouchableOpacity>
     </Modal>
   );
@@ -224,11 +246,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.35)',
   },
   cardWrapper: {
-    position: 'absolute',
     width: CARD_WIDTH,
     alignItems: 'center',
   },
-  // Blurred glow halo — uses shadow on iOS, elevation tint on Android
   glow: {
     position: 'absolute',
     width: CARD_WIDTH + 32,

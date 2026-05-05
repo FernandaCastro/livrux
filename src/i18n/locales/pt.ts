@@ -89,7 +89,7 @@ const pt = {
     livruxCoins: '{{count}} Livrux',
     deleteBook: 'Excluir livro',
     deleteConfirm: 'Excluir "{{title}}"? Os Livrux ganhos e sessões de leitura serão removidos.',
-    badgesRevoked: 'Você perdeu conquistas 😢',
+    badgesRevoked: 'Você perdeu conquistas!',
     badgesRevokedSubtitle: 'Ao excluir esse livro, você não se qualifica mais para:',
     badgesRevokedEncouragement: 'Continue lendo e você vai reconquistá-las! 💪',
     badgesRevokedBody: 'Você perdeu as conquistas: {{names}}.',

@@ -89,7 +89,7 @@ const en = {
     livruxCoins: '{{count}} Livrux',
     deleteBook: 'Delete book',
     deleteConfirm: 'Delete "{{title}}"? Livrux earned and reading sessions will be removed.',
-    badgesRevoked: 'You lost achievements 😢',
+    badgesRevoked: 'You lost achievements!',
     badgesRevokedSubtitle: 'By deleting this book, you no longer qualify for:',
     badgesRevokedEncouragement: "Keep reading and you'll earn them back! 💪",
     badgesRevokedBody: 'You lost the achievements: {{names}}.',

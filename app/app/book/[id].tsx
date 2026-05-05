@@ -21,7 +21,8 @@ import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReadingSession } from '../../../src/hooks/useReadingSession';
 import { completeBookRpc } from '../../../src/hooks/useLivrux';
 import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
-import type { AwardedBadge } from '../../../src/hooks/useLivrux';
+import { BadgeRevokedModal } from '../../../src/components/BadgeRevokedModal';
+import type { AwardedBadge, RevokedBadge } from '../../../src/hooks/useLivrux';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -55,6 +56,7 @@ export default function BookDetailScreen() {
   const [completeReview, setCompleteReview] = useState('');
   const [isCompleting, setIsCompleting] = useState(false);
   const [awardedBadges, setAwardedBadges] = useState<AwardedBadge[]>([]);
+  const [revokedBadges, setRevokedBadges] = useState<RevokedBadge[]>([]);
 
   const handleBack = () => {
     router.back();
@@ -88,16 +90,13 @@ export default function BookDetailScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
-            const { revokedBadges } = await deleteBook(book.id);
+            const { revokedBadges: revoked } = await deleteBook(book.id);
             if (selectedReader) {
               updateBalance(selectedReader.livrux_balance - book.livrux_earned);
             }
             handleBack();
-            if (revokedBadges.length > 0) {
-              const names = revokedBadges
-                .map((rb) => t(`badges.${rb.slug}.name`))
-                .join(', ');
-              Alert.alert(t('book.badgesRevoked'), t('book.badgesRevokedBody', { names }));
+            if (revoked.length > 0) {
+              setRevokedBadges(revoked);
             }
           },
         },
@@ -395,6 +394,7 @@ export default function BookDetailScreen() {
 
       <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
       <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
+      <BadgeRevokedModal badges={revokedBadges} onClose={() => setRevokedBadges([])} />
     </SafeAreaView>
   );
 }

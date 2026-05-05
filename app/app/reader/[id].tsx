@@ -34,7 +34,7 @@ export default function ReaderDashboardScreen() {
   const { deleteReader } = useReaders();
   const { books, isLoading, refresh } = useBooks(id ?? null);
   const { streak } = useStreak(id ?? null);
-  const { earnedBadges } = useBadges(id ?? null);
+  const { earnedBadges, refresh: refreshBadges } = useBadges(id ?? null);
 
   const readingNow = books.filter((b) => b.status === 'reading');
   const completedBooks = books.filter((b) => b.status === 'completed');
@@ -46,6 +46,7 @@ export default function ReaderDashboardScreen() {
   useEffect(() => {
     if (bookPersistedCount > 0 && id) {
       refresh();
+      refreshBadges();
       supabase
         .from('readers')
         .select('*')
@@ -59,6 +60,7 @@ export default function ReaderDashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       refresh();
+      refreshBadges();
       if (id) {
         supabase
           .from('readers')

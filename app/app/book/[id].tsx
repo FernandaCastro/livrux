@@ -76,6 +76,7 @@ export default function BookDetailScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
+        <BadgeRevokedModal badges={revokedBadges} onClose={() => { setRevokedBadges([]); handleBack(); }} />
       </SafeAreaView>
     );
   }

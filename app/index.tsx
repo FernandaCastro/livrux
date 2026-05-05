@@ -20,6 +20,7 @@ import { useParentalStore } from '../src/stores/parentalStore';
 import { useParentalGuard } from '../src/hooks/useParentalGuard';
 import { PinModal } from '../src/components/PinModal';
 import { ReaderCard } from '../src/components/reader/ReaderCard';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../src/constants/theme';
 import type { Reader } from '../src/types';
 
@@ -155,6 +156,7 @@ export default function HomeScreen() {
         <Text style={{ color: 'red', padding: 12 }}>{readersError}</Text>
       )}
 
+
       {/* Readers grid — show the full-screen spinner only on the very first
           load (no data yet). Background refreshes (focus, post-persist) use
           the FlatList's RefreshControl so the list doesn't flash away. */}
@@ -182,6 +184,7 @@ export default function HomeScreen() {
           renderItem={renderItem}
         />
       )}
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -246,7 +249,7 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.xl,
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
   },
   emptyContainer: {
     alignItems: 'center',

@@ -328,7 +328,7 @@ export default function AddBookScreen() {
           style={styles.saveButton}
         />
       </ScrollView>
-      <BottomMenu showReader showWallet showFriends readerId={readerId} />
+      <BottomMenu />
       <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
     </SafeAreaView>
   );

@@ -46,6 +46,14 @@ export const Colors = {
   // Coin / Livrux brand
   coin: '#F5A623',
   coinShadow: '#C4800B',
+
+  // Chip backgrounds — status badges on reader/friend cards.
+  // Change here to retheme all chips at once.
+  chipCoin: '#F5A623',    // 🪙 coin balance
+  chipXp: '#B45309',      // ⭐ XP — amber
+  chipBadge: '#2D6A4F',   // 🏅 badges — forest green
+  chipBook: '#7B5EA7',    // 📚 books
+  chipFriend: '#5FAF8A',  // 👦👧 friends
 } as const;
 
 export const Fonts = {

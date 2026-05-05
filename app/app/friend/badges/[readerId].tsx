@@ -74,7 +74,7 @@ export default function FriendBadgesScreen() {
         )}
       </ScrollView>
 
-      <BottomMenu showReader showWallet showFriends readerId={fromReaderId} />
+      <BottomMenu />
     </SafeAreaView>
   );
 }

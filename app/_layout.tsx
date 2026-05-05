@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { AppState, type AppStateStatus } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, Image, View, Text, StyleSheet, type AppStateStatus } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -16,9 +16,26 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from '../src/lib/supabase';
 import { useAuthStore } from '../src/stores/authStore';
 import { useParentalStore } from '../src/stores/parentalStore';
-import '../src/i18n'; // initialize i18n before any component renders
+import { Colors, Fonts, FontSizes } from '../src/constants/theme';
+import '../src/i18n';
 
+// Keep the native splash visible until we explicitly hide it.
 SplashScreen.preventAutoHideAsync();
+
+// Custom loading screen shown while fonts load and auth is checked.
+// Text only appears once fonts are ready to avoid a font-swap flash.
+function AppLoadingScreen({ fontsReady }: { fontsReady: boolean }) {
+  return (
+    <View style={styles.loadingRoot}>
+      <Image
+        source={require('../assets/splash-icon.png')}
+        style={styles.icon}
+        resizeMode="contain"
+      />
+      {fontsReady && <Text style={styles.appName}>Livrux</Text>}
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const router = useRouter();
@@ -26,6 +43,7 @@ export default function RootLayout() {
   const { session, isLoading, setSession, fetchProfile, fetchFormula } = useAuthStore();
   const { lock } = useParentalStore();
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const [hasNavigated, setHasNavigated] = useState(false);
 
   const [fontsLoaded] = useFonts({
     FredokaOne_400Regular,
@@ -34,6 +52,12 @@ export default function RootLayout() {
     Nunito_700Bold,
     Nunito_800ExtraBold,
   });
+
+  // Hide the native splash immediately on mount so our AppLoadingScreen
+  // takes over without the user ever seeing the old native splash image.
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
 
   // Lock parental state when the app goes to the background.
   useEffect(() => {
@@ -71,6 +95,7 @@ export default function RootLayout() {
   }, [session?.user?.id]);
 
   // Route guard: redirect based on auth state once fonts and session are ready.
+  // Setting hasNavigated=true dismisses AppLoadingScreen.
   useEffect(() => {
     if (!fontsLoaded || isLoading) return;
 
@@ -82,22 +107,49 @@ export default function RootLayout() {
     } else if (session && !inAppGroup) {
       router.replace('/app');
     }
+
+    setHasNavigated(true);
   }, [session, isLoading, fontsLoaded, segments]);
 
-  useEffect(() => {
-    if (fontsLoaded && !isLoading) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, isLoading]);
-
-  if (!fontsLoaded || isLoading) return null;
+  // Show our branded screen for the entire pre-navigation period
+  // (covers both font loading and auth check, regardless of order).
+  if (!hasNavigated) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <StatusBar style="dark" backgroundColor={Colors.background} />
+          <AppLoadingScreen fontsReady={fontsLoaded} />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="dark" backgroundColor="#FAFAF7" />
+        <StatusBar style="dark" backgroundColor={Colors.background} />
         <Stack screenOptions={{ headerShown: false }} />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingRoot: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  icon: {
+    width: 120,
+    height: 120,
+  },
+  appName: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes['3xl'],
+    color: Colors.primary,
+    letterSpacing: 0.5,
+  },
+});

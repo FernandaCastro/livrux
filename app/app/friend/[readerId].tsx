@@ -174,7 +174,7 @@ export default function FriendProfileScreen() {
         renderItem={({ item }) => <FriendBookCard book={item} />}
       />
 
-      <BottomMenu showReader showWallet showFriends readerId={fromReaderId} />
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: '#B45309',
+    backgroundColor: Colors.chipXp,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: '#2D6A4F',
+    backgroundColor: Colors.chipBadge,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,

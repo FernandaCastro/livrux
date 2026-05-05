@@ -395,7 +395,7 @@ export default function BookDetailScreen() {
         </View>
       </Modal>
 
-      <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
+      <BottomMenu />
       <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
       <BadgeRevokedModal badges={revokedBadges} onClose={() => { setRevokedBadges([]); handleBack(); }} />
     </SafeAreaView>

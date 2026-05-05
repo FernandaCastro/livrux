@@ -1,89 +1,48 @@
+import { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthStore } from '../stores/authStore';
 import { useParentalStore } from '../stores/parentalStore';
+import { useReaderStore } from '../stores/readerStore';
+import { MultiavatarView } from './reader/MultiavatarView';
+import { ReaderSelectorSheet } from './ReaderSelectorSheet';
 import { Colors, Fonts, FontSizes, Spacing } from '../constants/theme';
 
 export const BOTTOM_MENU_HEIGHT = 54;
 
-interface BottomMenuProps {
-  showWallet?: boolean;
-  showFriends?: boolean;
-  showReader?: boolean;
-  readerId?: string;
-}
-
-export function BottomMenu({ showWallet = false, showFriends = false, showReader = false, readerId }: BottomMenuProps) {
+export function BottomMenu() {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const { profile } = useAuthStore();
   const { isParentUnlocked } = useParentalStore();
+  const { selectedReader } = useReaderStore();
+  const [sheetVisible, setSheetVisible] = useState(false);
+
   const showSettingsTab = !profile?.parental_pin || isParentUnlocked;
 
   const isSettings = pathname.startsWith('/app/settings');
   const isWallet = pathname.startsWith('/app/rewards');
   const isFriends = pathname.startsWith('/app/friends') || pathname.startsWith('/app/friend/');
-  const isReader = pathname.startsWith('/app/reader') || pathname.startsWith('/app/book');
-  const isHome = !isSettings && !isWallet && !isFriends && !isReader;
+  const isReaderContext = !isSettings && !isWallet && !isFriends;
 
-  return (
-    <View style={styles.container}>
-      {/* Home — always first */}
-      <TouchableOpacity
-        style={styles.tab}
-        onPress={() => router.push('/app')}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.icon}>🏠</Text>
-        <Text style={[styles.label, isHome && styles.activeLabel]}>{t('home.title')}</Text>
-      </TouchableOpacity>
-
-      {/* Reader / Books */}
-      {showReader && readerId && (
+  if (!selectedReader) {
+    return (
+      <View style={styles.container}>
         <TouchableOpacity
           style={styles.tab}
-          onPress={() => router.push(`/app/reader/${readerId}`)}
+          onPress={() => router.replace('/app')}
           activeOpacity={0.7}
         >
-          <Text style={styles.icon}>📖</Text>
-          <Text style={[styles.label, isReader && styles.activeReaderLabel]}>{t('reader.books')}</Text>
+          <Text style={styles.icon}>🏠</Text>
+          <Text style={[styles.label, !isSettings && styles.activeLabel]}>{t('home.title')}</Text>
         </TouchableOpacity>
-      )}
 
-      {/* Wallet */}
-      <View style={styles.tab}>
-        {showWallet && readerId && (
-          <TouchableOpacity
-            style={styles.centreItem}
-            onPress={() => router.push(`/app/rewards?readerId=${readerId}`)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.icon}>🪙</Text>
-            <Text style={[styles.label, isWallet && styles.activeLabel]}>{t('rewards.title')}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Friends */}
-      {showFriends && readerId && (
-        <TouchableOpacity
-          style={styles.tab}
-          onPress={() => router.push(`/app/friends/${readerId}`)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.icon}>👦👧</Text>
-          <Text style={[styles.label, isFriends && styles.activeFriendsLabel]}>{t('friends.title')}</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Settings */}
-      <View style={styles.tab}>
         {showSettingsTab && (
           <TouchableOpacity
-            style={styles.centreItem}
+            style={styles.tab}
             onPress={() => router.push('/app/settings')}
             activeOpacity={0.7}
           >
@@ -92,7 +51,61 @@ export function BottomMenu({ showWallet = false, showFriends = false, showReader
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    );
+  }
+
+  return (
+    <>
+      <ReaderSelectorSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
+      <View style={styles.container}>
+        {/* Reader avatar — opens selector sheet */}
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => setSheetVisible(true)}
+          activeOpacity={0.7}
+        >
+          <MultiavatarView seed={selectedReader.avatar_seed} size={26} />
+          <Text
+            style={[styles.label, isReaderContext && styles.activeReaderLabel]}
+            numberOfLines={1}
+          >
+            {selectedReader.name}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Rewards */}
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => router.push(`/app/rewards?readerId=${selectedReader.id}`)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.icon}>🪙</Text>
+          <Text style={[styles.label, isWallet && styles.activeLabel]}>{t('rewards.title')}</Text>
+        </TouchableOpacity>
+
+        {/* Friends */}
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => router.push(`/app/friends/${selectedReader.id}`)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.icon}>👦👧</Text>
+          <Text style={[styles.label, isFriends && styles.activeFriendsLabel]}>{t('friends.title')}</Text>
+        </TouchableOpacity>
+
+        {/* Settings */}
+        {showSettingsTab && (
+          <TouchableOpacity
+            style={styles.tab}
+            onPress={() => router.push('/app/settings')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.icon}>⚙️</Text>
+            <Text style={[styles.label, isSettings && styles.activeLabel]}>{t('settings.title')}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </>
   );
 }
 
@@ -111,11 +124,6 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xs,
     gap: 2,
   },
-  centreItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-  },
   icon: { fontSize: 22 },
   label: {
     fontFamily: Fonts.bodySemiBold,
@@ -129,6 +137,6 @@ const styles = StyleSheet.create({
     color: Colors.readerBlue,
   },
   activeFriendsLabel: {
-    color: Colors.friendEmerald,
+    color: Colors.chipFriend,
   },
 });

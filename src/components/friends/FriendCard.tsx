@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   accentStrip: {
     width: 5,
     alignSelf: 'stretch',
-    backgroundColor: Colors.friendEmerald,
+    backgroundColor: Colors.chipFriend,
   },
   accentStripPending: {
     backgroundColor: Colors.friendEmeraldLight,

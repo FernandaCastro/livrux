@@ -35,7 +35,7 @@ export default function BadgesScreen() {
           <Text style={styles.emptyText}>{t('common.error')}</Text>
           <Text style={styles.emptySubtext}>{error}</Text>
         </View>
-        <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
+        <BottomMenu />
       </SafeAreaView>
     );
   }
@@ -105,7 +105,7 @@ export default function BadgesScreen() {
           </>
         )}
       </ScrollView>
-      <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
+      <BottomMenu />
     </SafeAreaView>
   );
 }

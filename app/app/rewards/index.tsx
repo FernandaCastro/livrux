@@ -112,7 +112,7 @@ export default function RewardsScreen() {
           renderItem={({ item }) => <TransactionRow tx={item} />}
         />
       )}
-      <BottomMenu showReader showWallet showFriends readerId={selectedReader?.id} />
+      <BottomMenu />
     </SafeAreaView>
   );
 }

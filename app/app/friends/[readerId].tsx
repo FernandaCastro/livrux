@@ -282,7 +282,7 @@ export default function FriendsScreen() {
         </Pressable>
       </Modal>
 
-      <BottomMenu showReader showWallet showFriends readerId={readerId} />
+      <BottomMenu />
     </SafeAreaView>
   );
 }

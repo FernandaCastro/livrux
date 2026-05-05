@@ -8,11 +8,12 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import i18n, { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../../src/i18n';
+import i18n, { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../src/i18n';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuthStore } from '../../../../src/stores/authStore';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
+import { useAuthStore } from '../../../src/stores/authStore';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
+import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 interface SettingsRowProps {
   icon: string;
@@ -129,6 +130,7 @@ export default function SettingsScreen() {
           />
         </View>
       </ScrollView>
+      <BottomMenu />
     </SafeAreaView>
   );
 }
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing['2xl'],
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
   screenTitle: {
     fontFamily: Fonts.heading,

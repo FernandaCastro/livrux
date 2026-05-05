@@ -167,8 +167,8 @@ export default function BookDetailScreen() {
           </View>
         )}
 
-        {/* Reading session button — only for medium/long books */}
-        {book.total_pages > STREAK_THRESHOLDS.SHORT_BOOK_MAX && (
+        {/* Reading session button — only for books still being read */}
+        {book.status === 'reading' && book.total_pages > STREAK_THRESHOLDS.SHORT_BOOK_MAX && (
           <TouchableOpacity
             style={styles.sessionBtn}
             onPress={() => { setSessionError(null); setSessionModalVisible(true); }}

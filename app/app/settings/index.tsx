@@ -87,7 +87,8 @@ export default function SettingsScreen() {
                     });
 
                     if (res.error) {
-                      Alert.alert(t('common.error'), res.error.message);
+                      const detail = (res.data as { error?: string } | null)?.error;
+                      Alert.alert(t('common.error'), detail ?? res.error.message);
                       return;
                     }
 

@@ -1,6 +1,18 @@
-# 📚 Livrux
 
-> **Turn pages into coins. Make reading an adventure.**
+
+<p align="center" style="margin-bottom: 0">
+  <img src="./assets/livrux.png" width="120" />
+</p>
+
+<h1 align="center" >Livrux</h1>
+
+<p align="center">
+  📚 Gamify children's reading with rewards  💰
+</p>
+
+<p align="center" style="margin-top: 10px;">
+  <strong>Turn pages into coins. Make reading an adventure.</strong>
+</p>
 
 Livrux is a cross-platform mobile app (iOS & Android) that gamifies reading for kids. Parents create reader profiles for their children and define a custom reward formula — every book a child finishes earns them **Livrux coins** based on the number of pages read. A virtual wallet tracks their growing balance and full reading history.
 

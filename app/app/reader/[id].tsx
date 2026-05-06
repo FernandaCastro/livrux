@@ -65,7 +65,7 @@ export default function ReaderDashboardScreen() {
     return () => subscription.remove();
   }, [id]);
 
-  const canEdit = canEditReader(id);
+  const canEdit = true;
   const canDelete = isParentUnlocked;
 
   useEffect(() => {
@@ -129,31 +129,26 @@ export default function ReaderDashboardScreen() {
     <SafeAreaView style={styles.safe}>
       {/* ── Hero banner ── */}
       <View style={styles.heroBanner}>
-        {/* Actions row — always rendered to keep heroBanner height stable.
-            Buttons are only visible when the parent has unlocked edit/delete. */}
+        {/* Actions row — edit is always visible; delete requires parent unlock. */}
         <View style={styles.bannerHeader}>
-          {(canEdit || canDelete) && (
-            <View style={styles.bannerActions}>
-              {canEdit && (
-                <TouchableOpacity
-                  onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  style={styles.actionBtn}
-                >
-                  <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
-                </TouchableOpacity>
-              )}
-              {canDelete && (
-                <TouchableOpacity
-                  onPress={handleDelete}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  style={[styles.actionBtn, styles.actionBtnDelete]}
-                >
-                  <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
+          <View style={styles.bannerActions}>
+            <TouchableOpacity
+              onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={styles.actionBtn}
+            >
+              <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
+            </TouchableOpacity>
+            {canDelete && (
+              <TouchableOpacity
+                onPress={handleDelete}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={[styles.actionBtn, styles.actionBtnDelete]}
+              >
+                <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
         {/* Avatar (left) + Name aligned to avatar bottom (right) */}

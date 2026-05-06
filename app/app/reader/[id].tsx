@@ -129,9 +129,10 @@ export default function ReaderDashboardScreen() {
     <SafeAreaView style={styles.safe}>
       {/* ── Hero banner ── */}
       <View style={styles.heroBanner}>
-        {/* Actions row — only rendered when at least one action is available */}
-        {(canEdit || canDelete) && (
-          <View style={styles.bannerHeader}>
+        {/* Actions row — always rendered to keep heroBanner height stable.
+            Buttons are only visible when the parent has unlocked edit/delete. */}
+        <View style={styles.bannerHeader}>
+          {(canEdit || canDelete) && (
             <View style={styles.bannerActions}>
               {canEdit && (
                 <TouchableOpacity
@@ -152,8 +153,8 @@ export default function ReaderDashboardScreen() {
                 </TouchableOpacity>
               )}
             </View>
-          </View>
-        )}
+          )}
+        </View>
 
         {/* Avatar (left) + Name aligned to avatar bottom (right) */}
         <View style={styles.heroContent}>

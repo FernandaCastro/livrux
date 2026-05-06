@@ -37,26 +37,24 @@ Deno.serve(async (req: Request) => {
       .eq('id', user.id)
       .single();
 
-    if (profile?.terms_accepted_at) {
-      const now = new Date();
-      const retainUntil = new Date(now);
-      retainUntil.setFullYear(retainUntil.getFullYear() + 3);
+    const now = new Date();
+    const retainUntil = new Date(now);
+    retainUntil.setFullYear(retainUntil.getFullYear() + 3);
 
-      const { error: logError } = await adminClient
-        .from('consent_logs')
-        .insert({
-          user_id:            user.id,
-          email:              user.email ?? '',
-          terms_accepted_at:  profile.terms_accepted_at,
-          account_deleted_at: now.toISOString(),
-          retain_until:       retainUntil.toISOString(),
-        });
+    const { error: logError } = await adminClient
+      .from('consent_logs')
+      .insert({
+        user_id:            user.id,
+        email:              user.email ?? '',
+        terms_accepted_at:  profile?.terms_accepted_at ?? null,
+        account_deleted_at: now.toISOString(),
+        retain_until:       retainUntil.toISOString(),
+      });
 
-      if (logError) {
-        // Log the error but don't block deletion — user's right to erasure
-        // takes precedence over our internal audit logging.
-        console.error('[delete-account] Failed to write consent log:', logError.message);
-      }
+    if (logError) {
+      // Log the error but don't block deletion — user's right to erasure
+      // takes precedence over our internal audit logging.
+      console.error('[delete-account] Failed to write consent log:', logError.message);
     }
 
     // ── 3. Delete the auth user (cascades to all public tables) ─────────────

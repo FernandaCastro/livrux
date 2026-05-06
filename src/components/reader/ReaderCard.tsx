@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     borderWidth: 2,
     borderColor: Colors.surfaceVariant,
-    paddingVertical: Spacing.lg,
+    paddingVertical: Spacing.xl,
     paddingHorizontal: Spacing.md,
     marginHorizontal: Spacing.md,
     marginVertical: Spacing.sm,

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Pressable,
+  Image,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -117,7 +118,10 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.appName}>{t('common.appName')}</Text>
+          <View style={styles.logoHeader}>
+            <Image source={require('../assets/icon.png')} style={{ width: 50, height: 50, marginBottom: 0 , marginLeft: -10 }} />
+            <Text style={styles.appName}>{t('common.appName')}</Text>
+          </View>
           {profile?.display_name && (
             <Text style={styles.greeting}>👋 {profile.display_name}</Text>
           )}
@@ -200,6 +204,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.md,
+  },
+  logoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
   appName: {
     fontFamily: Fonts.heading,

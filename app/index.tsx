@@ -42,6 +42,7 @@ export default function HomeScreen() {
     useCallback(() => {
       refresh();
       lockReaders();
+      setSelectedReader(null);
     }, [])
   );
 

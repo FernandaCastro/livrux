@@ -5,10 +5,12 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  AppState,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useRef } from 'react';
 
 import { useBadges } from '../../../../src/hooks/useBadges';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
@@ -31,7 +33,16 @@ export default function FriendBadgesScreen() {
   const router = useRouter();
   const { readerId, fromReaderId } = useLocalSearchParams<{ readerId: string; fromReaderId: string }>();
 
-  const { earnedBadges, isLoading } = useBadges(readerId ?? null);
+  const { earnedBadges, isLoading, refresh } = useBadges(readerId ?? null);
+  const appStateRef = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appStateRef.current !== 'active' && nextState === 'active') refresh();
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, []);
 
   if (isLoading) {
     return (

@@ -6,12 +6,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  AppState,
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -39,8 +40,32 @@ export default function ReaderDashboardScreen() {
   const readingNow = books.filter((b) => b.status === 'reading');
   const completedBooks = books.filter((b) => b.status === 'completed');
   const { canEditReader, isParentUnlocked } = useParentalStore();
+  const appStateRef = useRef(AppState.currentState);
+  const flatListRef = useRef<any>(null);
 
-  const canEdit = canEditReader(id);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appStateRef.current !== 'active' && nextState === 'active') {
+        // Synchronous state update forces an immediate re-render so SafeAreaView
+        // recalculates its insets before the async data fetches complete.
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+        refresh();
+        refreshBadges();
+        if (id) {
+          supabase
+            .from('readers')
+            .select('*')
+            .eq('id', id)
+            .single()
+            .then(({ data }) => { if (data) setSelectedReader(data as Reader); });
+        }
+      }
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, [id]);
+
+  const canEdit = true;
   const canDelete = isParentUnlocked;
 
   useEffect(() => {
@@ -104,31 +129,27 @@ export default function ReaderDashboardScreen() {
     <SafeAreaView style={styles.safe}>
       {/* ── Hero banner ── */}
       <View style={styles.heroBanner}>
-        {/* Actions row — only rendered when at least one action is available */}
-        {(canEdit || canDelete) && (
-          <View style={styles.bannerHeader}>
-            <View style={styles.bannerActions}>
-              {canEdit && (
-                <TouchableOpacity
-                  onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  style={styles.actionBtn}
-                >
-                  <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
-                </TouchableOpacity>
-              )}
-              {canDelete && (
-                <TouchableOpacity
-                  onPress={handleDelete}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  style={[styles.actionBtn, styles.actionBtnDelete]}
-                >
-                  <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+        {/* Actions row — edit is always visible; delete requires parent unlock. */}
+        <View style={styles.bannerHeader}>
+          <View style={styles.bannerActions}>
+            <TouchableOpacity
+              onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={styles.actionBtn}
+            >
+              <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
+            </TouchableOpacity>
+            {canDelete && (
+              <TouchableOpacity
+                onPress={handleDelete}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={[styles.actionBtn, styles.actionBtnDelete]}
+              >
+                <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
+              </TouchableOpacity>
+            )}
           </View>
-        )}
+        </View>
 
         {/* Avatar (left) + Name aligned to avatar bottom (right) */}
         <View style={styles.heroContent}>
@@ -196,6 +217,7 @@ export default function ReaderDashboardScreen() {
 
       {/* ── Books list ── */}
       <FlatList
+        ref={flatListRef}
         data={completedBooks}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}

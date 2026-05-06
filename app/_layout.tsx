@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, Image, View, Text, StyleSheet, type AppStateStatus } from 'react-native';
+import { AppState, Image, View, Text, StyleSheet, LogBox, type AppStateStatus } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -16,12 +16,17 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from '../src/lib/supabase';
 import { useAuthStore } from '../src/stores/authStore';
 import { useParentalStore } from '../src/stores/parentalStore';
+import { useReaderStore } from '../src/stores/readerStore';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { Colors, Fonts, FontSizes } from '../src/constants/theme';
 import '../src/i18n';
 
 // Keep the native splash visible until we explicitly hide it.
 SplashScreen.preventAutoHideAsync();
+
+// Supabase logs this internally before firing TOKEN_REFRESH_FAILED — the app
+// already handles it by redirecting to login, so the log is noise.
+LogBox.ignoreLogs(['Invalid Refresh Token', 'Refresh Token Not Found']);
 
 // Custom loading screen shown while fonts load and auth is checked.
 // Text only appears once fonts are ready to avoid a font-swap flash.
@@ -43,6 +48,7 @@ export default function RootLayout() {
   const segments = useSegments();
   const { session, isLoading, setSession, fetchProfile, fetchFormula } = useAuthStore();
   const { lock } = useParentalStore();
+  const { setSelectedReader } = useReaderStore();
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const [hasNavigated, setHasNavigated] = useState(false);
 
@@ -75,12 +81,16 @@ export default function RootLayout() {
   }, []);
 
   // Subscribe to Supabase auth state changes for the lifetime of the app.
+  // We skip INITIAL_SESSION when the access token is already expired so the
+  // loading screen stays visible while Supabase attempts a token refresh.
+  // The follow-up TOKEN_REFRESHED or TOKEN_REFRESH_FAILED event will resolve
+  // the final session state and redirect accordingly.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'INITIAL_SESSION' && session) {
+        const isExpired = (session.expires_at ?? 0) * 1000 < Date.now();
+        if (isExpired) return;
+      }
       setSession(session);
     });
 
@@ -88,8 +98,11 @@ export default function RootLayout() {
   }, []);
 
   // Fetch user data whenever a session becomes available.
+  // Also reset parental lock so no session starts with the PIN already unlocked.
   useEffect(() => {
     if (session) {
+      lock();
+      setSelectedReader(null);
       fetchProfile();
       fetchFormula();
     }

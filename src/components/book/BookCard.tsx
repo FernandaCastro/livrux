@@ -65,7 +65,7 @@ export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
             <Text style={styles.coinAmount}>+{book.livrux_earned}</Text>
           </View>
           <Text style={styles.date}>
-            {format(new Date(book.date_completed), 'dd/MM/yy')}
+            {format(new Date(book.date_completed ?? book.date_start), 'dd/MM/yy')}
           </Text>
         </View>
       </View>

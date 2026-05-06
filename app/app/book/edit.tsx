@@ -91,7 +91,7 @@ export default function EditBookScreen() {
         author: book.author ?? '',
         totalPages: String(book.total_pages),
         // Convert stored YYYY-MM-DD to display format DD/MM/YYYY.
-        dateCompleted: format(new Date(book.date_completed), 'dd/MM/yyyy'),
+        dateCompleted: format(new Date(book.date_completed ?? ''), 'dd/MM/yyyy'),
       });
       setCoverUri(book.cover_url);
       setIsForeignLanguage(book.is_foreign_language);
@@ -119,7 +119,7 @@ export default function EditBookScreen() {
       // Combine user-entered date (DD/MM/YYYY) with the original time from
       // book.date_completed so the sort order among same-day books is preserved.
       const newDate = parse(data.dateCompleted, 'dd/MM/yyyy', new Date());
-      const originalDateTime = new Date(book.date_completed);
+      const originalDateTime = new Date(book.date_completed ?? '');
       newDate.setHours(
         originalDateTime.getHours(),
         originalDateTime.getMinutes(),

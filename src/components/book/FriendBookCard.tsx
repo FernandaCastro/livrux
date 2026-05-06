@@ -51,7 +51,7 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={2}>{book.title}</Text>
           <View style={styles.metaCol}>
-            <Text style={styles.date}>{format(new Date(book.date_completed), 'dd/MM/yy')}</Text>
+            <Text style={styles.date}>{format(new Date(book.date_completed ?? book.date_start), 'dd/MM/yy')}</Text>
             <Text style={styles.pages}>📄 {book.total_pages} p.</Text>
           </View>
         </View>

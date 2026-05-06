@@ -6,11 +6,13 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
+  AppState,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useRef } from 'react';
 
 import { useLivrux } from '../../../src/hooks/useLivrux';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -52,6 +54,15 @@ export default function RewardsScreen() {
   const router = useRouter();
   const { selectedReader } = useReaderStore();
   const { transactions, isLoading, refresh } = useLivrux(selectedReader?.id ?? null);
+  const appStateRef = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appStateRef.current !== 'active' && nextState === 'active') refresh();
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, []);
 
   const totalBalance = selectedReader?.livrux_balance ?? 0;
 

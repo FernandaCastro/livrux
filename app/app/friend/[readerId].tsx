@@ -6,11 +6,12 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
+  AppState,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { supabase } from '../../../src/lib/supabase';
 import { useBooks } from '../../../src/hooks/useBooks';
@@ -60,6 +61,18 @@ export default function FriendProfileScreen() {
   }, [readerId]);
 
   useEffect(() => { fetchReader(); }, [fetchReader]);
+
+  const appStateRef = useRef(AppState.currentState);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appStateRef.current !== 'active' && nextState === 'active') {
+        fetchReader();
+        refreshBooks();
+      }
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, []);
 
   const isLoading = readerLoading || booksLoading;
 

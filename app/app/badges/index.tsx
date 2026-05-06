@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, AppState } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useRef } from 'react';
 
 import { useBadges } from '../../../src/hooks/useBadges';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -22,7 +23,16 @@ const TIER_ICON: Record<BadgeTier, string> = {
 export default function BadgesScreen() {
   const { t } = useTranslation();
   const { selectedReader } = useReaderStore();
-  const { earnedBadges, pendingBadges, isLoading, error } = useBadges(selectedReader?.id ?? null);
+  const { earnedBadges, pendingBadges, isLoading, error, refresh } = useBadges(selectedReader?.id ?? null);
+  const appStateRef = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appStateRef.current !== 'active' && nextState === 'active') refresh();
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, []);
 
   if (isLoading) {
     return (

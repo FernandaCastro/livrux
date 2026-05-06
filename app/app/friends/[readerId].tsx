@@ -11,11 +11,12 @@ import {
   Alert,
   RefreshControl,
   ScrollView,
+  AppState,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as Clipboard from 'expo-clipboard';
 
 import { useFriends } from '../../../src/hooks/useFriends';
@@ -48,6 +49,16 @@ export default function FriendsScreen() {
   } = useFriends(readerId ?? null);
 
   const { isParentUnlocked } = useParentalStore();
+  const appStateRef = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appStateRef.current !== 'active' && nextState === 'active') refresh();
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, []);
+
   const canManageFriends = isParentUnlocked || friendsAutonomy;
 
   const [addModalVisible, setAddModalVisible] = useState(false);

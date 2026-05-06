@@ -6,12 +6,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  AppState,
   Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -39,6 +40,26 @@ export default function ReaderDashboardScreen() {
   const readingNow = books.filter((b) => b.status === 'reading');
   const completedBooks = books.filter((b) => b.status === 'completed');
   const { canEditReader, isParentUnlocked } = useParentalStore();
+  const appStateRef = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (appStateRef.current !== 'active' && nextState === 'active') {
+        refresh();
+        refreshBadges();
+        if (id) {
+          supabase
+            .from('readers')
+            .select('*')
+            .eq('id', id)
+            .single()
+            .then(({ data }) => { if (data) setSelectedReader(data as Reader); });
+        }
+      }
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, [id]);
 
   const canEdit = canEditReader(id);
   const canDelete = isParentUnlocked;

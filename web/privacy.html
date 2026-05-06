@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livrux – Privacy Policy / Política de Privacidade / Datenschutzerklärung</title>
+  <meta name="description" content="Livrux Privacy Policy" />
+  <link rel="icon" href="../assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #F5A623;
+      --purple: #7C3AED;
+      --purple2: #A855F7;
+      --bg: #FAFAF7;
+      --card: #FFFFFF;
+      --text: #1E1B4B;
+      --muted: #6B7280;
+      --radius: 1.5rem;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 2rem;
+      background: rgba(250, 250, 247, 0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem;
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    .lang-switcher { display: flex; gap: .4rem; }
+
+    .lang-btn {
+      padding: .35rem .7rem;
+      border: 2px solid transparent;
+      border-radius: 2rem;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .lang-btn:hover { color: var(--purple); border-color: var(--purple2); }
+    .lang-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+    /* PAGE HEADER */
+    .page-header {
+      background: linear-gradient(160deg, #f0e6ff 0%, #fff7ed 60%, #fafaf7 100%);
+      padding: 3.5rem 1.5rem 2.5rem;
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--purple);
+      margin-bottom: .5rem;
+    }
+
+    .page-header .updated {
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    /* LANG CONTENT */
+    .lang-content { display: none; }
+    .lang-content.active { display: block; }
+
+    /* CONTENT */
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .content h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: var(--purple);
+      margin-top: 2.5rem;
+      margin-bottom: .75rem;
+    }
+
+    .content h3 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 1.5rem;
+      margin-bottom: .5rem;
+    }
+
+    .content p {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: .75rem;
+      font-size: .97rem;
+    }
+
+    .content ul {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: .75rem;
+    }
+
+    .content ul li {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: .97rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .content ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--purple);
+      font-weight: 700;
+    }
+
+    .content a { color: var(--purple); }
+
+    .highlight-box {
+      background: #f0e6ff;
+      border-left: 4px solid var(--purple);
+      border-radius: .5rem;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .highlight-box p { color: var(--text); margin-bottom: 0; }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid rgba(0,0,0,.06);
+    }
+
+    footer a { color: var(--purple); text-decoration: none; }
+    footer strong { color: var(--purple); }
+
+    @media (max-width: 500px) {
+      nav { padding: .9rem 1.2rem; }
+      .nav-logo { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <img src="../assets/livrux.png" alt="Livrux Logo" style="width:80px;height:80px;">
+      Livrux
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="pt">PT</button>
+      <button class="lang-btn" data-lang="de">DE</button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="lang-content" id="header-en">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: May 2025</p>
+    </div>
+    <div class="lang-content" id="header-pt">
+      <h1>Política de Privacidade</h1>
+      <p class="updated">Última atualização: Maio de 2025</p>
+    </div>
+    <div class="lang-content" id="header-de">
+      <h1>Datenschutzerklärung</h1>
+      <p class="updated">Zuletzt aktualisiert: Mai 2025</p>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══════════ ENGLISH ══════════ -->
+    <div class="lang-content" id="content-en">
+
+      <div class="highlight-box">
+        <p>Livrux is a family reading tracker. We collect only the data necessary to provide the service, never sell your data, and give you full control to delete your account at any time.</p>
+      </div>
+
+      <h2>1. Who we are</h2>
+      <p>Livrux ("we", "our", "us") is operated by <strong>Fernanda Castro</strong>, based in <strong>Germany</strong>. For any privacy-related questions, contact us at <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>.</p>
+
+      <h2>2. Data we collect</h2>
+
+      <h3>2.1 Account data</h3>
+      <ul>
+        <li><strong>Email address</strong> — used for authentication and account recovery.</li>
+        <li><strong>Display name</strong> — shown within the app to identify the account holder.</li>
+        <li><strong>Timestamp of consent</strong> — the date and time you accepted these terms, stored for legal compliance.</li>
+        <li><strong>Encrypted password</strong> — stored as a secure hash by Supabase; we never see your plaintext password.</li>
+      </ul>
+
+      <h3>2.2 App usage data</h3>
+      <ul>
+        <li><strong>Reader profiles</strong> — names and avatars created by the account holder for family members.</li>
+        <li><strong>Books</strong> — titles, authors, page counts, cover images, and completion dates.</li>
+        <li><strong>Reading sessions</strong> — pages read per session, used to calculate streaks and progress.</li>
+        <li><strong>Livrux transactions</strong> — coins earned and spent, linked to the reader profile.</li>
+        <li><strong>Reward formula settings</strong> — customised coin calculation preferences.</li>
+        <li><strong>Friend connections</strong> — reader codes shared between accounts to view reading progress.</li>
+      </ul>
+
+      <h3>2.3 Data we do NOT collect</h3>
+      <ul>
+        <li>Location data</li>
+        <li>Device identifiers or advertising IDs</li>
+        <li>Usage analytics or crash reports (at this time)</li>
+        <li>Payment information</li>
+      </ul>
+
+      <h2>3. Legal basis for processing (GDPR)</h2>
+      <ul>
+        <li><strong>Contract (Art. 6(1)(b) GDPR)</strong> — account and app data are necessary to provide the service you signed up for.</li>
+        <li><strong>Consent (Art. 6(1)(a) GDPR)</strong> — you explicitly agreed to this policy during sign-up. You may withdraw consent at any time by deleting your account.</li>
+        <li><strong>Legal obligation (Art. 6(1)(c) GDPR)</strong> — we retain the consent timestamp to demonstrate compliance.</li>
+      </ul>
+
+      <h2>4. Children's data</h2>
+      <p>Livrux accounts are created by parents or legal guardians. Reader profiles (representing children) are managed under the parent's account. We do not create accounts for minors, and children's reading data is accessible only to the account holder.</p>
+      <p>In accordance with GDPR Article 8, if you are under 16 years old, please ask a parent or guardian to create the account on your behalf.</p>
+
+      <h2>5. Data storage and processors</h2>
+      <p>All data is stored on <strong>Supabase</strong> (supabase.com), our backend-as-a-service provider. Supabase processes data on infrastructure located in the EU. Supabase is GDPR-compliant and acts as a data processor under a Data Processing Agreement.</p>
+      <p>Authentication via Google or Apple is handled by those respective providers under their own privacy policies. We receive only a verified email address and display name from these providers.</p>
+
+      <h2>6. Data retention</h2>
+      <ul>
+        <li><strong>Active accounts</strong> — data is retained for as long as your account exists.</li>
+        <li><strong>Deleted accounts</strong> — all data is permanently erased within 30 days of account deletion.</li>
+        <li><strong>Consent records</strong> — retained for 3 years after account deletion for legal compliance.</li>
+      </ul>
+
+      <h2>7. Your rights under GDPR</h2>
+      <p>You have the following rights regarding your personal data:</p>
+      <ul>
+        <li><strong>Right of access (Art. 15)</strong> — request a copy of all data we hold about you.</li>
+        <li><strong>Right to rectification (Art. 16)</strong> — correct inaccurate data via the app's Settings screen.</li>
+        <li><strong>Right to erasure (Art. 17)</strong> — delete your account and all associated data directly in the app (Settings → Delete account).</li>
+        <li><strong>Right to data portability (Art. 20)</strong> — request your data in a machine-readable format.</li>
+        <li><strong>Right to object (Art. 21)</strong> — object to processing at any time.</li>
+        <li><strong>Right to withdraw consent (Art. 7(3))</strong> — withdraw at any time by deleting your account.</li>
+      </ul>
+      <p>To exercise any right, contact us at <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>. We will respond within 30 days.</p>
+
+      <h2>8. Right to lodge a complaint</h2>
+      <p>If you believe we are processing your data unlawfully, you have the right to lodge a complaint with your local data protection authority. In Germany, this is the <strong>Bundesbeauftragte für den Datenschutz und die Informationsfreiheit (BfDI)</strong> at <a href="https://www.bfdi.bund.de" target="_blank" rel="noopener">www.bfdi.bund.de</a>.</p>
+
+      <h2>9. Cookies</h2>
+      <p>The Livrux app does not use cookies. The website (livrux.app) uses only a single localStorage key (<code>livrux_lang</code>) to remember your language preference. No tracking or advertising cookies are used.</p>
+
+      <h2>10. Changes to this policy</h2>
+      <p>We may update this policy from time to time. If we make significant changes, we will notify you via the app or email. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+
+      <h2>11. Contact</h2>
+      <p>For privacy questions or to exercise your rights:<br />
+      📧 <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a></p>
+
+    </div><!-- /content-en -->
+
+    <!-- ══════════ PORTUGUÊS ══════════ -->
+    <div class="lang-content" id="content-pt">
+
+      <div class="highlight-box">
+        <p>O Livrux é um app de registro de leitura para famílias. Coletamos apenas os dados necessários para fornecer o serviço, nunca vendemos seus dados e você tem controle total para excluir sua conta a qualquer momento.</p>
+      </div>
+
+      <h2>1. Quem somos</h2>
+      <p>O Livrux é operado por <strong>Fernanda Castro</strong>, com sede em <strong>Alemanha</strong>. Para dúvidas relacionadas à privacidade, entre em contato pelo e-mail <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>.</p>
+
+      <h2>2. Dados que coletamos</h2>
+
+      <h3>2.1 Dados da conta</h3>
+      <ul>
+        <li><strong>Endereço de e-mail</strong> — usado para autenticação e recuperação de conta.</li>
+        <li><strong>Nome de exibição</strong> — exibido no app para identificar o titular da conta.</li>
+        <li><strong>Data e hora do consentimento</strong> — registrada no momento em que você aceitou estes termos, armazenada para conformidade legal.</li>
+        <li><strong>Senha criptografada</strong> — armazenada como hash seguro pelo Supabase; nunca vemos sua senha em texto simples.</li>
+      </ul>
+
+      <h3>2.2 Dados de uso do app</h3>
+      <ul>
+        <li><strong>Perfis de leitores</strong> — nomes e avatares criados pelo titular da conta para membros da família.</li>
+        <li><strong>Livros</strong> — títulos, autores, número de páginas, imagens de capa e datas de conclusão.</li>
+        <li><strong>Sessões de leitura</strong> — páginas lidas por sessão, usadas para calcular sequências e progresso.</li>
+        <li><strong>Transações de Livrux</strong> — moedas ganhas e gastas, vinculadas ao perfil do leitor.</li>
+        <li><strong>Configurações da fórmula de recompensa</strong> — preferências personalizadas de cálculo de moedas.</li>
+        <li><strong>Conexões de amigos</strong> — códigos de leitores compartilhados entre contas para visualizar o progresso de leitura.</li>
+      </ul>
+
+      <h3>2.3 Dados que NÃO coletamos</h3>
+      <ul>
+        <li>Dados de localização</li>
+        <li>Identificadores de dispositivo ou IDs de publicidade</li>
+        <li>Análises de uso ou relatórios de falhas (por enquanto)</li>
+        <li>Informações de pagamento</li>
+      </ul>
+
+      <h2>3. Base legal para o tratamento (LGPD / GDPR)</h2>
+      <ul>
+        <li><strong>Contrato (Art. 6(1)(b) GDPR)</strong> — os dados da conta e do app são necessários para fornecer o serviço contratado.</li>
+        <li><strong>Consentimento (Art. 6(1)(a) GDPR)</strong> — você concordou expressamente com esta política ao se cadastrar. Você pode retirar o consentimento a qualquer momento excluindo sua conta.</li>
+        <li><strong>Obrigação legal (Art. 6(1)(c) GDPR)</strong> — mantemos o registro de consentimento para demonstrar conformidade.</li>
+      </ul>
+
+      <h2>4. Dados de crianças</h2>
+      <p>As contas no Livrux são criadas por pais ou responsáveis legais. Os perfis de leitores (que representam crianças) são gerenciados sob a conta do responsável. Não criamos contas para menores de idade, e os dados de leitura das crianças são acessíveis apenas pelo titular da conta.</p>
+      <p>Conforme o Art. 8 do GDPR, se você tiver menos de 16 anos, peça a um pai ou responsável que crie a conta em seu nome.</p>
+
+      <h2>5. Armazenamento de dados e processadores</h2>
+      <p>Todos os dados são armazenados no <strong>Supabase</strong> (supabase.com), nosso provedor de backend. O Supabase processa dados em infraestrutura localizada na UE e está em conformidade com o GDPR, atuando como processador de dados sob um Acordo de Processamento de Dados.</p>
+      <p>A autenticação via Google ou Apple é gerenciada pelos respectivos provedores, sob suas próprias políticas de privacidade. Recebemos apenas o e-mail verificado e o nome de exibição desses provedores.</p>
+
+      <h2>6. Retenção de dados</h2>
+      <ul>
+        <li><strong>Contas ativas</strong> — os dados são mantidos enquanto sua conta existir.</li>
+        <li><strong>Contas excluídas</strong> — todos os dados são apagados permanentemente em até 30 dias após a exclusão da conta.</li>
+        <li><strong>Registros de consentimento</strong> — mantidos por 3 anos após a exclusão da conta para conformidade legal.</li>
+      </ul>
+
+      <h2>7. Seus direitos (LGPD / GDPR)</h2>
+      <p>Você tem os seguintes direitos em relação aos seus dados pessoais:</p>
+      <ul>
+        <li><strong>Direito de acesso (Art. 15)</strong> — solicitar uma cópia de todos os dados que mantemos sobre você.</li>
+        <li><strong>Direito de retificação (Art. 16)</strong> — corrigir dados imprecisos na tela de Configurações do app.</li>
+        <li><strong>Direito de exclusão (Art. 17)</strong> — excluir sua conta e todos os dados associados diretamente no app (Configurações → Excluir conta).</li>
+        <li><strong>Direito à portabilidade (Art. 20)</strong> — solicitar seus dados em formato legível por máquina.</li>
+        <li><strong>Direito de oposição (Art. 21)</strong> — opor-se ao tratamento a qualquer momento.</li>
+        <li><strong>Direito de retirar o consentimento (Art. 7(3))</strong> — retirar a qualquer momento excluindo sua conta.</li>
+      </ul>
+      <p>Para exercer qualquer direito, entre em contato pelo e-mail <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>. Responderemos em até 30 dias.</p>
+
+      <h2>8. Direito de reclamação</h2>
+      <p>Se você acreditar que estamos tratando seus dados de forma ilegal, tem o direito de apresentar reclamação à autoridade de proteção de dados competente. No Brasil, é a <strong>Autoridade Nacional de Proteção de Dados (ANPD)</strong> em <a href="https://www.gov.br/anpd" target="_blank" rel="noopener">gov.br/anpd</a>. Na Alemanha, é o <strong>BfDI</strong> em <a href="https://www.bfdi.bund.de" target="_blank" rel="noopener">bfdi.bund.de</a>.</p>
+
+      <h2>9. Cookies</h2>
+      <p>O app Livrux não utiliza cookies. O site (livrux.app) utiliza apenas uma chave de localStorage (<code>livrux_lang</code>) para lembrar sua preferência de idioma. Nenhum cookie de rastreamento ou publicidade é utilizado.</p>
+
+      <h2>10. Alterações nesta política</h2>
+      <p>Podemos atualizar esta política periodicamente. Em caso de alterações significativas, notificaremos você pelo app ou por e-mail. O uso continuado do app após as alterações constitui aceitação da política atualizada.</p>
+
+      <h2>11. Contato</h2>
+      <p>Para dúvidas sobre privacidade ou para exercer seus direitos:<br />
+      📧 <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a></p>
+
+    </div><!-- /content-pt -->
+
+    <!-- ══════════ DEUTSCH ══════════ -->
+    <div class="lang-content" id="content-de">
+
+      <div class="highlight-box">
+        <p>Livrux ist eine Lese-Tracker-App für Familien. Wir erheben nur die Daten, die zur Bereitstellung des Dienstes notwendig sind, verkaufen deine Daten nicht und geben dir die volle Kontrolle, dein Konto jederzeit zu löschen.</p>
+      </div>
+
+      <h2>1. Wer wir sind</h2>
+      <p>Livrux wird betrieben von <strong>Fernanda Castro</strong>, ansässig in <strong>Deutschland</strong>. Bei datenschutzrechtlichen Fragen erreichst du uns unter <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>.</p>
+
+      <h2>2. Daten, die wir erheben</h2>
+
+      <h3>2.1 Kontodaten</h3>
+      <ul>
+        <li><strong>E-Mail-Adresse</strong> — zur Authentifizierung und Kontowiederherstellung.</li>
+        <li><strong>Anzeigename</strong> — wird in der App zur Identifikation des Kontoinhabers angezeigt.</li>
+        <li><strong>Zeitstempel der Einwilligung</strong> — Datum und Uhrzeit deiner Zustimmung zu diesen Bedingungen, gespeichert zur Einhaltung gesetzlicher Vorgaben.</li>
+        <li><strong>Verschlüsseltes Passwort</strong> — wird als sicherer Hash von Supabase gespeichert; wir sehen dein Passwort im Klartext nie.</li>
+      </ul>
+
+      <h3>2.2 App-Nutzungsdaten</h3>
+      <ul>
+        <li><strong>Leserprofile</strong> — Namen und Avatare, die vom Kontoinhaber für Familienmitglieder angelegt werden.</li>
+        <li><strong>Bücher</strong> — Titel, Autoren, Seitenanzahl, Coverbilder und Abschlussdaten.</li>
+        <li><strong>Lesesitzungen</strong> — pro Sitzung gelesene Seiten zur Berechnung von Serien und Fortschritt.</li>
+        <li><strong>Livrux-Transaktionen</strong> — verdiente und ausgegebene Münzen, verknüpft mit dem Leserprofil.</li>
+        <li><strong>Belohnungsformel-Einstellungen</strong> — individuelle Münzberechnungseinstellungen.</li>
+        <li><strong>Freundesverbindungen</strong> — zwischen Konten geteilte Lesercodes zur Anzeige von Lesefortschritten.</li>
+      </ul>
+
+      <h3>2.3 Daten, die wir NICHT erheben</h3>
+      <ul>
+        <li>Standortdaten</li>
+        <li>Gerätekennungen oder Werbe-IDs</li>
+        <li>Nutzungsanalysen oder Absturzberichte (derzeit nicht)</li>
+        <li>Zahlungsinformationen</li>
+      </ul>
+
+      <h2>3. Rechtsgrundlage der Verarbeitung (DSGVO)</h2>
+      <ul>
+        <li><strong>Vertrag (Art. 6 Abs. 1 lit. b DSGVO)</strong> — Konto- und App-Daten sind zur Erbringung des gebuchten Dienstes erforderlich.</li>
+        <li><strong>Einwilligung (Art. 6 Abs. 1 lit. a DSGVO)</strong> — du hast dieser Richtlinie bei der Registrierung ausdrücklich zugestimmt. Du kannst die Einwilligung jederzeit durch Löschen deines Kontos widerrufen.</li>
+        <li><strong>Rechtliche Verpflichtung (Art. 6 Abs. 1 lit. c DSGVO)</strong> — der Einwilligungszeitstempel wird zur Nachweisbarkeit der Compliance aufbewahrt.</li>
+      </ul>
+
+      <h2>4. Daten von Kindern</h2>
+      <p>Livrux-Konten werden von Eltern oder Erziehungsberechtigten erstellt. Leserprofile (die Kinder repräsentieren) werden unter dem Konto des Erziehungsberechtigten verwaltet. Wir erstellen keine Konten für Minderjährige; die Lesedaten der Kinder sind ausschließlich für den Kontoinhaber zugänglich.</p>
+      <p>Gemäß Art. 8 DSGVO bitten wir Personen unter 16 Jahren, ein Elternteil oder einen Erziehungsberechtigten zu bitten, das Konto in ihrem Namen zu erstellen.</p>
+
+      <h2>5. Datenspeicherung und Auftragsverarbeiter</h2>
+      <p>Alle Daten werden bei <strong>Supabase</strong> (supabase.com) gespeichert, unserem Backend-as-a-Service-Anbieter. Supabase verarbeitet Daten auf EU-basierter Infrastruktur und ist DSGVO-konform; er handelt als Auftragsverarbeiter im Rahmen eines Auftragsverarbeitungsvertrags (AVV).</p>
+      <p>Die Authentifizierung über Google oder Apple erfolgt über die jeweiligen Anbieter gemäß deren eigenen Datenschutzrichtlinien. Wir erhalten von diesen Anbietern lediglich die verifizierte E-Mail-Adresse und den Anzeigenamen.</p>
+
+      <h2>6. Datenspeicherfristen</h2>
+      <ul>
+        <li><strong>Aktive Konten</strong> — Daten werden so lange aufbewahrt, wie dein Konto besteht.</li>
+        <li><strong>Gelöschte Konten</strong> — alle Daten werden innerhalb von 30 Tagen nach Kontolöschung dauerhaft gelöscht.</li>
+        <li><strong>Einwilligungsnachweise</strong> — werden 3 Jahre nach Kontolöschung zur rechtlichen Absicherung aufbewahrt.</li>
+      </ul>
+
+      <h2>7. Deine Rechte nach der DSGVO</h2>
+      <p>Du hast folgende Rechte in Bezug auf deine personenbezogenen Daten:</p>
+      <ul>
+        <li><strong>Auskunftsrecht (Art. 15)</strong> — eine Kopie aller über dich gespeicherten Daten anfordern.</li>
+        <li><strong>Recht auf Berichtigung (Art. 16)</strong> — unrichtige Daten über den Einstellungsbereich der App korrigieren.</li>
+        <li><strong>Recht auf Löschung (Art. 17)</strong> — dein Konto und alle zugehörigen Daten direkt in der App löschen (Einstellungen → Konto löschen).</li>
+        <li><strong>Recht auf Datenübertragbarkeit (Art. 20)</strong> — deine Daten in einem maschinenlesbaren Format anfordern.</li>
+        <li><strong>Widerspruchsrecht (Art. 21)</strong> — der Verarbeitung jederzeit widersprechen.</li>
+        <li><strong>Widerruf der Einwilligung (Art. 7 Abs. 3)</strong> — jederzeit durch Löschen deines Kontos widerrufen.</li>
+      </ul>
+      <p>Zur Ausübung deiner Rechte wende dich an <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>. Wir antworten innerhalb von 30 Tagen.</p>
+
+      <h2>8. Beschwerderecht</h2>
+      <p>Wenn du der Ansicht bist, dass wir deine Daten rechtswidrig verarbeiten, hast du das Recht, eine Beschwerde bei der zuständigen Datenschutzaufsichtsbehörde einzulegen. In Deutschland ist dies der <strong>Bundesbeauftragte für den Datenschutz und die Informationsfreiheit (BfDI)</strong>, erreichbar unter <a href="https://www.bfdi.bund.de" target="_blank" rel="noopener">www.bfdi.bund.de</a>.</p>
+
+      <h2>9. Cookies</h2>
+      <p>Die Livrux-App verwendet keine Cookies. Die Website (livrux.app) verwendet lediglich einen localStorage-Eintrag (<code>livrux_lang</code>) zur Speicherung deiner Spracheinstellung. Es werden keine Tracking- oder Werbe-Cookies eingesetzt.</p>
+
+      <h2>10. Änderungen dieser Richtlinie</h2>
+      <p>Wir können diese Richtlinie gelegentlich aktualisieren. Bei wesentlichen Änderungen werden wir dich über die App oder per E-Mail informieren. Die fortgesetzte Nutzung der App nach Änderungen gilt als Zustimmung zur aktualisierten Richtlinie.</p>
+
+      <h2>11. Kontakt</h2>
+      <p>Bei Datenschutzfragen oder zur Ausübung deiner Rechte:<br />
+      📧 <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a></p>
+
+    </div><!-- /content-de -->
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      <a href="index.html">← Livrux</a>
+      &nbsp;·&nbsp;
+      <a href="privacy.html">Privacy Policy</a>
+      &nbsp;·&nbsp;
+      <a href="terms.html">Terms of Use</a>
+      &nbsp;·&nbsp;
+      <span id="year"></span>
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const SECTIONS = ['header', 'content'];
+      const LANGS = ['en', 'pt', 'de'];
+
+      function detectLang() {
+        const stored = localStorage.getItem('livrux_lang');
+        if (stored && LANGS.includes(stored)) return stored;
+        const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        return LANGS.includes(browser) ? browser : 'en';
+      }
+
+      function applyLang(lang) {
+        localStorage.setItem('livrux_lang', lang);
+        document.documentElement.lang = lang;
+
+        SECTIONS.forEach(section => {
+          LANGS.forEach(l => {
+            const el = document.getElementById(`${section}-${l}`);
+            if (el) el.classList.toggle('active', l === lang);
+          });
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+      }
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+      });
+
+      applyLang(detectLang());
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+  </script>
+
+</body>
+</html>

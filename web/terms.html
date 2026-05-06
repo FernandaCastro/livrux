@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livrux – Terms of Use / Termos de Uso / Nutzungsbedingungen</title>
+  <meta name="description" content="Livrux Terms of Use" />
+  <link rel="icon" href="../assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #F5A623;
+      --purple: #7C3AED;
+      --purple2: #A855F7;
+      --bg: #FAFAF7;
+      --card: #FFFFFF;
+      --text: #1E1B4B;
+      --muted: #6B7280;
+      --radius: 1.5rem;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 2rem;
+      background: rgba(250, 250, 247, 0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem;
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    .lang-switcher { display: flex; gap: .4rem; }
+
+    .lang-btn {
+      padding: .35rem .7rem;
+      border: 2px solid transparent;
+      border-radius: 2rem;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .lang-btn:hover { color: var(--purple); border-color: var(--purple2); }
+    .lang-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+    .page-header {
+      background: linear-gradient(160deg, #fff7ed 0%, #f0e6ff 60%, #fafaf7 100%);
+      padding: 3.5rem 1.5rem 2.5rem;
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--purple);
+      margin-bottom: .5rem;
+    }
+
+    .page-header .updated {
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    .lang-content { display: none; }
+    .lang-content.active { display: block; }
+
+    .content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .content h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: var(--purple);
+      margin-top: 2.5rem;
+      margin-bottom: .75rem;
+    }
+
+    .content h3 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 1.5rem;
+      margin-bottom: .5rem;
+    }
+
+    .content p {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: .75rem;
+      font-size: .97rem;
+    }
+
+    .content ul {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: .75rem;
+    }
+
+    .content ul li {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: .97rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .content ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--purple);
+      font-weight: 700;
+    }
+
+    .content a { color: var(--purple); }
+
+    .highlight-box {
+      background: #fff7ed;
+      border-left: 4px solid var(--orange);
+      border-radius: .5rem;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .highlight-box p { color: var(--text); margin-bottom: 0; }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid rgba(0,0,0,.06);
+    }
+
+    footer a { color: var(--purple); text-decoration: none; }
+    footer strong { color: var(--purple); }
+
+    @media (max-width: 500px) {
+      nav { padding: .9rem 1.2rem; }
+      .nav-logo { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <img src="../assets/livrux.png" alt="Livrux Logo" style="width:80px;height:80px;">
+      Livrux
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="pt">PT</button>
+      <button class="lang-btn" data-lang="de">DE</button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="lang-content" id="header-en">
+      <h1>Terms of Use</h1>
+      <p class="updated">Last updated: May 2025</p>
+    </div>
+    <div class="lang-content" id="header-pt">
+      <h1>Termos de Uso</h1>
+      <p class="updated">Última atualização: Maio de 2025</p>
+    </div>
+    <div class="lang-content" id="header-de">
+      <h1>Nutzungsbedingungen</h1>
+      <p class="updated">Zuletzt aktualisiert: Mai 2025</p>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══════════ ENGLISH ══════════ -->
+    <div class="lang-content" id="content-en">
+
+      <div class="highlight-box">
+        <p>By creating a Livrux account, you agree to these Terms of Use. Please read them carefully. If you do not agree, do not use the app.</p>
+      </div>
+
+      <h2>1. Acceptance of terms</h2>
+      <p>These Terms of Use ("Terms") govern your access to and use of the Livrux mobile application and website ("Service"), operated by <strong>Fernanda Castro</strong> ("we", "us", "our"). By registering an account, you confirm you have read and agreed to these Terms and our <a href="privacy.html">Privacy Policy</a>.</p>
+
+      <h2>2. Description of the Service</h2>
+      <p>Livrux is a family reading tracker that allows account holders to:</p>
+      <ul>
+        <li>Create reader profiles for family members (typically children).</li>
+        <li>Log books read and earn virtual coins ("Livrux") based on pages read.</li>
+        <li>Spend Livrux coins to record real-world rewards granted by the account holder.</li>
+        <li>Connect with friends to share reading progress.</li>
+        <li>Track reading streaks and earn achievement badges.</li>
+      </ul>
+      <p>Livrux coins have no monetary value and cannot be exchanged for money or transferred between accounts.</p>
+
+      <h2>3. Eligibility</h2>
+      <p>You must be at least 16 years old to create an account. By registering, you confirm that you are 16 or older, or that a parent or legal guardian is creating the account on your behalf. Parents are responsible for all activity under their account, including reader profiles created for their children.</p>
+
+      <h2>4. Account responsibilities</h2>
+      <ul>
+        <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
+        <li>You must provide accurate information when creating your account.</li>
+        <li>You must notify us immediately if you suspect unauthorised access to your account.</li>
+        <li>You may not share your account with others or create multiple accounts for the same person.</li>
+      </ul>
+
+      <h2>5. Acceptable use</h2>
+      <p>You agree not to:</p>
+      <ul>
+        <li>Use the Service for any unlawful purpose or in violation of any regulations.</li>
+        <li>Attempt to gain unauthorised access to other accounts or our systems.</li>
+        <li>Upload content that is harmful, offensive, or infringes any third-party rights.</li>
+        <li>Reverse-engineer, decompile, or attempt to extract the source code of the app.</li>
+        <li>Use automated tools (bots, scrapers) to access the Service.</li>
+        <li>Misrepresent books as read to gain coins fraudulently.</li>
+      </ul>
+
+      <h2>6. Intellectual property</h2>
+      <p>All content, design, graphics, and code within the Livrux app and website are the property of Livrux and are protected by applicable intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.</p>
+      <p>Book cover images retrieved via third-party APIs are the property of their respective rights holders and are displayed for informational purposes only.</p>
+
+      <h2>7. Disclaimer of warranties</h2>
+      <p>The Service is provided "as is" and "as available" without warranties of any kind, express or implied. We do not warrant that the Service will be uninterrupted, error-free, or free from harmful components. Your use of the Service is at your own risk.</p>
+
+      <h2>8. Limitation of liability</h2>
+      <p>To the fullest extent permitted by law, Livrux shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the Service, including but not limited to loss of data or virtual coins.</p>
+
+      <h2>9. Account termination</h2>
+      <p>You may delete your account at any time via Settings → Delete account. We reserve the right to suspend or terminate accounts that violate these Terms, with or without prior notice.</p>
+
+      <h2>10. Changes to the Service and Terms</h2>
+      <p>We reserve the right to modify or discontinue the Service at any time. We may update these Terms from time to time. We will notify you of significant changes via the app or email. Continued use after changes constitutes acceptance of the updated Terms.</p>
+
+      <h2>11. Governing law</h2>
+      <p>These Terms are governed by the laws of <strong>Germany</strong>. Any disputes shall be resolved in the courts of <strong>Germany</strong>, unless otherwise required by applicable consumer protection law.</p>
+
+      <h2>12. Contact</h2>
+      <p>For any questions about these Terms:<br />
+      📧 <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a></p>
+
+    </div><!-- /content-en -->
+
+    <!-- ══════════ PORTUGUÊS ══════════ -->
+    <div class="lang-content" id="content-pt">
+
+      <div class="highlight-box">
+        <p>Ao criar uma conta no Livrux, você concorda com estes Termos de Uso. Leia-os com atenção. Se você não concordar, não utilize o app.</p>
+      </div>
+
+      <h2>1. Aceitação dos termos</h2>
+      <p>Estes Termos de Uso ("Termos") regem o acesso e o uso do aplicativo móvel e do site Livrux ("Serviço"), operado por <strong>Fernanda Castro</strong> ("nós", "nosso"). Ao criar uma conta, você confirma que leu e concordou com estes Termos e com nossa <a href="privacy.html">Política de Privacidade</a>.</p>
+
+      <h2>2. Descrição do Serviço</h2>
+      <p>O Livrux é um app de registro de leitura para famílias que permite ao titular da conta:</p>
+      <ul>
+        <li>Criar perfis de leitores para membros da família (geralmente crianças).</li>
+        <li>Registrar livros lidos e ganhar moedas virtuais ("Livrux") com base nas páginas lidas.</li>
+        <li>Gastar moedas Livrux para registrar recompensas do mundo real concedidas pelo titular da conta.</li>
+        <li>Conectar-se com amigos para compartilhar o progresso de leitura.</li>
+        <li>Acompanhar sequências de leitura e conquistar medalhas de conquistas.</li>
+      </ul>
+      <p>As moedas Livrux não têm valor monetário e não podem ser trocadas por dinheiro nem transferidas entre contas.</p>
+
+      <h2>3. Elegibilidade</h2>
+      <p>Você deve ter pelo menos 16 anos para criar uma conta. Ao se cadastrar, confirma que tem 16 anos ou mais, ou que um pai ou responsável legal está criando a conta em seu nome. Os responsáveis são responsáveis por toda a atividade na conta, incluindo os perfis de leitores criados para seus filhos.</p>
+
+      <h2>4. Responsabilidades da conta</h2>
+      <ul>
+        <li>Você é responsável por manter a confidencialidade das suas credenciais de acesso.</li>
+        <li>Você deve fornecer informações precisas ao criar sua conta.</li>
+        <li>Você deve nos notificar imediatamente se suspeitar de acesso não autorizado à sua conta.</li>
+        <li>Você não pode compartilhar sua conta com terceiros nem criar múltiplas contas para a mesma pessoa.</li>
+      </ul>
+
+      <h2>5. Uso aceitável</h2>
+      <p>Você concorda em não:</p>
+      <ul>
+        <li>Usar o Serviço para qualquer finalidade ilegal ou em violação de regulamentos.</li>
+        <li>Tentar obter acesso não autorizado a outras contas ou aos nossos sistemas.</li>
+        <li>Fazer upload de conteúdo prejudicial, ofensivo ou que viole direitos de terceiros.</li>
+        <li>Fazer engenharia reversa, descompilar ou tentar extrair o código-fonte do app.</li>
+        <li>Usar ferramentas automatizadas (bots, scrapers) para acessar o Serviço.</li>
+        <li>Registrar livros que não foram lidos para obter moedas de forma fraudulenta.</li>
+      </ul>
+
+      <h2>6. Propriedade intelectual</h2>
+      <p>Todo o conteúdo, design, gráficos e código do app e do site Livrux são propriedade do Livrux e estão protegidos pelas leis de propriedade intelectual aplicáveis. Você não pode reproduzir, distribuir ou criar trabalhos derivados sem nossa permissão expressa por escrito.</p>
+      <p>As imagens de capas de livros obtidas por meio de APIs de terceiros são de propriedade de seus respectivos titulares de direitos e são exibidas apenas para fins informativos.</p>
+
+      <h2>7. Isenção de garantias</h2>
+      <p>O Serviço é fornecido "no estado em que se encontra" e "conforme disponível", sem garantias de qualquer tipo, expressas ou implícitas. Não garantimos que o Serviço será ininterrupto, livre de erros ou de componentes prejudiciais. O uso do Serviço é por sua conta e risco.</p>
+
+      <h2>8. Limitação de responsabilidade</h2>
+      <p>Na máxima extensão permitida por lei, o Livrux não será responsável por danos indiretos, incidentais, especiais, consequenciais ou punitivos decorrentes do uso ou da impossibilidade de uso do Serviço, incluindo, mas não se limitando a, perda de dados ou de moedas virtuais.</p>
+
+      <h2>9. Encerramento da conta</h2>
+      <p>Você pode excluir sua conta a qualquer momento em Configurações → Excluir conta. Reservamo-nos o direito de suspender ou encerrar contas que violem estes Termos, com ou sem aviso prévio.</p>
+
+      <h2>10. Alterações no Serviço e nos Termos</h2>
+      <p>Reservamo-nos o direito de modificar ou descontinuar o Serviço a qualquer momento. Podemos atualizar estes Termos periodicamente. Notificaremos você sobre alterações significativas pelo app ou por e-mail. O uso continuado após as alterações constitui aceitação dos Termos atualizados.</p>
+
+      <h2>11. Lei aplicável</h2>
+      <p>Estes Termos são regidos pelas leis de <strong>Alemanha</strong>. Quaisquer disputas serão resolvidas nos tribunais de <strong>Alemanha</strong>, salvo quando a lei de proteção ao consumidor aplicável exigir o contrário.</p>
+
+      <h2>12. Contato</h2>
+      <p>Para dúvidas sobre estes Termos:<br />
+      📧 <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a></p>
+
+    </div><!-- /content-pt -->
+
+    <!-- ══════════ DEUTSCH ══════════ -->
+    <div class="lang-content" id="content-de">
+
+      <div class="highlight-box">
+        <p>Mit der Erstellung eines Livrux-Kontos stimmst du diesen Nutzungsbedingungen zu. Bitte lies sie sorgfältig. Wenn du nicht zustimmst, nutze die App nicht.</p>
+      </div>
+
+      <h2>1. Annahme der Bedingungen</h2>
+      <p>Diese Nutzungsbedingungen ("Bedingungen") regeln den Zugang zu und die Nutzung der mobilen App und der Website von Livrux ("Dienst"), betrieben von <strong>Fernanda Castro</strong> ("wir", "uns", "unser"). Mit der Registrierung bestätigst du, diese Bedingungen und unsere <a href="privacy.html">Datenschutzerklärung</a> gelesen und akzeptiert zu haben.</p>
+
+      <h2>2. Beschreibung des Dienstes</h2>
+      <p>Livrux ist eine Lese-Tracker-App für Familien, die dem Kontoinhaber folgendes ermöglicht:</p>
+      <ul>
+        <li>Leserprofile für Familienmitglieder (in der Regel Kinder) anlegen.</li>
+        <li>Gelesene Bücher erfassen und virtuelle Münzen ("Livrux") basierend auf den gelesenen Seiten verdienen.</li>
+        <li>Livrux-Münzen ausgeben, um reale Belohnungen des Kontoinhabers zu erfassen.</li>
+        <li>Mit Freunden verbinden, um Lesefortschritte zu teilen.</li>
+        <li>Leseserien verfolgen und Erfolgsabzeichen verdienen.</li>
+      </ul>
+      <p>Livrux-Münzen haben keinen Geldwert und können weder gegen Geld eingelöst noch zwischen Konten übertragen werden.</p>
+
+      <h2>3. Nutzungsvoraussetzungen</h2>
+      <p>Du musst mindestens 16 Jahre alt sein, um ein Konto zu erstellen. Mit der Registrierung bestätigst du, dass du 16 Jahre oder älter bist, oder dass ein Elternteil oder Erziehungsberechtigter das Konto in deinem Namen erstellt. Eltern sind für alle Aktivitäten unter ihrem Konto verantwortlich, einschließlich der für ihre Kinder erstellten Leserprofile.</p>
+
+      <h2>4. Kontoverantwortlichkeiten</h2>
+      <ul>
+        <li>Du bist für die Vertraulichkeit deiner Zugangsdaten verantwortlich.</li>
+        <li>Du musst bei der Kontoerstellung genaue Angaben machen.</li>
+        <li>Du musst uns unverzüglich benachrichtigen, wenn du einen unbefugten Zugriff auf dein Konto vermutest.</li>
+        <li>Du darfst dein Konto nicht mit anderen teilen oder mehrere Konten für dieselbe Person erstellen.</li>
+      </ul>
+
+      <h2>5. Zulässige Nutzung</h2>
+      <p>Du stimmst zu, Folgendes zu unterlassen:</p>
+      <ul>
+        <li>Den Dienst für rechtswidrige Zwecke oder unter Verletzung von Vorschriften zu nutzen.</li>
+        <li>Den Versuch, unbefugten Zugang zu anderen Konten oder unseren Systemen zu erlangen.</li>
+        <li>Das Hochladen schädlicher, beleidigender oder rechtswidriger Inhalte.</li>
+        <li>Reverse Engineering, Dekompilierung oder den Versuch, den Quellcode der App zu extrahieren.</li>
+        <li>Die Nutzung automatisierter Tools (Bots, Scraper) für den Zugriff auf den Dienst.</li>
+        <li>Das betrügerische Eintragen nicht gelesener Bücher zur Erlangung von Münzen.</li>
+      </ul>
+
+      <h2>6. Geistiges Eigentum</h2>
+      <p>Alle Inhalte, Designs, Grafiken und Codes der Livrux-App und der Website sind Eigentum von Livrux und durch geltende Gesetze zum Schutz geistigen Eigentums geschützt. Eine Vervielfältigung, Verbreitung oder Erstellung abgeleiteter Werke ist ohne unsere ausdrückliche schriftliche Genehmigung nicht gestattet.</p>
+      <p>Buchcover-Bilder, die über Drittanbieter-APIs abgerufen werden, sind Eigentum der jeweiligen Rechteinhaber und werden nur zu Informationszwecken angezeigt.</p>
+
+      <h2>7. Haftungsausschluss für Gewährleistungen</h2>
+      <p>Der Dienst wird "wie besehen" und "wie verfügbar" ohne ausdrückliche oder stillschweigende Gewährleistungen jeglicher Art bereitgestellt. Wir garantieren nicht, dass der Dienst ununterbrochen, fehlerfrei oder frei von schädlichen Komponenten ist. Die Nutzung des Dienstes erfolgt auf eigenes Risiko.</p>
+
+      <h2>8. Haftungsbeschränkung</h2>
+      <p>Im größtmöglichen gesetzlich zulässigen Umfang haftet Livrux nicht für indirekte, zufällige, besondere, Folge- oder Strafschäden, die sich aus der Nutzung oder der Unmöglichkeit der Nutzung des Dienstes ergeben, einschließlich, aber nicht beschränkt auf den Verlust von Daten oder virtuellen Münzen.</p>
+
+      <h2>9. Kontolöschung</h2>
+      <p>Du kannst dein Konto jederzeit über Einstellungen → Konto löschen löschen. Wir behalten uns das Recht vor, Konten, die gegen diese Bedingungen verstoßen, mit oder ohne vorherige Ankündigung zu sperren oder zu kündigen.</p>
+
+      <h2>10. Änderungen am Dienst und den Bedingungen</h2>
+      <p>Wir behalten uns das Recht vor, den Dienst jederzeit zu ändern oder einzustellen. Diese Bedingungen können von Zeit zu Zeit aktualisiert werden. Über wesentliche Änderungen informieren wir dich über die App oder per E-Mail. Die weitere Nutzung nach Änderungen gilt als Zustimmung zu den aktualisierten Bedingungen.</p>
+
+      <h2>11. Anwendbares Recht</h2>
+      <p>Diese Bedingungen unterliegen dem Recht von <strong>Deutschland</strong>. Streitigkeiten werden vor den Gerichten von <strong>Deutschland</strong> ausgetragen, soweit nicht zwingendes Verbraucherrecht etwas anderes vorschreibt.</p>
+
+      <h2>12. Kontakt</h2>
+      <p>Bei Fragen zu diesen Bedingungen:<br />
+      📧 <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a></p>
+
+    </div><!-- /content-de -->
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      <a href="index.html">← Livrux</a>
+      &nbsp;·&nbsp;
+      <a href="privacy.html">Privacy Policy</a>
+      &nbsp;·&nbsp;
+      <a href="terms.html">Terms of Use</a>
+      &nbsp;·&nbsp;
+      <span id="year"></span>
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const SECTIONS = ['header', 'content'];
+      const LANGS = ['en', 'pt', 'de'];
+
+      function detectLang() {
+        const stored = localStorage.getItem('livrux_lang');
+        if (stored && LANGS.includes(stored)) return stored;
+        const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        return LANGS.includes(browser) ? browser : 'en';
+      }
+
+      function applyLang(lang) {
+        localStorage.setItem('livrux_lang', lang);
+        document.documentElement.lang = lang;
+
+        SECTIONS.forEach(section => {
+          LANGS.forEach(l => {
+            const el = document.getElementById(`${section}-${l}`);
+            if (el) el.classList.toggle('active', l === lang);
+          });
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+      }
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+      });
+
+      applyLang(detectLang());
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+  </script>
+
+</body>
+</html>

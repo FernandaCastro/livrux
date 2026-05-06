@@ -20,6 +20,11 @@ const TIER_COLORS: Record<BadgeTier, string> = {
   silver: '#A8A9AD',
   gold: '#F5A623',
 };
+const TIER_ICON: Record<BadgeTier, string> = {
+  bronze: '🥉',
+  silver: '🥈',
+  gold: '🥇',
+};
 
 export default function FriendBadgesScreen() {
   const { t } = useTranslation();
@@ -59,6 +64,7 @@ export default function FriendBadgesScreen() {
           <View style={styles.grid}>
             {earnedBadges.map((badge) => (
               <View key={badge.slug} style={styles.badgeCard}>
+                <Text style={styles.tierIcon}>{TIER_ICON[badge.tier]}</Text>
                 <View style={[styles.iconCircle, { borderColor: TIER_COLORS[badge.tier] }]}>
                   <Text style={styles.badgeIcon}>{badge.icon}</Text>
                 </View>
@@ -152,5 +158,11 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textSecondary,
     textAlign: 'center',
+  },
+  tierIcon: {
+    marginTop: -8,
+    marginBottom: -10,
+    marginLeft: 100, 
+    fontSize: 30 
   },
 });

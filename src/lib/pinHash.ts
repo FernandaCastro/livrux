@@ -3,6 +3,8 @@
 // where `globalThis.crypto` is not exposed.
 // This is sufficient to prevent casual access — it is not designed for adversarial contexts.
 
+import type * as ExpoCryptoModule from 'expo-crypto';
+
 export async function hashPin(pin: string): Promise<string> {
   const subtle = globalThis.crypto?.subtle;
 
@@ -23,11 +25,7 @@ export async function verifyPin(pin: string, storedHash: string): Promise<boolea
   return hash === storedHash;
 }
 
-
-async function loadExpoCrypto(): Promise<{
-  digestStringAsync: (algorithm: string, data: string) => Promise<string>;
-  CryptoDigestAlgorithm: { SHA256: string };
-}> {
+async function loadExpoCrypto(): Promise<typeof ExpoCryptoModule> {
   try {
     return await import('expo-crypto');
   } catch {

@@ -9,7 +9,8 @@
     "scheme": "livrux",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.livrux.app"
+      "bundleIdentifier": "com.livrux.app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -46,7 +47,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Livrux to use your camera to scan book barcodes."
+          "cameraPermission": "Allow Livrux to use your camera to scan book barcodes.",
+          "microphonePermission": "Allow Livrux to access your microphone."
         }
       ],
       "expo-localization",

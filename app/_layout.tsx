@@ -74,7 +74,6 @@ export default function RootLayout() {
         (nextState === 'background' || nextState === 'inactive')
       ) {
         lock();
-        setSelectedReader(null);
       }
       appStateRef.current = nextState;
     });

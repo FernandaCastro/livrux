@@ -16,6 +16,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from '../src/lib/supabase';
 import { useAuthStore } from '../src/stores/authStore';
 import { useParentalStore } from '../src/stores/parentalStore';
+import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { Colors, Fonts, FontSizes } from '../src/constants/theme';
 import '../src/i18n';
 
@@ -115,22 +116,26 @@ export default function RootLayout() {
   // (covers both font loading and auth check, regardless of order).
   if (!hasNavigated) {
     return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <StatusBar style="dark" backgroundColor={Colors.background} />
-          <AppLoadingScreen fontsReady={fontsLoaded} />
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
+      <ErrorBoundary>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider>
+            <StatusBar style="dark" backgroundColor={Colors.background} />
+            <AppLoadingScreen fontsReady={fontsLoaded} />
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <StatusBar style="dark" backgroundColor={Colors.background} />
-        <Stack screenOptions={{ headerShown: false }} />
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <StatusBar style="dark" backgroundColor={Colors.background} />
+          <Stack screenOptions={{ headerShown: false }} />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 

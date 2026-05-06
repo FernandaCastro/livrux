@@ -41,7 +41,7 @@ function AppLoadingScreen({ fontsReady }: { fontsReady: boolean }) {
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
-  const { session, isLoading, setSession, fetchProfile, fetchFormula, signOut } = useAuthStore();
+  const { session, isLoading, setSession, fetchProfile, fetchFormula } = useAuthStore();
   const { lock } = useParentalStore();
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const [hasNavigated, setHasNavigated] = useState(false);
@@ -80,12 +80,8 @@ export default function RootLayout() {
       setSession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'TOKEN_REFRESH_FAILED' || event === 'SIGNED_OUT') {
-        signOut();
-      } else {
-        setSession(session);
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
     });
 
     return () => subscription.unsubscribe();

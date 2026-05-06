@@ -96,8 +96,10 @@ export default function RootLayout() {
   }, []);
 
   // Fetch user data whenever a session becomes available.
+  // Also reset parental lock so no session starts with the PIN already unlocked.
   useEffect(() => {
     if (session) {
+      lock();
       fetchProfile();
       fetchFormula();
     }

@@ -12,7 +12,7 @@ import {
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -41,14 +41,14 @@ export default function ReaderDashboardScreen() {
   const completedBooks = books.filter((b) => b.status === 'completed');
   const { canEditReader, isParentUnlocked } = useParentalStore();
   const appStateRef = useRef(AppState.currentState);
-  const [, forceLayout] = useState(0);
+  const flatListRef = useRef<any>(null);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (appStateRef.current !== 'active' && nextState === 'active') {
         // Synchronous state update forces an immediate re-render so SafeAreaView
         // recalculates its insets before the async data fetches complete.
-        forceLayout(n => n + 1);
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
         refresh();
         refreshBadges();
         if (id) {
@@ -221,6 +221,7 @@ export default function ReaderDashboardScreen() {
 
       {/* ── Books list ── */}
       <FlatList
+        ref={flatListRef}
         data={completedBooks}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}

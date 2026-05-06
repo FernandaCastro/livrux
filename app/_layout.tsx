@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, Image, View, Text, StyleSheet, type AppStateStatus } from 'react-native';
+import { AppState, Image, View, Text, StyleSheet, LogBox, type AppStateStatus } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -22,6 +22,10 @@ import '../src/i18n';
 
 // Keep the native splash visible until we explicitly hide it.
 SplashScreen.preventAutoHideAsync();
+
+// Supabase logs this internally before firing TOKEN_REFRESH_FAILED — the app
+// already handles it by redirecting to login, so the log is noise.
+LogBox.ignoreLogs(['Invalid Refresh Token', 'Refresh Token Not Found']);
 
 // Custom loading screen shown while fonts load and auth is checked.
 // Text only appears once fonts are ready to avoid a font-swap flash.
@@ -75,12 +79,16 @@ export default function RootLayout() {
   }, []);
 
   // Subscribe to Supabase auth state changes for the lifetime of the app.
+  // We skip INITIAL_SESSION when the access token is already expired so the
+  // loading screen stays visible while Supabase attempts a token refresh.
+  // The follow-up TOKEN_REFRESHED or TOKEN_REFRESH_FAILED event will resolve
+  // the final session state and redirect accordingly.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'INITIAL_SESSION' && session) {
+        const isExpired = (session.expires_at ?? 0) * 1000 < Date.now();
+        if (isExpired) return;
+      }
       setSession(session);
     });
 

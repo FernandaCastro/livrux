@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -20,6 +21,7 @@ import { supabase } from '../../src/lib/supabase';
 import { useAuthStore } from '../../src/stores/authStore';
 import { Button } from '../../src/components/ui/Button';
 import { TextInput } from '../../src/components/ui/TextInput';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '../../src/constants/legal';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../../src/constants/theme';
 
 function useSignUpSchema() {
@@ -48,6 +50,8 @@ export default function SignUpScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [serverError, setServerError] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState(false);
   const schema = useSignUpSchema();
   const setPendingEmailConfirmation = useAuthStore((s) => s.setPendingEmailConfirmation);
 
@@ -57,12 +61,22 @@ export default function SignUpScreen() {
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!termsAccepted) {
+      setTermsError(true);
+      return;
+    }
+
     setServerError('');
+    setTermsError(false);
+
     const { error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
-        data: { display_name: data.name },
+        data: {
+          display_name: data.name,
+          terms_accepted_at: new Date().toISOString(),
+        },
       },
     });
 
@@ -171,6 +185,40 @@ export default function SignUpScreen() {
               )}
             />
 
+            {/* Terms & Privacy consent */}
+            <TouchableOpacity
+              style={styles.termsRow}
+              onPress={() => {
+                setTermsAccepted((v) => !v);
+                setTermsError(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}>
+                {termsAccepted && <Text style={styles.checkboxMark}>✓</Text>}
+              </View>
+              <Text style={styles.termsText}>
+                {t('auth.termsAgree')}{' '}
+                <Text
+                  style={styles.termsLink}
+                  onPress={() => Linking.openURL(TERMS_URL)}
+                >
+                  {t('auth.termsLink')}
+                </Text>
+                {' '}{t('auth.termsAnd')}{' '}
+                <Text
+                  style={styles.termsLink}
+                  onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+                >
+                  {t('auth.privacyLink')}
+                </Text>
+                .
+              </Text>
+            </TouchableOpacity>
+            {termsError && (
+              <Text style={styles.termsErrorText}>{t('auth.errors.termsRequired')}</Text>
+            )}
+
             <Button
               label={t('auth.signUp')}
               onPress={handleSubmit(onSubmit)}
@@ -231,6 +279,52 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.body,
     fontSize: FontSizes.sm,
     color: Colors.error,
+  },
+  termsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    marginTop: Spacing.lg,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: Colors.textDisabled,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+    flexShrink: 0,
+  },
+  checkboxChecked: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  checkboxMark: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontFamily: Fonts.bodyBold,
+    lineHeight: 16,
+  },
+  termsText: {
+    flex: 1,
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  termsLink: {
+    fontFamily: Fonts.bodyBold,
+    color: Colors.secondary,
+    textDecorationLine: 'underline',
+  },
+  termsErrorText: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.error,
+    marginTop: Spacing.xs,
+    marginLeft: 22 + Spacing.sm,
   },
   submitButton: { marginTop: Spacing.md },
   footer: {

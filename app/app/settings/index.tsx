@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,8 @@ import i18n, { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../src/
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuthStore } from '../../../src/stores/authStore';
+import { supabase } from '../../../src/lib/supabase';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '../../../src/constants/legal';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
@@ -55,6 +58,51 @@ export default function SettingsScreen() {
     ]);
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      t('settings.deleteAccount'),
+      t('settings.deleteAccountConfirm'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('settings.deleteAccount'),
+          style: 'destructive',
+          onPress: () => {
+            // Second confirmation — irreversible action
+            Alert.alert(
+              t('settings.deleteAccountFinal'),
+              t('settings.deleteAccountFinalBody'),
+              [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                  text: t('settings.deleteAccountFinal'),
+                  style: 'destructive',
+                  onPress: async () => {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const token = session?.access_token;
+                    if (!token) return;
+
+                    const res = await supabase.functions.invoke('delete-account', {
+                      method: 'POST',
+                    });
+
+                    if (res.error) {
+                      Alert.alert(t('common.error'), res.error.message);
+                      return;
+                    }
+
+                    await signOut();
+                    router.replace('/auth/sign-in');
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -67,13 +115,13 @@ export default function SettingsScreen() {
             icon="👤"
             label={t('settings.displayName')}
             value={profile?.display_name ?? '—'}
-            onPress={() => {/* TODO: edit name screen */}}
+            onPress={() => router.push('/app/settings/edit-name')}
           />
           <View style={styles.divider} />
           <SettingsRow
             icon="🔐"
             label={t('settings.changePassword')}
-            onPress={() => router.push('/auth/forgot-password')}
+            onPress={() => router.push('/app/settings/change-password')}
           />
         </View>
 
@@ -120,12 +168,35 @@ export default function SettingsScreen() {
           ))}
         </View>
 
+        {/* Legal section */}
+        <Text style={styles.sectionLabel}>{t('settings.legal')}</Text>
+        <View style={styles.card}>
+          <SettingsRow
+            icon="📄"
+            label={t('settings.privacyPolicy')}
+            onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+          />
+          <View style={styles.divider} />
+          <SettingsRow
+            icon="📋"
+            label={t('settings.termsOfUse')}
+            onPress={() => Linking.openURL(TERMS_URL)}
+          />
+        </View>
+
         {/* Danger zone */}
         <View style={styles.card}>
           <SettingsRow
             icon="🚪"
             label={t('settings.signOut')}
             onPress={handleSignOut}
+            danger
+          />
+          <View style={styles.divider} />
+          <SettingsRow
+            icon="🗑️"
+            label={t('settings.deleteAccount')}
+            onPress={handleDeleteAccount}
             danger
           />
         </View>

@@ -6,5 +6,5 @@
 // before publishing.
 // ---------------------------------------------------------------------------
 
-export const PRIVACY_POLICY_URL = 'https://livrux.app/privacy.html';
-export const TERMS_URL = 'https://livrux.app/terms.html';
+export const PRIVACY_POLICY_URL = 'https://livrux.fecastro.com/privacy.html';
+export const TERMS_URL = 'https://livrux.fecastro.com/terms.html';

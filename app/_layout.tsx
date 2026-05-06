@@ -16,6 +16,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { supabase } from '../src/lib/supabase';
 import { useAuthStore } from '../src/stores/authStore';
 import { useParentalStore } from '../src/stores/parentalStore';
+import { useReaderStore } from '../src/stores/readerStore';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { Colors, Fonts, FontSizes } from '../src/constants/theme';
 import '../src/i18n';
@@ -47,6 +48,7 @@ export default function RootLayout() {
   const segments = useSegments();
   const { session, isLoading, setSession, fetchProfile, fetchFormula } = useAuthStore();
   const { lock } = useParentalStore();
+  const { setSelectedReader } = useReaderStore();
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const [hasNavigated, setHasNavigated] = useState(false);
 
@@ -72,6 +74,7 @@ export default function RootLayout() {
         (nextState === 'background' || nextState === 'inactive')
       ) {
         lock();
+        setSelectedReader(null);
       }
       appStateRef.current = nextState;
     });
@@ -100,6 +103,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (session) {
       lock();
+      setSelectedReader(null);
       fetchProfile();
       fetchFormula();
     }

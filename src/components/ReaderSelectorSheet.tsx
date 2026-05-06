@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Modal, View, Text, TouchableOpacity, FlatList, StyleSheet, Pressable } from 'react-native';
+import { Animated, Modal, View, Text, TouchableOpacity, FlatList, StyleSheet, Pressable, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -92,7 +92,7 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
 
           <TouchableOpacity style={styles.homeRow} onPress={handleGoHome} activeOpacity={0.75}>
             <View style={styles.homeIconWrap}>
-              <Text style={styles.homeIcon}>🏠</Text>
+              <Image source={require('../../assets/readers.png')} style={styles.homeIcon} resizeMode="contain"/>
             </View>
             <Text style={styles.homeLabel}>{t('home.title')}</Text>
           </TouchableOpacity>
@@ -161,14 +161,14 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   homeIconWrap: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     borderRadius: 20,
     backgroundColor: Colors.surfaceVariant,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  homeIcon: { fontSize: 20 },
+  homeIcon: { width: 60, height: 60 },
   homeLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.md,

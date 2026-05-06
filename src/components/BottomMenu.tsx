@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -36,7 +36,7 @@ export function BottomMenu() {
           onPress={() => router.replace('/app')}
           activeOpacity={0.7}
         >
-          <Text style={styles.icon}>🏠</Text>
+          <Image source={require('../../assets/readers.png')} style={styles.readersIcon} resizeMode="contain" />
           <Text style={[styles.label, !isSettings && styles.activeLabel]}>{t('home.title')}</Text>
         </TouchableOpacity>
 
@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.xs,
     gap: 2,
   },
+  readersIcon: { width: 50, height: 50, marginTop: -9, marginBottom: -7 },
   icon: { fontSize: 22 },
   label: {
     fontFamily: Fonts.bodySemiBold,

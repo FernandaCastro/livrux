@@ -52,20 +52,25 @@ export function useFriends(readerId: string | null): UseFriendsResult {
 
     if (acceptedData) {
       setFriends(
-        (acceptedData as any[]).map((rf) => {
-          const iAmRequester = rf.requester_id === readerId;
-          const friend = iAmRequester ? rf.addressee : rf.requester;
-          return {
-            friendshipId: rf.id,
-            reader: {
-              id: friend.id,
-              name: friend.name,
-              avatar_seed: friend.avatar_seed ?? null,
-              book_count: (friend.books?.[0]?.count ?? 0) as number,
-              xp: (friend.xp ?? 0) as number,
-            },
-          } satisfies FriendData;
-        })
+        (acceptedData as any[])
+          .filter((rf) => {
+            const friend = rf.requester_id === readerId ? rf.addressee : rf.requester;
+            return friend != null;
+          })
+          .map((rf) => {
+            const iAmRequester = rf.requester_id === readerId;
+            const friend = iAmRequester ? rf.addressee : rf.requester;
+            return {
+              friendshipId: rf.id,
+              reader: {
+                id: friend.id,
+                name: friend.name,
+                avatar_seed: friend.avatar_seed ?? null,
+                book_count: (friend.books?.[0]?.count ?? 0) as number,
+                xp: (friend.xp ?? 0) as number,
+              },
+            } satisfies FriendData;
+          })
       );
     }
 
@@ -81,16 +86,18 @@ export function useFriends(readerId: string | null): UseFriendsResult {
 
     if (pendingData) {
       setPendingRequests(
-        (pendingData as any[]).map((rf) => ({
-          friendshipId: rf.id,
-          reader: {
-            id: rf.requester.id,
-            name: rf.requester.name,
-            avatar_seed: rf.requester.avatar_seed ?? null,
-            book_count: (rf.requester.books?.[0]?.count ?? 0) as number,
-            xp: (rf.requester.xp ?? 0) as number,
-          },
-        } satisfies FriendRequest))
+        (pendingData as any[])
+          .filter((rf) => rf.requester != null)
+          .map((rf) => ({
+            friendshipId: rf.id,
+            reader: {
+              id: rf.requester.id,
+              name: rf.requester.name,
+              avatar_seed: rf.requester.avatar_seed ?? null,
+              book_count: (rf.requester.books?.[0]?.count ?? 0) as number,
+              xp: (rf.requester.xp ?? 0) as number,
+            },
+          } satisfies FriendRequest))
       );
     }
 

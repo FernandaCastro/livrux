@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- 0006_book_title_in_transactions.sql
+-- 0007_book_title_in_transactions.sql
 -- Store book title in livrux_transactions.description when adding,
 -- completing, or deleting a book generates a non-zero Livrux balance change.
 -- ---------------------------------------------------------------------------
@@ -7,6 +7,8 @@
 
 -- ---------------------------------------------------------------------------
 -- log_book: add description = p_title when recording the earn transaction.
+-- Preserves the XP fix introduced in 0006 (XP awarded for all completed
+-- books, not only short ones).
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.log_book(
   p_reader_id           UUID,
@@ -66,35 +68,35 @@ BEGIN
     WHERE id = p_reader_id;
   END IF;
 
-  -- XP for completing a short book (≤ 100 pages) = total page count
-  IF p_status = 'completed' AND p_total_pages <= 100 THEN
+  -- XP = total pages for any book added directly as completed (no reading sessions).
+  -- Short books (≤ 100p) and long books alike get XP here because log_book is used
+  -- for retroactive entries that bypass the reading-session flow entirely.
+  IF p_status = 'completed' THEN
     v_xp_earned := p_total_pages;
 
     INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
-    VALUES (p_reader_id, v_user_id, v_xp_earned, 'book_completed_short');
+    VALUES (p_reader_id, v_user_id, v_xp_earned, 'book_completed');
 
     UPDATE public.readers
     SET xp = xp + v_xp_earned, updated_at = NOW()
     WHERE id = p_reader_id;
   END IF;
 
-  IF p_status = 'completed' THEN
-    FOR v_badge_row IN
-      SELECT awarded_slug, bonus_xp
-      FROM public.check_and_award_badges(p_reader_id)
-    LOOP
-      v_badges := v_badges || jsonb_build_object(
-        'slug',     v_badge_row.awarded_slug,
-        'bonus_xp', v_badge_row.bonus_xp
-      );
-    END LOOP;
+  FOR v_badge_row IN
+    SELECT awarded_slug, bonus_xp
+    FROM public.check_and_award_badges(p_reader_id)
+  LOOP
+    v_badges := v_badges || jsonb_build_object(
+      'slug',     v_badge_row.awarded_slug,
+      'bonus_xp', v_badge_row.bonus_xp
+    );
+  END LOOP;
 
-    IF public.check_book_club_badge(p_reader_id) THEN
-      v_badges := v_badges || jsonb_build_object(
-        'slug',     'book_club',
-        'bonus_xp', 100
-      );
-    END IF;
+  IF public.check_book_club_badge(p_reader_id) THEN
+    v_badges := v_badges || jsonb_build_object(
+      'slug',     'book_club',
+      'bonus_xp', 100
+    );
   END IF;
 
   RETURN jsonb_build_object(

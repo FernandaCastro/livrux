@@ -11,12 +11,14 @@ import {
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { supabase } from '../../../src/lib/supabase';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { FORMULA_PREVIEW_PAGES } from '../../../src/constants/config';
 import type { BonusRule } from '../../../src/types';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -44,9 +46,6 @@ export default function FormulaScreen() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  // Recompute live preview whenever the inputs change.
-  // min_pages bonus is included in the preview (using FORMULA_PREVIEW_PAGES vs threshold).
-  // foreign_language bonus is not shown in the preview since it depends on book-time user input.
   const previewBonusRules: BonusRule[] = minPagesEnabled
     ? [{ type: 'min_pages', threshold: Number(minPagesThreshold) || 0, bonus_amount: Number(minPagesBonus) || 0, label: '' }]
     : [];
@@ -119,127 +118,137 @@ export default function FormulaScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.screenTitle}>{t('settings.formulaTitle')}</Text>
-          <View style={{ width: 24 }} />
-        </View>
-
-        {/* Base formula inputs */}
-        <TextInput
-          label={t('settings.baseReward')}
-          value={baseReward}
-          onChangeText={setBaseReward}
-          keyboardType="decimal-pad"
-          placeholder="5"
-        />
-        <TextInput
-          label={t('settings.perPageRate')}
-          value={perPageRate}
-          onChangeText={setPerPageRate}
-          keyboardType="decimal-pad"
-          placeholder="0.1"
-        />
-
-        {/* Bonus rules section */}
-        <Text style={styles.sectionTitle}>{t('settings.bonusRules')}</Text>
-
-        {/* Min pages bonus */}
-        <View style={styles.ruleCard}>
-          <View style={styles.ruleHeader}>
-            <Text style={styles.ruleTitle}>{t('settings.minPagesBonus')}</Text>
-            <Switch
-              value={minPagesEnabled}
-              onValueChange={setMinPagesEnabled}
-              trackColor={{ true: Colors.primary }}
-              thumbColor={Colors.textOnPrimary}
-            />
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.backText}>←</Text>
+            </TouchableOpacity>
+            <Text style={styles.screenTitle}>{t('settings.formulaTitle')}</Text>
+            <View style={{ width: 24 }} />
           </View>
-          {minPagesEnabled && (
-            <View style={styles.ruleInputs}>
-              <View style={styles.ruleInputHalf}>
-                <TextInput
-                  label={t('settings.pageThreshold')}
-                  value={minPagesThreshold}
-                  onChangeText={setMinPagesThreshold}
-                  keyboardType="number-pad"
-                  placeholder="100"
-                />
-              </View>
-              <View style={styles.ruleInputHalf}>
-                <TextInput
-                  label={t('settings.bonusAmount')}
-                  value={minPagesBonus}
-                  onChangeText={setMinPagesBonus}
-                  keyboardType="decimal-pad"
-                  placeholder="5"
-                />
-              </View>
+
+          <TextInput
+            label={t('settings.baseReward')}
+            value={baseReward}
+            onChangeText={setBaseReward}
+            keyboardType="decimal-pad"
+            placeholder="5"
+          />
+          <TextInput
+            label={t('settings.perPageRate')}
+            value={perPageRate}
+            onChangeText={setPerPageRate}
+            keyboardType="decimal-pad"
+            placeholder="0.1"
+          />
+
+          <Text style={styles.sectionTitle}>{t('settings.bonusRules')}</Text>
+
+          <View style={styles.ruleCard}>
+            <View style={styles.ruleHeader}>
+              <Text style={styles.ruleTitle}>{t('settings.minPagesBonus')}</Text>
+              <Switch
+                value={minPagesEnabled}
+                onValueChange={setMinPagesEnabled}
+                trackColor={{ true: Colors.secondary }}
+                thumbColor={Colors.textOnPrimary}
+              />
             </View>
-          )}
-        </View>
-
-        {/* Foreign language bonus */}
-        <View style={styles.ruleCard}>
-          <View style={styles.ruleHeader}>
-            <Text style={styles.ruleTitle}>{t('settings.foreignLanguageBonus')}</Text>
-            <Switch
-              value={foreignLangEnabled}
-              onValueChange={setForeignLangEnabled}
-              trackColor={{ true: Colors.primary }}
-              thumbColor={Colors.textOnPrimary}
-            />
-          </View>
-          {foreignLangEnabled && (
-            <View style={styles.ruleInputs}>
-              <View style={styles.ruleInputFull}>
-                <TextInput
-                  label={t('settings.bonusAmount')}
-                  value={foreignLangBonus}
-                  onChangeText={setForeignLangBonus}
-                  keyboardType="decimal-pad"
-                  placeholder="5"
-                />
+            {minPagesEnabled && (
+              <View style={styles.ruleInputs}>
+                <View style={styles.ruleInputHalf}>
+                  <TextInput
+                    label={t('settings.pageThreshold')}
+                    value={minPagesThreshold}
+                    onChangeText={setMinPagesThreshold}
+                    keyboardType="number-pad"
+                    placeholder="100"
+                  />
+                </View>
+                <View style={styles.ruleInputHalf}>
+                  <TextInput
+                    label={t('settings.bonusAmount')}
+                    value={minPagesBonus}
+                    onChangeText={setMinPagesBonus}
+                    keyboardType="decimal-pad"
+                    placeholder="5"
+                  />
+                </View>
               </View>
-            </View>
-          )}
-        </View>
-
-        {/* Live preview */}
-        <View style={styles.previewCard}>
-          <Text style={styles.previewText}>
-            {t('settings.preview', {
-              pages: FORMULA_PREVIEW_PAGES,
-              coins: previewCoins,
-            })}
-          </Text>
-          <View style={styles.previewRow}>
-            <Text style={styles.previewCoin}>🪙</Text>
-            <Text style={styles.previewAmount}>{previewCoins}</Text>
-            <Text style={styles.previewCurrency}>Livrux</Text>
+            )}
           </View>
-        </View>
 
-        <Button
-          label={t('common.save')}
-          onPress={handleSave}
-          loading={isSaving}
-          fullWidth
-          style={styles.saveButton}
-        />
-      </ScrollView>
-      <BottomMenu />
-    </SafeAreaView>
+          <View style={styles.ruleCard}>
+            <View style={styles.ruleHeader}>
+              <Text style={styles.ruleTitle}>{t('settings.foreignLanguageBonus')}</Text>
+              <Switch
+                value={foreignLangEnabled}
+                onValueChange={setForeignLangEnabled}
+                trackColor={{ true: Colors.secondary }}
+                thumbColor={Colors.textOnPrimary}
+              />
+            </View>
+            {foreignLangEnabled && (
+              <View style={styles.ruleInputs}>
+                <View style={styles.ruleInputFull}>
+                  <TextInput
+                    label={t('settings.bonusAmount')}
+                    value={foreignLangBonus}
+                    onChangeText={setForeignLangBonus}
+                    keyboardType="decimal-pad"
+                    placeholder="5"
+                  />
+                </View>
+              </View>
+            )}
+          </View>
+
+          <LinearGradient
+            colors={['#F5A623', '#FF7F3E']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.previewCard}
+          >
+            <Text style={styles.previewText}>
+              {t('settings.preview', {
+                pages: FORMULA_PREVIEW_PAGES,
+                coins: previewCoins,
+              })}
+            </Text>
+            <View style={styles.previewRow}>
+              <Text style={styles.previewCoin}>🪙</Text>
+              <Text style={styles.previewAmount}>{previewCoins}</Text>
+              <Text style={styles.previewCurrency}>Livrux</Text>
+            </View>
+          </LinearGradient>
+
+          <Button
+            label={t('common.save')}
+            onPress={handleSave}
+            loading={isSaving}
+            fullWidth
+            style={styles.saveButton}
+          />
+        </ScrollView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
@@ -269,7 +278,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   ruleCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(255,255,255,0.75)',
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md,
@@ -295,7 +304,6 @@ const styles = StyleSheet.create({
   ruleInputHalf: { flex: 1 },
   ruleInputFull: { flex: 1 },
   previewCard: {
-    backgroundColor: Colors.primary,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
     alignItems: 'center',

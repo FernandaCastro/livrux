@@ -11,12 +11,14 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { supabase } from '../../../src/lib/supabase';
 import { useBooks } from '../../../src/hooks/useBooks';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FriendBookCard } from '../../../src/components/book/FriendBookCard';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
@@ -78,128 +80,146 @@ export default function FriendProfileScreen() {
 
   if (readerLoading) {
     return (
-      <SafeAreaView style={styles.safe}>
-        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
-      </SafeAreaView>
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.85, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.safe}>
+          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+        </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* ── Hero banner ── */}
-      <View style={styles.heroBanner}>
-        {friendReader && (
-          <>
-            {/* Avatar (left) + Name (right) */}
-            <View style={styles.heroContent}>
-              <View style={styles.avatarRing}>
-                <MultiavatarView
-                  seed={friendReader.avatar_seed}
-                  size={AVATAR_SIZE}
-                  borderColor={Colors.primaryLight}
-                  borderWidth={4}
-                />
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        {/* ── Hero banner ── */}
+        <LinearGradient
+          colors={['#3ECA8C', '#0A6E48']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroBanner}
+        >
+          {friendReader && (
+            <>
+              <View style={styles.heroContent}>
+                <View style={styles.avatarRing}>
+                  <MultiavatarView
+                    seed={friendReader.avatar_seed}
+                    size={AVATAR_SIZE}
+                    borderColor={Colors.friendEmeraldLight}
+                    borderWidth={4}
+                  />
+                </View>
+                <View style={styles.heroRight}>
+                  <Text style={styles.readerName} numberOfLines={2}>
+                    {friendReader.name}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.heroRight}>
-                <Text style={styles.readerName} numberOfLines={2}>
-                  {friendReader.name}
-                </Text>
-              </View>
-            </View>
 
-            {/* XP + Badges chips */}
-            <View style={styles.heroBadgesRow}>
-              <View style={styles.xpBadge}>
-                <Text style={styles.badgeIcon}>⭐</Text>
-                <Text style={styles.badgeCount}>{friendReader.xp}</Text>
-                <Text style={styles.badgeCurrency}>XP</Text>
-              </View>
+              <View style={styles.heroBadgesRow}>
+                <View style={styles.xpBadge}>
+                  <Text style={styles.badgeIcon}>⭐</Text>
+                  <Text style={styles.badgeCountAmber}>{friendReader.xp}</Text>
+                  <Text style={styles.badgeCurrencyAmber}>XP</Text>
+                </View>
 
-              <TouchableOpacity
-                style={styles.badgesBadge}
-                onPress={() => router.push(`/app/friend/badges/${readerId}?fromReaderId=${fromReaderId}`)}
-                activeOpacity={0.75}
-              >
-                <Text style={styles.badgeIcon}>🏅</Text>
-                <Text style={styles.badgeCount}>{badgeCount}</Text>
-                <Text style={styles.badgeCurrency}>{t('badges.title')}</Text>
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  style={styles.badgesBadge}
+                  onPress={() => router.push(`/app/friend/badges/${readerId}?fromReaderId=${fromReaderId}`)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={styles.badgeIcon}>🏅</Text>
+                  <Text style={styles.badgeCount}>{badgeCount}</Text>
+                </TouchableOpacity>
 
-            {/* Books stats row — simple semi-transparent buttons */}
-            <View style={styles.statsRow}>
-              <View style={styles.statChip}>
-                <Text style={styles.statChipText}>📚 {completedBooks.length} {t('reader.books')}</Text>
-              </View>
-              {readingNow.length > 0 && (
                 <View style={styles.statChip}>
-                  <Text style={styles.statChipText}>📖 {readingNow.length} {t('reader.readingNow')}</Text>
+                  <Text style={styles.statChipText}>📚 {completedBooks.length}</Text>
+                </View>
+
+                {readingNow.length > 0 && (
+                  <View style={styles.statChip}>
+                    <Text style={styles.statChipText}>📖 {readingNow.length}</Text>
+                  </View>
+                )}
+              </View>
+            </>
+          )}
+        </LinearGradient>
+
+        {/* ── Books list ── */}
+        <FlatList
+          data={completedBooks}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={async () => { await fetchReader(); await refreshBooks(); }}
+              tintColor={Colors.secondary}
+            />
+          }
+          ListHeaderComponent={
+            <>
+              {readingNow.length > 0 && (
+                <>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionIcon}>📖</Text>
+                    <Text style={styles.sectionTitle}>{t('reader.readingNow')}</Text>
+                  </View>
+                  {readingNow.map((item) => (
+                    <FriendBookCard key={item.id} book={item} />
+                  ))}
+                </>
+              )}
+              {completedBooks.length > 0 && (
+                <View style={[styles.sectionHeader, readingNow.length > 0 && styles.sectionHeaderSpaced]}>
+                  <Text style={styles.sectionIcon}>✅</Text>
+                  <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
                 </View>
               )}
-            </View>
-          </>
-        )}
-      </View>
-
-      {/* ── Books list ── */}
-      <FlatList
-        data={completedBooks}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={async () => { await fetchReader(); await refreshBooks(); }}
-            tintColor={Colors.primary}
-          />
-        }
-        ListHeaderComponent={
-          <>
-            {readingNow.length > 0 && (
-              <>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionIcon}>📖</Text>
-                  <Text style={styles.sectionTitle}>{t('reader.readingNow')}</Text>
-                </View>
-                {readingNow.map((item) => (
-                  <FriendBookCard key={item.id} book={item} />
-                ))}
-              </>
-            )}
-            {completedBooks.length > 0 && (
-              <View style={[styles.sectionHeader, readingNow.length > 0 && styles.sectionHeaderSpaced]}>
-                <Text style={styles.sectionIcon}>✅</Text>
-                <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+            </>
+          }
+          ListEmptyComponent={
+            !isLoading && books.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyIcon}>🌱</Text>
+                <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
+                <Text style={styles.emptySubtext}>{friendReader?.name} {t('friends.noBooksSub')}</Text>
               </View>
-            )}
-          </>
-        }
-        ListEmptyComponent={
-          !isLoading && books.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>🌱</Text>
-              <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
-              <Text style={styles.emptySubtext}>{friendReader?.name} {t('friends.noBooksSub')}</Text>
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => <FriendBookCard book={item} />}
-      />
+            ) : null
+          }
+          renderItem={({ item }) => <FriendBookCard book={item} />}
+        />
 
-      <BottomMenu />
-    </SafeAreaView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const AVATAR_SIZE = 80;
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
 
-  /* ── Hero ── */
   heroBanner: {
-    backgroundColor: Colors.friendEmerald,
     borderRadius: Radius.xl,
     marginHorizontal: Spacing.md,
     marginTop: Spacing.xs,
@@ -234,37 +254,32 @@ const styles = StyleSheet.create({
     color: Colors.textOnPrimary,
   },
 
-  /* ── Chips rows ── */
   heroBadgesRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: Spacing.md,
     marginBottom: Spacing.sm,
   },
-  statsRow: {
-    flexDirection: 'row',
-    alignSelf: 'stretch',
-    gap: Spacing.sm,
-    marginTop: Spacing.xs,
-  },
   statChip: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: Radius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: Spacing.xs,
+    backgroundColor: '#38BDF8',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    ...Shadows.sm,
   },
   statChipText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.sm,
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes.xl,
     color: Colors.textOnPrimary,
   },
   xpBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.chipXp,
+    backgroundColor: '#FCD34D',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
@@ -274,7 +289,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.chipBadge,
+    backgroundColor: '#22C55E',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
@@ -286,13 +301,22 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textOnPrimary,
   },
+  badgeCountAmber: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes.xl,
+    color: '#78350F',
+  },
   badgeCurrency: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
     color: 'rgba(255,255,255,0.85)',
   },
+  badgeCurrencyAmber: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: '#92400E',
+  },
 
-  /* ── List ── */
   list: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.lg,
@@ -314,7 +338,6 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
 
-  /* ── Empty ── */
   emptyContainer: {
     alignItems: 'center',
     paddingTop: Spacing['2xl'],

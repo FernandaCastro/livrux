@@ -12,11 +12,13 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef } from 'react';
 
 import { useLivrux } from '../../../src/hooks/useLivrux';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import type { LivruxTransaction } from '../../../src/types';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
@@ -30,7 +32,12 @@ function TransactionRow({ tx }: { tx: LivruxTransaction }) {
         : tx.reason === 'book_updated' ? 'rewards.reasonBookUpdated'
           : 'rewards.reasonManualSpend';
   return (
-    <View style={styles.txRow}>
+    <LinearGradient
+      colors={['#FEFBFF', '#FFFAF4']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.txRow}
+    >
       <View style={[styles.txAccent, isEarned ? styles.txAccentEarned : styles.txAccentSpent]} />
       <Text style={styles.txIcon}>{isEarned ? '🪙' : '💸'}</Text>
       <View style={styles.txInfo}>
@@ -45,7 +52,7 @@ function TransactionRow({ tx }: { tx: LivruxTransaction }) {
       <Text style={[styles.txAmount, isEarned ? styles.earned : styles.spent]}>
         {isEarned ? '+' : ''}{tx.amount.toFixed(2)} Lx
       </Text>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -67,71 +74,86 @@ export default function RewardsScreen() {
   const totalBalance = selectedReader?.livrux_balance ?? 0;
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* Gold banner */}
-      <View style={styles.heroBanner}>
-        {selectedReader ? (
-          <>
-            <View style={styles.bannerAvatar}>
-              <MultiavatarView seed={selectedReader.avatar_seed} size={38} borderColor="rgba(255,255,255,0.6)" borderWidth={2} />
-            </View>
-            <Text style={styles.title}>{t('rewards.title')}</Text>
-            <Text style={styles.balanceLabel}>{t('rewards.totalBalance')}</Text>
-            <View style={styles.balanceRow}>
-              <Text style={styles.balanceCoin}>🪙</Text>
-              <Text style={styles.balanceAmount}>{totalBalance.toFixed(2)}</Text>
-              <Text style={styles.balanceCurrency}>Livrux</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.spendButton}
-              onPress={() => router.push(`/app/spend?readerId=${selectedReader.id}`)}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.spendButtonText}>💸 {t('rewards.spendButton')}</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <Text style={styles.noReaderText}>{t('home.emptyTitle')}</Text>
-        )}
-      </View>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        {/* Gold banner */}
+        <LinearGradient
+          colors={['#F5A623', '#FF7F3E']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroBanner}
+        >
+          {selectedReader ? (
+            <>
+              <View style={styles.bannerAvatar}>
+                <MultiavatarView seed={selectedReader.avatar_seed} size={38} borderColor="rgba(255,255,255,0.6)" borderWidth={2} />
+              </View>
+              <Text style={styles.title}>{t('rewards.title')}</Text>
+              <Text style={styles.balanceLabel}>{t('rewards.totalBalance')}</Text>
+              <View style={styles.balanceRow}>
+                <Text style={styles.balanceCoin}>🪙</Text>
+                <Text style={styles.balanceAmount}>{totalBalance.toFixed(2)}</Text>
+                <Text style={styles.balanceCurrency}>Livrux</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.spendButton}
+                onPress={() => router.push(`/app/spend?readerId=${selectedReader.id}`)}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.spendButtonText}>💸 {t('rewards.spendButton')}</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={styles.noReaderText}>{t('home.emptyTitle')}</Text>
+          )}
+        </LinearGradient>
 
-      {/* Transaction history */}
-      {isLoading ? (
-        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
-      ) : (
-        <FlatList
-          data={transactions}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isLoading}
-              onRefresh={refresh}
-              tintColor={Colors.primary}
-            />
-          }
-          ListHeaderComponent={
-            <Text style={styles.sectionTitle}>{t('rewards.history')}</Text>
-          }
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Text style={styles.emptyIcon}>🏦</Text>
-              <Text style={styles.emptyText}>{t('rewards.emptyHistory')}</Text>
-            </View>
-          }
-          renderItem={({ item }) => <TransactionRow tx={item} />}
-        />
-      )}
-      <BottomMenu />
-    </SafeAreaView>
+        {/* Transaction history */}
+        {isLoading ? (
+          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+        ) : (
+          <FlatList
+            data={transactions}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={refresh}
+                tintColor={Colors.secondary}
+              />
+            }
+            ListHeaderComponent={
+              <Text style={styles.sectionTitle}>{t('rewards.history')}</Text>
+            }
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Text style={styles.emptyIcon}>🏦</Text>
+                <Text style={styles.emptyText}>{t('rewards.emptyHistory')}</Text>
+              </View>
+            }
+            renderItem={({ item }) => <TransactionRow tx={item} />}
+          />
+        )}
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   heroBanner: {
-    backgroundColor: Colors.primary,
     borderRadius: Radius.xl,
     marginHorizontal: Spacing.md,
     marginTop: Spacing.xs,
@@ -145,12 +167,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Spacing.md,
     left: Spacing.md,
-  },
-  readerName: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
-    color: Colors.textOnPrimary,
-    marginBottom: Spacing.sm,
   },
   balanceLabel: {
     fontFamily: Fonts.bodySemiBold,
@@ -215,7 +231,6 @@ const styles = StyleSheet.create({
   txRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
     borderRadius: Radius.md,
     padding: Spacing.md,
     paddingLeft: Spacing.md + 4,

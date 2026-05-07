@@ -10,12 +10,12 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  ScrollView,
   AppState,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState, useEffect, useRef } from 'react';
 import * as Clipboard from 'expo-clipboard';
 
@@ -24,6 +24,7 @@ import { useReaderStore } from '../../../src/stores/readerStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { FriendCard } from '../../../src/components/friends/FriendCard';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { FriendSearchResult } from '../../../src/types';
@@ -128,180 +129,198 @@ export default function FriendsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* Hero banner */}
-      <View style={styles.heroBanner}>
-        {selectedReader && (
-          <View style={styles.bannerAvatar}>
-            <MultiavatarView seed={selectedReader.avatar_seed} size={38} borderColor="rgba(255,255,255,0.6)" borderWidth={2} />
-          </View>
-        )}
-        <Text style={styles.title}>{t('friends.title')}</Text>
-        {friendCode && (
-          <TouchableOpacity onPress={handleCopyCode} activeOpacity={0.75} style={styles.codeBlock}>
-            <Text style={styles.codeLabel}>{t('friends.myCode')}</Text>
-            <Text style={styles.codeValue}>{friendCode}</Text>
-            <Text style={styles.codeHint}>
-              {codeCopied ? t('friends.codeCopied') : t('friends.shareCodeHint')}
-            </Text>
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity style={styles.addBtn} onPress={() => setAddModalVisible(true)} activeOpacity={0.85}>
-          <Text style={styles.addBtnText}>+ {t('friends.addFriend')}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={friends}
-        keyExtractor={(item) => item.friendshipId}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor={Colors.primary} />
-        }
-        ListHeaderComponent={
-          <>
-            {/* Pending requests */}
-            {pendingRequests.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionLabel}>{t('friends.pendingRequests')}</Text>
-                {pendingRequests.map((req) =>
-                  canManageFriends ? (
-                    <FriendCard
-                      key={req.friendshipId}
-                      name={req.reader.name}
-                      avatarSeed={req.reader.avatar_seed}
-                      bookCount={req.reader.book_count}
-                      xp={req.reader.xp}
-                      onAccept={() => acceptRequest(req.friendshipId)}
-                      onReject={() => rejectRequest(req.friendshipId)}
-                    />
-                  ) : (
-                    <FriendCard
-                      key={req.friendshipId}
-                      name={req.reader.name}
-                      avatarSeed={req.reader.avatar_seed}
-                      bookCount={req.reader.book_count}
-                      xp={req.reader.xp}
-                    />
-                  )
-                )}
-                {!canManageFriends && (
-                  <Text style={styles.autonomyHint}>{t('friends.parentApprovalNeeded')}</Text>
-                )}
-              </View>
-            )}
-
-            {/* Friends section header */}
-            {friends.length > 0 && (
-              <Text style={styles.sectionLabel}>{t('friends.myFriends')}</Text>
-            )}
-          </>
-        }
-        ListEmptyComponent={
-          !isLoading && pendingRequests.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>👥</Text>
-              <Text style={styles.emptyText}>{t('friends.noFriends')}</Text>
-              <Text style={styles.emptySubtext}>{t('friends.noFriendsHint')}</Text>
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <FriendCard
-            name={item.reader.name}
-            avatarSeed={item.reader.avatar_seed}
-            bookCount={item.reader.book_count}
-            xp={item.reader.xp}
-            onPress={() => router.push(`/app/friend/${item.reader.id}?fromReaderId=${readerId}`)}
-            onReject={
-              canManageFriends
-                ? () => handleUnfriend(item.friendshipId, item.reader.name)
-                : undefined
-            }
-          />
-        )}
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
       />
-
-      {/* Add friend modal */}
-      <Modal visible={addModalVisible} transparent animationType="slide" onRequestClose={closeAddModal}>
-        <Pressable style={styles.overlay} onPress={closeAddModal}>
-          <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
-            <Text style={styles.sheetTitle}>{t('friends.addFriend')}</Text>
-            <Text style={styles.sheetSubtitle}>{t('friends.enterCodeLabel')}</Text>
-
-            <View style={styles.codeInputRow}>
-              <TextInput
-                style={styles.codeInput}
-                value={searchCode}
-                onChangeText={(v) => {
-                  setSearchCode(v.toUpperCase());
-                  setSearchError(null);
-                  setSearchResult(null);
-                  setRequestSent(false);
-                }}
-                placeholder={t('friends.codePlaceholder')}
-                placeholderTextColor={Colors.textDisabled}
-                autoCapitalize="characters"
-                maxLength={6}
-                autoCorrect={false}
-              />
-              <TouchableOpacity
-                style={[styles.searchBtn, searchLoading && styles.searchBtnDisabled]}
-                onPress={handleSearch}
-                disabled={searchLoading || !searchCode.trim()}
-                activeOpacity={0.8}
-              >
-                {searchLoading
-                  ? <ActivityIndicator color={Colors.textOnPrimary} size="small" />
-                  : <Text style={styles.searchBtnText}>{t('friends.search')}</Text>
-                }
-              </TouchableOpacity>
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        {/* Hero banner */}
+        <LinearGradient
+          colors={['#3ECA8C', '#0A6E48']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroBanner}
+        >
+          {selectedReader && (
+            <View style={styles.bannerAvatar}>
+              <MultiavatarView seed={selectedReader.avatar_seed} size={38} borderColor="rgba(255,255,255,0.6)" borderWidth={2} />
             </View>
+          )}
+          <Text style={styles.title}>{t('friends.title')}</Text>
+          {friendCode && (
+            <TouchableOpacity onPress={handleCopyCode} activeOpacity={0.75} style={styles.codeBlock}>
+              <Text style={styles.codeLabel}>{t('friends.myCode')}</Text>
+              <Text style={styles.codeValue}>{friendCode}</Text>
+              <Text style={styles.codeHint}>
+                {codeCopied ? t('friends.codeCopied') : t('friends.shareCodeHint')}
+              </Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.addBtn} onPress={() => setAddModalVisible(true)} activeOpacity={0.85}>
+            <Text style={styles.addBtnText}>+ {t('friends.addFriend')}</Text>
+          </TouchableOpacity>
+        </LinearGradient>
 
-            {searchError && (
-              <Text style={styles.errorText}>{searchError}</Text>
-            )}
-
-            {searchResult && !requestSent && (
-              <View style={styles.searchResultCard}>
-                <MultiavatarView seed={searchResult.avatar_seed} size={56} borderColor={Colors.primaryLight} borderWidth={2} />
-                <View style={styles.searchResultInfo}>
-                  <Text style={styles.searchResultName}>{searchResult.name}</Text>
-                  <Text style={styles.searchResultBooks}>📚 {searchResult.book_count} {t('friends.booksRead')}</Text>
-                  {searchResult.xp > 0 && (
-                    <Text style={styles.searchResultBooks}>⭐ {searchResult.xp} XP</Text>
+        <FlatList
+          data={friends}
+          keyExtractor={(item) => item.friendshipId}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor={Colors.secondary} />
+          }
+          ListHeaderComponent={
+            <>
+              {pendingRequests.length > 0 && (
+                <View style={styles.section}>
+                  <Text style={styles.sectionLabel}>{t('friends.pendingRequests')}</Text>
+                  {pendingRequests.map((req) =>
+                    canManageFriends ? (
+                      <FriendCard
+                        key={req.friendshipId}
+                        name={req.reader.name}
+                        avatarSeed={req.reader.avatar_seed}
+                        bookCount={req.reader.book_count}
+                        xp={req.reader.xp}
+                        onAccept={() => acceptRequest(req.friendshipId)}
+                        onReject={() => rejectRequest(req.friendshipId)}
+                      />
+                    ) : (
+                      <FriendCard
+                        key={req.friendshipId}
+                        name={req.reader.name}
+                        avatarSeed={req.reader.avatar_seed}
+                        bookCount={req.reader.book_count}
+                        xp={req.reader.xp}
+                      />
+                    )
+                  )}
+                  {!canManageFriends && (
+                    <Text style={styles.autonomyHint}>{t('friends.parentApprovalNeeded')}</Text>
                   )}
                 </View>
-                <TouchableOpacity style={styles.sendBtn} onPress={handleSendRequest} activeOpacity={0.8}>
-                  <Text style={styles.sendBtnText}>{t('friends.sendRequest')}</Text>
+              )}
+
+              {friends.length > 0 && (
+                <Text style={styles.sectionLabel}>{t('friends.myFriends')}</Text>
+              )}
+            </>
+          }
+          ListEmptyComponent={
+            !isLoading && pendingRequests.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyIcon}>👥</Text>
+                <Text style={styles.emptyText}>{t('friends.noFriends')}</Text>
+                <Text style={styles.emptySubtext}>{t('friends.noFriendsHint')}</Text>
+              </View>
+            ) : null
+          }
+          renderItem={({ item }) => (
+            <FriendCard
+              name={item.reader.name}
+              avatarSeed={item.reader.avatar_seed}
+              bookCount={item.reader.book_count}
+              xp={item.reader.xp}
+              onPress={() => router.push(`/app/friend/${item.reader.id}?fromReaderId=${readerId}`)}
+              onReject={
+                canManageFriends
+                  ? () => handleUnfriend(item.friendshipId, item.reader.name)
+                  : undefined
+              }
+            />
+          )}
+        />
+
+        {/* Add friend modal */}
+        <Modal visible={addModalVisible} transparent animationType="slide" onRequestClose={closeAddModal}>
+          <Pressable style={styles.overlay} onPress={closeAddModal}>
+            <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+              <Text style={styles.sheetTitle}>{t('friends.addFriend')}</Text>
+              <Text style={styles.sheetSubtitle}>{t('friends.enterCodeLabel')}</Text>
+
+              <View style={styles.codeInputRow}>
+                <TextInput
+                  style={styles.codeInput}
+                  value={searchCode}
+                  onChangeText={(v) => {
+                    setSearchCode(v.toUpperCase());
+                    setSearchError(null);
+                    setSearchResult(null);
+                    setRequestSent(false);
+                  }}
+                  placeholder={t('friends.codePlaceholder')}
+                  placeholderTextColor={Colors.textDisabled}
+                  autoCapitalize="characters"
+                  maxLength={6}
+                  autoCorrect={false}
+                />
+                <TouchableOpacity
+                  style={[styles.searchBtn, searchLoading && styles.searchBtnDisabled]}
+                  onPress={handleSearch}
+                  disabled={searchLoading || !searchCode.trim()}
+                  activeOpacity={0.8}
+                >
+                  {searchLoading
+                    ? <ActivityIndicator color={Colors.textOnPrimary} size="small" />
+                    : <Text style={styles.searchBtnText}>{t('friends.search')}</Text>
+                  }
                 </TouchableOpacity>
               </View>
-            )}
 
-            {requestSent && (
-              <View style={styles.sentContainer}>
-                <Text style={styles.sentIcon}>🎉</Text>
-                <Text style={styles.sentText}>{t('friends.requestSentSuccess')}</Text>
-              </View>
-            )}
+              {searchError && (
+                <Text style={styles.errorText}>{searchError}</Text>
+              )}
 
-            <TouchableOpacity onPress={closeAddModal} style={styles.closeBtn} activeOpacity={0.7}>
-              <Text style={styles.closeBtnText}>{t('common.cancel')}</Text>
-            </TouchableOpacity>
+              {searchResult && !requestSent && (
+                <LinearGradient
+                  colors={['#FEFBFF', '#FFFAF4']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.searchResultCard}
+                >
+                  <MultiavatarView seed={searchResult.avatar_seed} size={56} borderColor={Colors.secondaryLight} borderWidth={2} />
+                  <View style={styles.searchResultInfo}>
+                    <Text style={styles.searchResultName}>{searchResult.name}</Text>
+                    <Text style={styles.searchResultBooks}>📚 {searchResult.book_count} {t('friends.booksRead')}</Text>
+                    {searchResult.xp > 0 && (
+                      <Text style={styles.searchResultBooks}>⭐ {searchResult.xp} XP</Text>
+                    )}
+                  </View>
+                  <TouchableOpacity style={styles.sendBtn} onPress={handleSendRequest} activeOpacity={0.8}>
+                    <Text style={styles.sendBtnText}>{t('friends.sendRequest')}</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              )}
+
+              {requestSent && (
+                <View style={styles.sentContainer}>
+                  <Text style={styles.sentIcon}>🎉</Text>
+                  <Text style={styles.sentText}>{t('friends.requestSentSuccess')}</Text>
+                </View>
+              )}
+
+              <TouchableOpacity onPress={closeAddModal} style={styles.closeBtn} activeOpacity={0.7}>
+                <Text style={styles.closeBtnText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+            </Pressable>
           </Pressable>
-        </Pressable>
-      </Modal>
+        </Modal>
 
-      <BottomMenu />
-    </SafeAreaView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   heroBanner: {
-    backgroundColor: Colors.friendEmerald,
     borderRadius: Radius.xl,
     marginHorizontal: Spacing.md,
     marginTop: Spacing.xs,
@@ -402,7 +421,6 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: Colors.textOnPrimary,
   },
-  // Modal
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -472,7 +490,6 @@ const styles = StyleSheet.create({
   searchResultCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
     padding: Spacing.md,
     gap: Spacing.md,
@@ -492,7 +509,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   sendBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.secondary,
     borderRadius: Radius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,

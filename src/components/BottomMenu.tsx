@@ -8,9 +8,18 @@ import { useParentalStore } from '../stores/parentalStore';
 import { useReaderStore } from '../stores/readerStore';
 import { MultiavatarView } from './reader/MultiavatarView';
 import { ReaderSelectorSheet } from './ReaderSelectorSheet';
-import { Colors, Fonts, FontSizes, Spacing } from '../constants/theme';
+import { Colors, Fonts, FontSizes, Spacing, Radius } from '../constants/theme';
 
-export const BOTTOM_MENU_HEIGHT = 54;
+export const BOTTOM_MENU_HEIGHT = 62;
+
+const ACCENT_READER  = Colors.secondary;   // purple
+const ACCENT_REWARDS = Colors.primary;     // gold
+const ACCENT_FRIENDS = '#3ECA8C';          // jade
+const ACCENT_SETTINGS = Colors.textSecondary;
+
+function TabIndicator({ color }: { color: string }) {
+  return <View style={[styles.indicator, { backgroundColor: color }]} />;
+}
 
 export function BottomMenu() {
   const { t } = useTranslation();
@@ -23,10 +32,10 @@ export function BottomMenu() {
 
   const showSettingsTab = !profile?.parental_pin || isParentUnlocked;
 
-  const isSettings = pathname.startsWith('/app/settings');
-  const isWallet = pathname.startsWith('/app/rewards');
-  const isFriends = pathname.startsWith('/app/friends') || pathname.startsWith('/app/friend/');
-  const isReaderContext = !isSettings && !isWallet && !isFriends;
+  const isSettings   = pathname.startsWith('/app/settings');
+  const isWallet     = pathname.startsWith('/app/rewards');
+  const isFriends    = pathname.startsWith('/app/friends') || pathname.startsWith('/app/friend/');
+  const isReader     = !isSettings && !isWallet && !isFriends;
 
   if (!selectedReader) {
     return (
@@ -36,8 +45,9 @@ export function BottomMenu() {
           onPress={() => router.replace('/app')}
           activeOpacity={0.7}
         >
+          {isReader && <TabIndicator color={ACCENT_READER} />}
           <Image source={require('../../assets/readers.png')} style={styles.readersIcon} resizeMode="contain" />
-          <Text style={[styles.label, !isSettings && styles.activeLabel]}>{t('home.title')}</Text>
+          <Text style={[styles.label, isReader && { color: ACCENT_READER }]}>{t('home.title')}</Text>
         </TouchableOpacity>
 
         {showSettingsTab && (
@@ -46,8 +56,9 @@ export function BottomMenu() {
             onPress={() => router.push('/app/settings')}
             activeOpacity={0.7}
           >
+            {isSettings && <TabIndicator color={ACCENT_SETTINGS} />}
             <Text style={styles.icon}>⚙️</Text>
-            <Text style={[styles.label, isSettings && styles.activeLabel]}>{t('settings.title')}</Text>
+            <Text style={[styles.label, isSettings && { color: ACCENT_SETTINGS }]}>{t('settings.title')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -58,50 +69,60 @@ export function BottomMenu() {
     <>
       <ReaderSelectorSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
       <View style={styles.container}>
-        {/* Reader avatar — opens selector sheet */}
+
+        {/* Reader — purple */}
         <TouchableOpacity
           style={styles.tab}
           onPress={() => setSheetVisible(true)}
           activeOpacity={0.7}
         >
-          <MultiavatarView seed={selectedReader.avatar_seed} size={26} />
-          <Text
-            style={[styles.label, isReaderContext && styles.activeReaderLabel]}
-            numberOfLines={1}
-          >
+          {isReader && <TabIndicator color={ACCENT_READER} />}
+          <View style={[styles.iconWrap, isReader && { backgroundColor: Colors.secondaryLight }]}>
+            <MultiavatarView seed={selectedReader.avatar_seed} size={24} />
+          </View>
+          <Text style={[styles.label, isReader && { color: ACCENT_READER }]} numberOfLines={1}>
             {selectedReader.name}
           </Text>
         </TouchableOpacity>
 
-        {/* Rewards */}
+        {/* Rewards — gold */}
         <TouchableOpacity
           style={styles.tab}
           onPress={() => router.push(`/app/rewards?readerId=${selectedReader.id}`)}
           activeOpacity={0.7}
         >
-          <Text style={styles.icon}>🪙</Text>
-          <Text style={[styles.label, isWallet && styles.activeLabel]}>{t('rewards.title')}</Text>
+          {isWallet && <TabIndicator color={ACCENT_REWARDS} />}
+          <View style={[styles.iconWrap, isWallet && { backgroundColor: '#FEF3C7' }]}>
+            <Text style={styles.icon}>🪙</Text>
+          </View>
+          <Text style={[styles.label, isWallet && { color: ACCENT_REWARDS }]}>{t('rewards.title')}</Text>
         </TouchableOpacity>
 
-        {/* Friends */}
+        {/* Friends — jade */}
         <TouchableOpacity
           style={styles.tab}
           onPress={() => router.push(`/app/friends/${selectedReader.id}`)}
           activeOpacity={0.7}
         >
-          <Text style={styles.icon}>👦👧</Text>
-          <Text style={[styles.label, isFriends && styles.activeFriendsLabel]}>{t('friends.title')}</Text>
+          {isFriends && <TabIndicator color={ACCENT_FRIENDS} />}
+          <View style={[styles.iconWrap, isFriends && { backgroundColor: '#D1FAE5' }]}>
+            <Text style={styles.icon}>👦👧</Text>
+          </View>
+          <Text style={[styles.label, isFriends && { color: ACCENT_FRIENDS }]}>{t('friends.title')}</Text>
         </TouchableOpacity>
 
-        {/* Settings */}
+        {/* Settings — grey */}
         {showSettingsTab && (
           <TouchableOpacity
             style={styles.tab}
             onPress={() => router.push('/app/settings')}
             activeOpacity={0.7}
           >
-            <Text style={styles.icon}>⚙️</Text>
-            <Text style={[styles.label, isSettings && styles.activeLabel]}>{t('settings.title')}</Text>
+            {isSettings && <TabIndicator color={ACCENT_SETTINGS} />}
+            <View style={[styles.iconWrap, isSettings && { backgroundColor: Colors.border }]}>
+              <Text style={styles.icon}>⚙️</Text>
+            </View>
+            <Text style={[styles.label, isSettings && { color: ACCENT_SETTINGS }]}>{t('settings.title')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -113,7 +134,7 @@ const styles = StyleSheet.create({
   container: {
     height: BOTTOM_MENU_HEIGHT,
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(255,255,255,0.92)',
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },
@@ -121,23 +142,29 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: Spacing.xs,
     gap: 2,
   },
+  indicator: {
+    position: 'absolute',
+    top: 0,
+    width: 28,
+    height: 3,
+    borderBottomLeftRadius: Radius.full,
+    borderBottomRightRadius: Radius.full,
+  },
+  iconWrap: {
+    width: 36,
+    height: 28,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   readersIcon: { width: 50, height: 50, marginTop: -9, marginBottom: -7 },
-  icon: { fontSize: 22 },
+  icon: { fontSize: 20 },
   label: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,
     color: Colors.textDisabled,
-  },
-  activeLabel: {
-    color: Colors.primary,
-  },
-  activeReaderLabel: {
-    color: Colors.readerBlue,
-  },
-  activeFriendsLabel: {
-    color: Colors.chipFriend,
+    maxWidth: 72,
   },
 });

@@ -17,6 +17,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { parse, format, isValid } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useBooks } from '../../../src/hooks/useBooks';
 import { useAuthStore } from '../../../src/stores/authStore';
@@ -24,6 +25,7 @@ import { useReaderStore } from '../../../src/stores/readerStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
@@ -83,14 +85,12 @@ export default function EditBookScreen() {
     defaultValues: { title: '', author: '', totalPages: '', dateCompleted: '' },
   });
 
-  // Pre-fill the form once the book is available from the store.
   useEffect(() => {
     if (book && !initialised) {
       reset({
         title: book.title,
         author: book.author ?? '',
         totalPages: String(book.total_pages),
-        // Convert stored YYYY-MM-DD to display format DD/MM/YYYY.
         dateCompleted: format(new Date(book.date_completed ?? ''), 'dd/MM/yyyy'),
       });
       setCoverUri(book.cover_url);
@@ -101,7 +101,6 @@ export default function EditBookScreen() {
     }
   }, [book, initialised, reset]);
 
-  // Live Livrux preview based on the new values.
   const pagesValue = watch('totalPages');
   const previewPages = Number(pagesValue) || 0;
   const newLivrux = previewPages > 0
@@ -116,8 +115,6 @@ export default function EditBookScreen() {
     try {
       const pages = Number(data.totalPages);
       const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
-      // Combine user-entered date (DD/MM/YYYY) with the original time from
-      // book.date_completed so the sort order among same-day books is preserved.
       const newDate = parse(data.dateCompleted, 'dd/MM/yyyy', new Date());
       const originalDateTime = new Date(book.date_completed ?? '');
       newDate.setHours(
@@ -141,7 +138,6 @@ export default function EditBookScreen() {
         review: review.trim() || null,
       });
 
-      // Optimistically adjust the reader balance by the delta.
       if (selectedReader) {
         updateBalance(selectedReader.livrux_balance + (livruxEarned - book.livrux_earned));
       }
@@ -154,176 +150,194 @@ export default function EditBookScreen() {
 
   if (!book) {
     return (
-      <SafeAreaView style={styles.safe}>
-        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
-      </SafeAreaView>
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.85, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.safe}>
+          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+        </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.screenTitle}>{t('book.editBook')}</Text>
-        </View>
-
-        {/* Cover — shows the original cover if present */}
-        {coverUri && (
-          <View style={styles.coverContainer}>
-            <Image source={{ uri: coverUri }} style={styles.coverImage} resizeMode="cover" />
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Text style={styles.screenTitle}>{t('book.editBook')}</Text>
           </View>
-        )}
 
-        {/* Form fields */}
-        <Controller
-          control={control}
-          name="title"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label={t('book.title')}
-              placeholder={t('book.titlePlaceholder')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.title?.message}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="author"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label={t('book.author')}
-              placeholder={t('book.authorPlaceholder')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="totalPages"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label={t('book.totalPages')}
-              placeholder={t('book.totalPagesPlaceholder')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              keyboardType="number-pad"
-              error={errors.totalPages?.message}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="dateCompleted"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label={t('book.dateCompleted')}
-              placeholder="DD/MM/YYYY"
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              keyboardType="number-pad"
-              error={errors.dateCompleted?.message}
-            />
-          )}
-        />
-
-        {/* Foreign language checkbox — only shown when the bonus rule is configured */}
-        {hasForeignLanguageBonus && (
-          <TouchableOpacity
-            style={styles.checkboxRow}
-            onPress={() => setIsForeignLanguage(v => !v)}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.checkbox, isForeignLanguage && styles.checkboxChecked]}>
-              {isForeignLanguage && <Text style={styles.checkmark}>✓</Text>}
+          {coverUri && (
+            <View style={styles.coverContainer}>
+              <Image source={{ uri: coverUri }} style={styles.coverImage} resizeMode="cover" />
             </View>
-            <Text style={styles.checkboxLabel}>{t('book.foreignLanguage')}</Text>
-          </TouchableOpacity>
-        )}
+          )}
 
-        {/* Live Livrux preview — shows new value and delta vs original */}
-        {previewPages > 0 && (
-          <View style={styles.previewCard}>
-            <Text style={styles.previewLabel}>{t('book.willEarn')}</Text>
-            <View style={styles.previewRow}>
-              <Text style={styles.previewCoin}>🪙</Text>
-              <Text style={styles.previewAmount}>{newLivrux.toFixed(2)}</Text>
-              <Text style={styles.previewCurrency}>Livrux</Text>
-            </View>
-            {delta !== 0 && (
-              <Text style={[styles.deltaText, delta > 0 ? styles.deltaPositive : styles.deltaNegative]}>
-                {delta > 0 ? '+' : ''}{delta.toFixed(2)} vs original
-              </Text>
+          <Controller
+            control={control}
+            name="title"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label={t('book.title')}
+                placeholder={t('book.titlePlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.title?.message}
+              />
             )}
-          </View>
-        )}
-
-        {/* Rating picker */}
-        <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>
-        <View style={styles.ratingRow}>
-          {([
-            { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
-            { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
-            { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
-          ] as const).map((opt) => (
-            <TouchableOpacity
-              key={opt.value}
-              style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
-              onPress={() => setRating(rating === opt.value ? null : opt.value)}
-              activeOpacity={0.75}
-            >
-              <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
-              <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
-                {opt.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Review */}
-        <View style={styles.reviewContainer}>
-          <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
-          <RNTextInput
-            style={styles.reviewInput}
-            value={review}
-            onChangeText={setReview}
-            placeholder={t('book.reviewPlaceholder')}
-            placeholderTextColor={Colors.textDisabled}
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
           />
-        </View>
 
-        <Button
-          label={t('common.save')}
-          onPress={handleSubmit(onSubmit)}
-          loading={isSubmitting}
-          fullWidth
-          style={styles.saveButton}
-        />
-      </ScrollView>
-      <BottomMenu />
-    </SafeAreaView>
+          <Controller
+            control={control}
+            name="author"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label={t('book.author')}
+                placeholder={t('book.authorPlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="totalPages"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label={t('book.totalPages')}
+                placeholder={t('book.totalPagesPlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                keyboardType="number-pad"
+                error={errors.totalPages?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="dateCompleted"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label={t('book.dateCompleted')}
+                placeholder="DD/MM/YYYY"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                keyboardType="number-pad"
+                error={errors.dateCompleted?.message}
+              />
+            )}
+          />
+
+          {hasForeignLanguageBonus && (
+            <TouchableOpacity
+              style={styles.checkboxRow}
+              onPress={() => setIsForeignLanguage(v => !v)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, isForeignLanguage && styles.checkboxChecked]}>
+                {isForeignLanguage && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>{t('book.foreignLanguage')}</Text>
+            </TouchableOpacity>
+          )}
+
+          {previewPages > 0 && (
+            <LinearGradient
+              colors={['#F5A623', '#FF7F3E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.previewCard}
+            >
+              <Text style={styles.previewLabel}>{t('book.willEarn')}</Text>
+              <View style={styles.previewRow}>
+                <Text style={styles.previewCoin}>🪙</Text>
+                <Text style={styles.previewAmount}>{newLivrux.toFixed(2)}</Text>
+                <Text style={styles.previewCurrency}>Livrux</Text>
+              </View>
+              {delta !== 0 && (
+                <Text style={[styles.deltaText, delta > 0 ? styles.deltaPositive : styles.deltaNegative]}>
+                  {delta > 0 ? '+' : ''}{delta.toFixed(2)} vs original
+                </Text>
+              )}
+            </LinearGradient>
+          )}
+
+          <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>
+          <View style={styles.ratingRow}>
+            {([
+              { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
+              { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
+              { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
+            ] as const).map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
+                onPress={() => setRating(rating === opt.value ? null : opt.value)}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
+                <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.reviewContainer}>
+            <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
+            <RNTextInput
+              style={styles.reviewInput}
+              value={review}
+              onChangeText={setReview}
+              placeholder={t('book.reviewPlaceholder')}
+              placeholderTextColor={Colors.textDisabled}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+          </View>
+
+          <Button
+            label={t('common.save')}
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+            fullWidth
+            style={styles.saveButton}
+          />
+        </ScrollView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
@@ -361,12 +375,12 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: Radius.sm,
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: Colors.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.secondary,
   },
   checkmark: {
     color: Colors.textOnPrimary,
@@ -379,7 +393,6 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   previewCard: {
-    backgroundColor: Colors.primary,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
     alignItems: 'center',
@@ -437,7 +450,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
     borderRadius: Radius.lg,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: 'rgba(255,255,255,0.65)',
     borderWidth: 2,
     borderColor: 'transparent',
     gap: 4,
@@ -466,7 +479,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   reviewInput: {
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(255,255,255,0.75)',
     borderRadius: Radius.md,
     borderWidth: 1,
     borderColor: Colors.border,

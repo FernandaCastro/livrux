@@ -15,19 +15,20 @@ import {
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { supabase } from '../../../src/lib/supabase';
-import { hashPin, verifyPin } from '../../../src/lib/pinHash';
+import { hashPin } from '../../../src/lib/pinHash';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { useReaders } from '../../../src/hooks/useReaders';
 import { PinModal } from '../../../src/components/PinModal';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
 // ─── PinCaptureModal ──────────────────────────────────────────────────────────
-// Collects a new PIN (no verification) and returns the SHA-256 hash via onCapture.
 
 interface PinCaptureModalProps {
   visible: boolean;
@@ -93,15 +94,15 @@ function PinCaptureModal({ visible, title, subtitle, onCapture, onCancel }: PinC
 type FlowContext = 'parental' | Reader;
 type FlowStep =
   | 'idle'
-  | 'verify_current'   // verify existing PIN before changing/removing
-  | 'enter_new'        // enter new PIN
-  | 'confirm_new';     // re-enter new PIN to confirm
+  | 'verify_current'
+  | 'enter_new'
+  | 'confirm_new';
 
 interface FlowState {
   step: FlowStep;
   action: 'set' | 'change' | 'remove';
   context: FlowContext;
-  pendingHash: string | null; // hash of first entry, used in confirm step
+  pendingHash: string | null;
 }
 
 const IDLE: FlowState = { step: 'idle', action: 'set', context: 'parental', pendingHash: null };
@@ -122,8 +123,6 @@ export default function ParentalControlsScreen() {
 
   const resetFlow = () => setFlow(IDLE);
 
-  // ─── Parental PIN actions ─────────────────────────────────────────────────
-
   const startSetParentalPin = () =>
     setFlow({ step: 'enter_new', action: 'set', context: 'parental', pendingHash: null });
 
@@ -132,8 +131,6 @@ export default function ParentalControlsScreen() {
 
   const startRemoveParentalPin = () =>
     setFlow({ step: 'verify_current', action: 'remove', context: 'parental', pendingHash: null });
-
-  // ─── Reader PIN actions ───────────────────────────────────────────────────
 
   const startSetReaderPin = (reader: Reader) =>
     setFlow({ step: 'enter_new', action: 'set', context: reader, pendingHash: null });
@@ -156,8 +153,6 @@ export default function ParentalControlsScreen() {
       ]
     );
   };
-
-  // ─── Persist helpers ──────────────────────────────────────────────────────
 
   const saveParentalPin = async (hash: string | null) => {
     if (!profile) return;
@@ -184,8 +179,6 @@ export default function ParentalControlsScreen() {
     await refreshReaders();
   };
 
-  // ─── Flow callbacks ───────────────────────────────────────────────────────
-
   const isParentalContext = flow.context === 'parental';
   const currentHash = isParentalContext
     ? (profile?.parental_pin ?? null)
@@ -196,7 +189,6 @@ export default function ParentalControlsScreen() {
 
   const onCurrentVerified = () => {
     if (flow.action === 'remove') {
-      // Confirmed — proceed with removal
       resetFlow();
       if (isParentalContext) {
         saveParentalPin(null);
@@ -204,7 +196,6 @@ export default function ParentalControlsScreen() {
         saveReaderPin(flow.context as Reader, null);
       }
     } else {
-      // change → go to enter_new
       setFlow((prev) => ({ ...prev, step: 'enter_new' }));
     }
   };
@@ -214,7 +205,6 @@ export default function ParentalControlsScreen() {
   };
 
   const onConfirmed = () => {
-    // PinModal verified pendingHash === re-entry; save it
     const hash = flow.pendingHash!;
     resetFlow();
     if (isParentalContext) {
@@ -225,117 +215,121 @@ export default function ParentalControlsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* ── Modals ── */}
-
-      {/* Verify current PIN */}
-      <PinModal
-        visible={flow.step === 'verify_current'}
-        title={contextName}
-        subtitle={
-          flow.action === 'remove'
-            ? t('parental.confirmCurrentToRemove')
-            : t('parental.confirmCurrentToChange')
-        }
-        pinHash={currentHash ?? undefined}
-        onSuccess={onCurrentVerified}
-        onCancel={resetFlow}
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
       />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        {/* ── Modals ── */}
+        <PinModal
+          visible={flow.step === 'verify_current'}
+          title={contextName}
+          subtitle={
+            flow.action === 'remove'
+              ? t('parental.confirmCurrentToRemove')
+              : t('parental.confirmCurrentToChange')
+          }
+          pinHash={currentHash ?? undefined}
+          onSuccess={onCurrentVerified}
+          onCancel={resetFlow}
+        />
 
-      {/* Enter new PIN (capture) */}
-      <PinCaptureModal
-        visible={flow.step === 'enter_new'}
-        title={contextName}
-        subtitle={t('parental.enterNewPin')}
-        onCapture={onNewPinCaptured}
-        onCancel={resetFlow}
-      />
+        <PinCaptureModal
+          visible={flow.step === 'enter_new'}
+          title={contextName}
+          subtitle={t('parental.enterNewPin')}
+          onCapture={onNewPinCaptured}
+          onCancel={resetFlow}
+        />
 
-      {/* Confirm new PIN (verify against first entry) */}
-      <PinModal
-        visible={flow.step === 'confirm_new'}
-        title={contextName}
-        subtitle={t('parental.confirmNewPin')}
-        pinHash={flow.pendingHash ?? undefined}
-        onSuccess={onConfirmed}
-        onCancel={resetFlow}
-      />
+        <PinModal
+          visible={flow.step === 'confirm_new'}
+          title={contextName}
+          subtitle={t('parental.confirmNewPin')}
+          pinHash={flow.pendingHash ?? undefined}
+          onSuccess={onConfirmed}
+          onCancel={resetFlow}
+        />
 
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.screenTitle}>{t('parental.title')}</Text>
-          <View style={{ width: 32 }} />
-        </View>
-
-        {saving && <ActivityIndicator color={Colors.primary} style={styles.saving} />}
-
-        {/* ── Parental PIN ── */}
-        <Text style={styles.sectionLabel}>{t('parental.parentalPinSection')}</Text>
-        <View style={styles.card}>
-          {!hasParentalPin ? (
-            <SettingsRow icon="🔐" label={t('parental.setParentalPin')} onPress={startSetParentalPin} />
-          ) : (
-            <>
-              <SettingsRow icon="🔄" label={t('parental.changeParentalPin')} onPress={startChangeParentalPin} />
-              <View style={styles.divider} />
-              <SettingsRow icon="🗑️" label={t('parental.removeParentalPin')} onPress={startRemoveParentalPin} danger />
-            </>
-          )}
-        </View>
-
-        {/* ── Reader PINs ── */}
-        <Text style={styles.sectionLabel}>{t('parental.readerPinsSection')}</Text>
-        {readers.length === 0 ? (
-          <Text style={styles.emptyText}>{t('parental.noReaders')}</Text>
-        ) : (
-          <View style={styles.card}>
-            {readers.map((reader, i) => (
-              <View key={reader.id}>
-                <View style={styles.readerRow}>
-                  <Text style={styles.readerName}>{reader.name}</Text>
-                  <View style={styles.readerActions}>
-                    {!reader.pin ? (
-                      <TouchableOpacity onPress={() => startSetReaderPin(reader)} style={styles.pill} activeOpacity={0.75}>
-                        <Text style={styles.pillText}>{t('parental.setPinBtn')}</Text>
-                      </TouchableOpacity>
-                    ) : (
-                      <>
-                        <TouchableOpacity onPress={() => startChangeReaderPin(reader)} style={styles.pill} activeOpacity={0.75}>
-                          <Text style={styles.pillText}>{t('parental.changePinBtn')}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => confirmRemoveReaderPin(reader)} style={[styles.pill, styles.pillDanger]} activeOpacity={0.75}>
-                          <Text style={[styles.pillText, styles.pillDangerText]}>✕</Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
-                  </View>
-                </View>
-                <View style={styles.autonomyRow}>
-                  <View style={styles.autonomyTextGroup}>
-                    <Text style={styles.autonomyLabel}>👥 {t('friends.friendsAutonomy')}</Text>
-                    <Text style={styles.autonomyHint}>{t('friends.friendsAutonomyHint')}</Text>
-                  </View>
-                  <Switch
-                    value={reader.friends_autonomy}
-                    onValueChange={() => toggleFriendsAutonomy(reader)}
-                    trackColor={{ false: Colors.border, true: Colors.secondary }}
-                    thumbColor={Colors.surface}
-                  />
-                </View>
-                {i < readers.length - 1 && <View style={styles.divider} />}
-              </View>
-            ))}
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.backText}>←</Text>
+            </TouchableOpacity>
+            <Text style={styles.screenTitle}>{t('parental.title')}</Text>
+            <View style={{ width: 32 }} />
           </View>
-        )}
-      </ScrollView>
-      <BottomMenu />
-    </SafeAreaView>
+
+          {saving && <ActivityIndicator color={Colors.secondary} style={styles.saving} />}
+
+          <Text style={styles.sectionLabel}>{t('parental.parentalPinSection')}</Text>
+          <View style={styles.card}>
+            {!hasParentalPin ? (
+              <SettingsRow icon="🔐" label={t('parental.setParentalPin')} onPress={startSetParentalPin} />
+            ) : (
+              <>
+                <SettingsRow icon="🔄" label={t('parental.changeParentalPin')} onPress={startChangeParentalPin} />
+                <View style={styles.divider} />
+                <SettingsRow icon="🗑️" label={t('parental.removeParentalPin')} onPress={startRemoveParentalPin} danger />
+              </>
+            )}
+          </View>
+
+          <Text style={styles.sectionLabel}>{t('parental.readerPinsSection')}</Text>
+          {readers.length === 0 ? (
+            <Text style={styles.emptyText}>{t('parental.noReaders')}</Text>
+          ) : (
+            <View style={styles.card}>
+              {readers.map((reader, i) => (
+                <View key={reader.id}>
+                  <View style={styles.readerRow}>
+                    <Text style={styles.readerName}>{reader.name}</Text>
+                    <View style={styles.readerActions}>
+                      {!reader.pin ? (
+                        <TouchableOpacity onPress={() => startSetReaderPin(reader)} style={styles.pill} activeOpacity={0.75}>
+                          <Text style={styles.pillText}>{t('parental.setPinBtn')}</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <>
+                          <TouchableOpacity onPress={() => startChangeReaderPin(reader)} style={styles.pill} activeOpacity={0.75}>
+                            <Text style={styles.pillText}>{t('parental.changePinBtn')}</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => confirmRemoveReaderPin(reader)} style={[styles.pill, styles.pillDanger]} activeOpacity={0.75}>
+                            <Text style={[styles.pillText, styles.pillDangerText]}>✕</Text>
+                          </TouchableOpacity>
+                        </>
+                      )}
+                    </View>
+                  </View>
+                  <View style={styles.autonomyRow}>
+                    <View style={styles.autonomyTextGroup}>
+                      <Text style={styles.autonomyLabel}>👥 {t('friends.friendsAutonomy')}</Text>
+                      <Text style={styles.autonomyHint}>{t('friends.friendsAutonomyHint')}</Text>
+                    </View>
+                    <Switch
+                      value={reader.friends_autonomy}
+                      onValueChange={() => toggleFriendsAutonomy(reader)}
+                      trackColor={{ false: Colors.border, true: Colors.secondary }}
+                      thumbColor={Colors.surface}
+                    />
+                  </View>
+                  {i < readers.length - 1 && <View style={styles.divider} />}
+                </View>
+              ))}
+            </View>
+          )}
+        </ScrollView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -349,7 +343,6 @@ function SettingsRow({ icon, label, onPress, danger }: { icon: string; label: st
   );
 }
 
-// Shared styles for PinCaptureModal
 const cs = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -430,7 +423,8 @@ const cs = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
@@ -464,7 +458,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
   },
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(255,255,255,0.75)',
     borderRadius: Radius.lg,
     overflow: 'hidden',
     marginBottom: Spacing.lg,
@@ -511,7 +505,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pill: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: Colors.secondaryLight,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
@@ -535,7 +529,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: 'rgba(237,233,254,0.5)',
     gap: Spacing.md,
   },
   autonomyTextGroup: { flex: 1 },

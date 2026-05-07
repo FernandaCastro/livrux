@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 
-import { useBooks } from '../../../src/hooks/useBooks';
+import { useBook } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReadingSession } from '../../../src/hooks/useReadingSession';
 import { completeBookRpc } from '../../../src/hooks/useLivrux';
@@ -47,7 +47,7 @@ export default function BookDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { selectedReader, updateBalance } = useReaderStore();
-  const { books, isLoading, deleteBook } = useBooks(selectedReader?.id ?? null);
+  const { book, isLoading, deleteBook } = useBook(id ?? null);
   const { formula } = useAuthStore();
   const { loggedToday, lastPageRead, logSession } = useReadingSession(selectedReader?.id ?? null, id ?? null);
   const [sessionModalVisible, setSessionModalVisible] = useState(false);
@@ -64,7 +64,6 @@ export default function BookDetailScreen() {
     router.back();
   };
 
-  const book = books.find((b) => b.id === id);
 
   if (isLoading) {
     return (

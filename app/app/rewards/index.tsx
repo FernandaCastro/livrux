@@ -2,12 +2,12 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
   AppState,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
@@ -60,7 +60,7 @@ export default function RewardsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { selectedReader } = useReaderStore();
-  const { transactions, isLoading, refresh } = useLivrux(selectedReader?.id ?? null);
+  const { transactions, isLoading, refresh, fetchNextPage, hasNextPage, isFetchingNextPage } = useLivrux(selectedReader?.id ?? null);
   const appStateRef = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -120,9 +120,10 @@ export default function RewardsScreen() {
         {isLoading ? (
           <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
         ) : (
-          <FlatList
+          <FlashList
             data={transactions}
             keyExtractor={(item) => item.id}
+            drawDistance={500}
             contentContainerStyle={styles.list}
             showsVerticalScrollIndicator={false}
             refreshControl={
@@ -132,6 +133,8 @@ export default function RewardsScreen() {
                 tintColor={Colors.secondary}
               />
             }
+            onEndReached={() => { if (hasNextPage) fetchNextPage(); }}
+            onEndReachedThreshold={0.4}
             ListHeaderComponent={
               <Text style={styles.sectionTitle}>{t('rewards.history')}</Text>
             }
@@ -140,6 +143,11 @@ export default function RewardsScreen() {
                 <Text style={styles.emptyIcon}>🏦</Text>
                 <Text style={styles.emptyText}>{t('rewards.emptyHistory')}</Text>
               </View>
+            }
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <ActivityIndicator color={Colors.secondary} style={{ paddingVertical: 16 }} />
+              ) : null
             }
             renderItem={({ item }) => <TransactionRow tx={item} />}
           />

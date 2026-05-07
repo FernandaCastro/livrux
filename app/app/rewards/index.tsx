@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.lg,
-    color: Colors.textPrimary,
+    color: Colors.primary,
     marginBottom: Spacing.md,
   },
   title: {

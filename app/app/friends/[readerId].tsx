@@ -372,9 +372,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   sectionLabel: {
-    fontFamily: Fonts.bodySemiBold,
+    fontFamily: Fonts.heading,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: Colors.friendEmerald,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: Spacing.sm,

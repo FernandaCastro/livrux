@@ -223,9 +223,9 @@ const styles = StyleSheet.create({
   screenTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
-    color: Colors.textPrimary,
+    color: Colors.secondary,
     paddingTop: Spacing.lg,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   sectionLabel: {
     fontFamily: Fonts.bodySemiBold,

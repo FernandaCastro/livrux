@@ -273,7 +273,6 @@ export default function ReaderDashboardScreen() {
               )}
               {completedBooks.length > 0 && (
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionIcon}>✅</Text>
                   <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
                 </View>
               )}
@@ -509,7 +508,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.lg,
-    color: Colors.textPrimary,
+    color: Colors.secondary,
   },
 
   /* ── Empty ── */

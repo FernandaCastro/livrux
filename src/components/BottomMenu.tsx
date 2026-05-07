@@ -47,7 +47,7 @@ export function BottomMenu() {
         >
           {isReader && <TabIndicator color={ACCENT_READER} />}
           <Image source={require('../../assets/readers.png')} style={styles.readersIcon} resizeMode="contain" />
-          <Text style={[styles.label, isReader && { color: ACCENT_READER }]}>{t('home.title')}</Text>
+          {/* <Text style={[styles.label, isReader && { color: ACCENT_READER }]}>{t('home.title')}</Text> */}
         </TouchableOpacity>
 
         {showSettingsTab && (
@@ -58,7 +58,7 @@ export function BottomMenu() {
           >
             {isSettings && <TabIndicator color={ACCENT_SETTINGS} />}
             <Text style={styles.icon}>⚙️</Text>
-            <Text style={[styles.label, isSettings && { color: ACCENT_SETTINGS }]}>{t('settings.title')}</Text>
+            {/* <Text style={[styles.label, isSettings && { color: ACCENT_SETTINGS }]}>{t('settings.title')}</Text> */}
           </TouchableOpacity>
         )}
       </View>
@@ -78,11 +78,11 @@ export function BottomMenu() {
         >
           {isReader && <TabIndicator color={ACCENT_READER} />}
           <View style={[styles.iconWrap, isReader && { backgroundColor: Colors.secondaryLight }]}>
-            <MultiavatarView seed={selectedReader.avatar_seed} size={24} />
+            <MultiavatarView seed={selectedReader.avatar_seed} size={30} />
           </View>
-          <Text style={[styles.label, isReader && { color: ACCENT_READER }]} numberOfLines={1}>
+          {/* <Text style={[styles.label, isReader && { color: ACCENT_READER }]} numberOfLines={1}>
             {selectedReader.name}
-          </Text>
+          </Text> */}
         </TouchableOpacity>
 
         {/* Rewards — gold */}
@@ -95,7 +95,7 @@ export function BottomMenu() {
           <View style={[styles.iconWrap, isWallet && { backgroundColor: '#FEF3C7' }]}>
             <Text style={styles.icon}>🪙</Text>
           </View>
-          <Text style={[styles.label, isWallet && { color: ACCENT_REWARDS }]}>{t('rewards.title')}</Text>
+          {/* <Text style={[styles.label, isWallet && { color: ACCENT_REWARDS }]}>{t('rewards.title')}</Text> */}
         </TouchableOpacity>
 
         {/* Friends — jade */}
@@ -106,9 +106,9 @@ export function BottomMenu() {
         >
           {isFriends && <TabIndicator color={ACCENT_FRIENDS} />}
           <View style={[styles.iconWrap, isFriends && { backgroundColor: '#D1FAE5' }]}>
-            <Text style={styles.icon}>👦👧</Text>
+          <Image source={require('../../assets/friends.png')} style={styles.iconIcon} resizeMode="contain" />
           </View>
-          <Text style={[styles.label, isFriends && { color: ACCENT_FRIENDS }]}>{t('friends.title')}</Text>
+          {/* <Text style={[styles.label, isFriends && { color: ACCENT_FRIENDS }]}>{t('friends.title')}</Text> */}
         </TouchableOpacity>
 
         {/* Settings — grey */}
@@ -122,7 +122,7 @@ export function BottomMenu() {
             <View style={[styles.iconWrap, isSettings && { backgroundColor: Colors.border }]}>
               <Text style={styles.icon}>⚙️</Text>
             </View>
-            <Text style={[styles.label, isSettings && { color: ACCENT_SETTINGS }]}>{t('settings.title')}</Text>
+            {/* <Text style={[styles.label, isSettings && { color: ACCENT_SETTINGS }]}>{t('settings.title')}</Text> */}
           </TouchableOpacity>
         )}
       </View>
@@ -153,14 +153,15 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: Radius.full,
   },
   iconWrap: {
-    width: 36,
-    height: 28,
+    width: 40,
+    height: 40,
     borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   readersIcon: { width: 50, height: 50, marginTop: -9, marginBottom: -7 },
-  icon: { fontSize: 20 },
+  icon: { fontSize: 28 },
+  iconIcon: { width: 33, height: 33},
   label: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,

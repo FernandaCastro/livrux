@@ -12,6 +12,7 @@ import {
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useBooks } from '../../../src/hooks/useBooks';
@@ -24,6 +25,7 @@ import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
@@ -46,8 +48,6 @@ export default function ReaderDashboardScreen() {
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (appStateRef.current !== 'active' && nextState === 'active') {
-        // Synchronous state update forces an immediate re-render so SafeAreaView
-        // recalculates its insets before the async data fetches complete.
         flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
         refresh();
         refreshBadges();
@@ -101,9 +101,18 @@ export default function ReaderDashboardScreen() {
 
   if (!reader) {
     return (
-      <SafeAreaView style={styles.safe}>
-        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
-      </SafeAreaView>
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.85, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.safe}>
+          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+        </SafeAreaView>
+      </View>
     );
   }
 
@@ -126,175 +135,190 @@ export default function ReaderDashboardScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {/* ── Hero banner ── */}
-      <View style={styles.heroBanner}>
-        {/* Actions row — edit is always visible; delete requires parent unlock. */}
-        <View style={styles.bannerHeader}>
-          <View style={styles.bannerActions}>
-            <TouchableOpacity
-              onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              style={styles.actionBtn}
-            >
-              <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
-            </TouchableOpacity>
-            {canDelete && (
-              <TouchableOpacity
-                onPress={handleDelete}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                style={[styles.actionBtn, styles.actionBtnDelete]}
-              >
-                <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-
-        {/* Avatar (left) + Name aligned to avatar bottom (right) */}
-        <View style={styles.heroContent}>
-          <View style={styles.avatarRing}>
-            <MultiavatarView
-              seed={reader.avatar_seed}
-              size={AVATAR_SIZE}
-              borderColor={Colors.primaryLight}
-              borderWidth={4}
-            />
-          </View>
-          <View style={styles.heroRight}>
-            <Text style={styles.readerName} numberOfLines={2}>{reader.name}</Text>
-          </View>
-        </View>
-
-        {/* Livrux + XP + Conquistas */}
-        <View style={styles.heroBadgesRow}>
-          <View style={styles.balanceBadge}>
-            <Text style={styles.badgeCoin}>🪙</Text>
-            <Text style={styles.balanceAmount}>{reader.livrux_balance.toFixed(2)}</Text>
-          </View>
-          <View style={styles.xpBadge}>
-            <Text style={styles.badgeCoin}>⭐</Text>
-            <Text style={styles.balanceAmount}>{reader.xp}</Text>
-            <Text style={styles.balanceCurrency}>XP</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.badgesBadge}
-            onPress={() => router.push('/app/badges')}
-            activeOpacity={0.75}
-          >
-            <Text style={styles.badgeIcon}>🏅</Text>
-            <Text style={styles.booksCount}>{earnedBadges.length}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* ── Streak + books row ── */}
-        <View style={styles.streakRow}>
-          <View style={styles.streakChip}>
-            <Text style={styles.streakText}>
-              {streak.current_streak > 0
-                ? t(streak.current_streak === 1 ? 'streak.current' : 'streak.current_plural', { count: streak.current_streak })
-                : '🔥 0'}
-            </Text>
-            {streak.best_streak > 0 && (
-              <Text style={styles.streakBest}>{t('streak.best', { count: streak.best_streak })}</Text>
-            )}
-          </View>
-          <View style={styles.booksChip}>
-            <Text style={styles.booksCount}>📚 {completedBooks.length} </Text>
-            <Text style={styles.booksChipText}>{t('reader.books')}</Text>
-          </View>
-        </View>
-
-        {/* ── Add book button ── */}
-        <TouchableOpacity
-          style={styles.addBookBtn}
-          onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.addBookBtnText}>📖 + {t('book.logBook')}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* ── Books list ── */}
-      <FlatList
-        ref={flatListRef}
-        data={completedBooks}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={refresh}
-            tintColor={Colors.primary}
-          />
-        }
-        ListHeaderComponent={
-          <>
-            {/* Currently reading section */}
-            {readingNow.length > 0 && (
-              <>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionIcon}>📖</Text>
-                  <Text style={styles.sectionTitle}>{t('reader.readingNow')}</Text>
-                </View>
-                {readingNow.map((item) => (
-                  <BookCard
-                    key={item.id}
-                    book={item}
-                    onPress={() => router.push(`/app/book/${item.id}`)}
-                    onLongPress={canEdit ? () => router.push(`/app/book/edit?bookId=${item.id}`) : undefined}
-                  />
-                ))}
-              </>
-            )}
-            {completedBooks.length > 0 && (
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionIcon}>✅</Text>
-                <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
-              </View>
-            )}
-          </>
-        }
-        ListEmptyComponent={
-          !isLoading && readingNow.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>📚</Text>
-              <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
-              <Text style={styles.emptySubtext}>{t('reader.noBooksHint')}</Text>
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <BookCard
-            book={item}
-            onPress={() => router.push(`/app/book/${item.id}`)}
-            onLongPress={canEdit ? () => router.push(`/app/book/edit?bookId=${item.id}`) : undefined}
-          />
-        )}
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
       />
+      <FloatingEmojis />
 
-      <BottomMenu />
-    </SafeAreaView>
+      <SafeAreaView style={styles.safe}>
+        {/* ── Hero banner ── */}
+        <LinearGradient
+          colors={[Colors.secondary, Colors.secondary2]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroBanner}
+        >
+          {/* Actions row */}
+          <View style={styles.bannerHeader}>
+            <View style={styles.bannerActions}>
+              <TouchableOpacity
+                onPress={() => router.push(`/app/reader/add?editId=${reader.id}`)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.actionBtn}
+              >
+                <Text style={styles.actionBtnText}>{t('reader.editReader')}</Text>
+              </TouchableOpacity>
+              {canDelete && (
+                <TouchableOpacity
+                  onPress={handleDelete}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={[styles.actionBtn, styles.actionBtnDelete]}
+                >
+                  <Text style={styles.actionBtnDeleteText}>{t('reader.deleteReader')}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
+          {/* Avatar + Name */}
+          <View style={styles.heroContent}>
+            <View style={styles.avatarRing}>
+              <MultiavatarView
+                seed={reader.avatar_seed}
+                size={AVATAR_SIZE}
+                borderColor="rgba(255,255,255,0.9)"
+                borderWidth={4}
+              />
+            </View>
+            <View style={styles.heroRight}>
+              <Text style={styles.readerName} numberOfLines={2}>{reader.name}</Text>
+            </View>
+          </View>
+
+          {/* Stats chips */}
+          <View style={styles.heroBadgesRow}>
+            <View style={styles.balanceBadge}>
+              <Text style={styles.badgeCoin}>🪙</Text>
+              <Text style={styles.balanceAmount}>{reader.livrux_balance.toFixed(2)}</Text>
+            </View>
+            <View style={styles.xpBadge}>
+              <Text style={styles.badgeCoin}>⭐</Text>
+              <Text style={styles.balanceAmount}>{reader.xp}</Text>
+              <Text style={styles.balanceCurrency}>XP</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.badgesBadge}
+              onPress={() => router.push('/app/badges')}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.badgeIcon}>🏅</Text>
+              <Text style={styles.booksCount}>{earnedBadges.length}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Streak + books row */}
+          <View style={styles.streakRow}>
+            <View style={styles.streakChip}>
+              <Text style={styles.streakText}>
+                {streak.current_streak > 0
+                  ? t(streak.current_streak === 1 ? 'streak.current' : 'streak.current_plural', { count: streak.current_streak })
+                  : '🔥 0'}
+              </Text>
+              {streak.best_streak > 0 && (
+                <Text style={styles.streakBest}>{t('streak.best', { count: streak.best_streak })}</Text>
+              )}
+            </View>
+            <View style={styles.booksChip}>
+              <Text style={styles.booksCount}>📚 {completedBooks.length} </Text>
+              <Text style={styles.booksChipText}>{t('reader.books')}</Text>
+            </View>
+          </View>
+
+          {/* Add book button */}
+          <TouchableOpacity
+            style={styles.addBookBtn}
+            onPress={() => router.push(`/app/book/add?readerId=${reader.id}&bookCount=${books.length}`)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.addBookBtnText}>📖 + {t('book.logBook')}</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+
+        {/* ── Books list ── */}
+        <FlatList
+          ref={flatListRef}
+          data={completedBooks}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={refresh}
+              tintColor={Colors.secondary}
+            />
+          }
+          ListHeaderComponent={
+            <>
+              {readingNow.length > 0 && (
+                <>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionIcon}>📖</Text>
+                    <Text style={styles.sectionTitle}>{t('reader.readingNow')}</Text>
+                  </View>
+                  {readingNow.map((item) => (
+                    <BookCard
+                      key={item.id}
+                      book={item}
+                      onPress={() => router.push(`/app/book/${item.id}`)}
+                      onLongPress={canEdit ? () => router.push(`/app/book/edit?bookId=${item.id}`) : undefined}
+                    />
+                  ))}
+                </>
+              )}
+              {completedBooks.length > 0 && (
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionIcon}>✅</Text>
+                  <Text style={styles.sectionTitle}>{t('reader.books')}</Text>
+                </View>
+              )}
+            </>
+          }
+          ListEmptyComponent={
+            !isLoading && readingNow.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyIcon}>📚</Text>
+                <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
+                <Text style={styles.emptySubtext}>{t('reader.noBooksHint')}</Text>
+              </View>
+            ) : null
+          }
+          renderItem={({ item }) => (
+            <BookCard
+              book={item}
+              onPress={() => router.push(`/app/book/${item.id}`)}
+              onLongPress={canEdit ? () => router.push(`/app/book/edit?bookId=${item.id}`) : undefined}
+            />
+          )}
+        />
+
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const AVATAR_SIZE = 80;
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
 
   /* ── Hero ── */
   heroBanner: {
-    backgroundColor: Colors.readerBlue,
     alignItems: 'center',
-    justifyContent: 'space-between',
     borderRadius: Radius.xl,
     marginHorizontal: Spacing.md,
     marginTop: Spacing.xs,
     marginBottom: Spacing.md,
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.lg,
+    overflow: 'hidden',
     ...Shadows.lg,
   },
   bannerHeader: {
@@ -402,11 +426,6 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textOnPrimary,
   },
-  booksLabel: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.85)',
-  },
 
   /* ── Streak ── */
   streakRow: {
@@ -442,11 +461,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     alignItems: 'center',
   },
-  badgesBtnText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
-  },
   booksChipText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,
@@ -457,14 +471,13 @@ const styles = StyleSheet.create({
   addBookBtn: {
     alignSelf: 'stretch',
     marginTop: Spacing.lg,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(255,255,255,0.22)',
     borderRadius: Radius.xl,
     paddingVertical: Spacing.sm,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.6)',
+    borderColor: 'rgba(255,255,255,0.55)',
   },
-
   addBookBtnText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,

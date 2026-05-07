@@ -70,16 +70,10 @@ export default function ReaderDashboardScreen() {
   const canDelete = isParentUnlocked;
 
   useEffect(() => {
-    if (bookPersistedCount > 0 && id) {
+    if (bookPersistedCount > 0) {
       refresh();
       refreshReading();
       refreshBadges();
-      supabase
-        .from('readers')
-        .select('*')
-        .eq('id', id)
-        .single()
-        .then(({ data }) => { if (data) setSelectedReader(data as Reader); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookPersistedCount]);

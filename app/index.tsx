@@ -190,6 +190,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.md,
+    backgroundColor: Colors.backgroundTinted,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    marginBottom: Spacing.sm,
+    shadowColor: Colors.secondary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
   },
   logoHeader: {
     flexDirection: 'row',
@@ -199,7 +208,7 @@ const styles = StyleSheet.create({
   appName: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['3xl'],
-    color: Colors.primary,
+    color: Colors.secondary,
     letterSpacing: 0.5,
   },
   greeting: {

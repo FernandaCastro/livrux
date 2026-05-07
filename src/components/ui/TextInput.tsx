@@ -92,7 +92,11 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   focused: {
-    borderColor: Colors.primary,
+    borderColor: Colors.secondary,
+    shadowColor: Colors.secondary,
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    elevation: 3,
   },
   errorBorder: {
     borderColor: Colors.error,

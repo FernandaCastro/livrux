@@ -105,16 +105,19 @@ export default function SignUpScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
+          {/* Hero header zone */}
+          <View style={styles.hero}>
             <Image
               source={require('../../assets/adaptive-icon.png')}
               style={styles.logo}
               resizeMode="contain"
             />
+            <Text style={styles.appName}>Livrux</Text>
             <Text style={styles.tagline}>{t('auth.signUp')}</Text>
           </View>
 
-          <View style={styles.form}>
+          {/* Form card */}
+          <View style={styles.card}>
             {serverError ? (
               <View style={styles.errorBanner}>
                 <Text style={styles.errorBannerText}>{serverError}</Text>
@@ -223,20 +226,21 @@ export default function SignUpScreen() {
 
             <Button
               label={t('auth.signUp')}
+              variant="secondary"
               onPress={handleSubmit(onSubmit)}
               loading={isSubmitting}
               fullWidth
               style={styles.submitButton}
             />
-          </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>{t('auth.hasAccount')} </Text>
-            <Link href="/auth/sign-in" asChild>
-              <TouchableOpacity>
-                <Text style={styles.footerLink}>{t('auth.signIn')}</Text>
-              </TouchableOpacity>
-            </Link>
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>{t('auth.hasAccount')} </Text>
+              <Link href="/auth/sign-in" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.footerLink}>{t('auth.signIn')}</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -245,30 +249,48 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  safe: { flex: 1, backgroundColor: Colors.backgroundTinted },
   flex: { flex: 1 },
   container: {
     flexGrow: 1,
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing['3xl'],
-    paddingBottom: Spacing.xl,
   },
-  header: {
+  hero: {
     alignItems: 'center',
-    marginBottom: Spacing['2xl'],
+    paddingTop: Spacing['2xl'],
+    paddingBottom: Spacing.xl,
+    paddingHorizontal: Spacing.xl,
   },
   logo: {
-    width: 180,
-    height: 180,
-    marginBottom: Spacing.sm,
+    width: 80,
+    height: 80,
+    marginBottom: Spacing.xs,
+  },
+  appName: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes['3xl'],
+    color: Colors.secondary,
+    letterSpacing: 0.5,
   },
   tagline: {
     fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.lg,
+    fontSize: FontSizes.md,
     color: Colors.textSecondary,
     marginTop: Spacing.xs,
   },
-  form: { flex: 1 },
+  card: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing['2xl'],
+    paddingBottom: Spacing.xl,
+    shadowColor: Colors.secondary,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 8,
+  },
   errorBanner: {
     backgroundColor: '#FDECEA',
     borderRadius: Radius.md,
@@ -300,8 +322,8 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   checkboxChecked: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Colors.secondary,
+    borderColor: Colors.secondary,
   },
   checkboxMark: {
     color: '#FFFFFF',

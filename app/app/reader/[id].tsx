@@ -2,20 +2,20 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
   AppState,
   Alert,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useBooks } from '../../../src/hooks/useBooks';
+import { useBooks, useReadingBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReaders } from '../../../src/hooks/useReaders';
 import { useParentalStore } from '../../../src/stores/parentalStore';
@@ -35,12 +35,12 @@ export default function ReaderDashboardScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { selectedReader, setSelectedReader, bookPersistedCount } = useReaderStore();
   const { deleteReader } = useReaders();
-  const { books, isLoading, refresh } = useBooks(id ?? null);
+  const { books, isLoading, refresh, fetchNextPage, hasNextPage, isFetchingNextPage } = useBooks(id ?? null);
+  const { readingBooks, refresh: refreshReading } = useReadingBooks(id ?? null);
   const { streak } = useStreak(id ?? null);
   const { earnedBadges, refresh: refreshBadges } = useBadges(id ?? null);
 
-  const readingNow = books.filter((b) => b.status === 'reading');
-  const completedBooks = books.filter((b) => b.status === 'completed');
+  const completedBooks = books;
   const { canEditReader, isParentUnlocked } = useParentalStore();
   const appStateRef = useRef(AppState.currentState);
   const flatListRef = useRef<any>(null);
@@ -50,6 +50,7 @@ export default function ReaderDashboardScreen() {
       if (appStateRef.current !== 'active' && nextState === 'active') {
         flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
         refresh();
+        refreshReading();
         refreshBadges();
         if (id) {
           supabase
@@ -69,15 +70,10 @@ export default function ReaderDashboardScreen() {
   const canDelete = isParentUnlocked;
 
   useEffect(() => {
-    if (bookPersistedCount > 0 && id) {
+    if (bookPersistedCount > 0) {
       refresh();
+      refreshReading();
       refreshBadges();
-      supabase
-        .from('readers')
-        .select('*')
-        .eq('id', id)
-        .single()
-        .then(({ data }) => { if (data) setSelectedReader(data as Reader); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookPersistedCount]);
@@ -85,6 +81,7 @@ export default function ReaderDashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       refresh();
+      refreshReading();
       refreshBadges();
       if (id) {
         supabase
@@ -240,28 +237,31 @@ export default function ReaderDashboardScreen() {
         </LinearGradient>
 
         {/* ── Books list ── */}
-        <FlatList
+        <FlashList
           ref={flatListRef}
           data={completedBooks}
           keyExtractor={(item) => item.id}
+          drawDistance={500}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
-              onRefresh={refresh}
+              onRefresh={() => { refresh(); refreshReading(); }}
               tintColor={Colors.secondary}
             />
           }
+          onEndReached={() => { if (hasNextPage) fetchNextPage(); }}
+          onEndReachedThreshold={0.4}
           ListHeaderComponent={
             <>
-              {readingNow.length > 0 && (
+              {readingBooks.length > 0 && (
                 <>
                   <View style={styles.sectionHeader}>
                     <Text style={styles.sectionIcon}>📖</Text>
                     <Text style={styles.sectionTitle}>{t('reader.readingNow')}</Text>
                   </View>
-                  {readingNow.map((item) => (
+                  {readingBooks.map((item) => (
                     <BookCard
                       key={item.id}
                       book={item}
@@ -279,12 +279,17 @@ export default function ReaderDashboardScreen() {
             </>
           }
           ListEmptyComponent={
-            !isLoading && readingNow.length === 0 ? (
+            !isLoading && readingBooks.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyIcon}>📚</Text>
                 <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
                 <Text style={styles.emptySubtext}>{t('reader.noBooksHint')}</Text>
               </View>
+            ) : null
+          }
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <ActivityIndicator color={Colors.secondary} style={{ paddingVertical: 16 }} />
             ) : null
           }
           renderItem={({ item }) => (

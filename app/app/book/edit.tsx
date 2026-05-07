@@ -19,7 +19,7 @@ import { parse, format, isValid } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useBooks } from '../../../src/hooks/useBooks';
+import { useBook } from '../../../src/hooks/useBooks';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
@@ -62,13 +62,11 @@ export default function EditBookScreen() {
 
   const { formula } = useAuthStore();
   const { selectedReader, updateBalance } = useReaderStore();
-  const { books, updateBook } = useBooks(selectedReader?.id ?? null);
+  const { book, updateBook } = useBook(bookId ?? null);
 
   const handleBack = () => {
     router.back();
   };
-
-  const book = books.find((b) => b.id === bookId);
 
   const activeFormula = formula ?? getDefaultFormula();
   const hasForeignLanguageBonus = activeFormula.bonus_rules.some(r => r.type === 'foreign_language');

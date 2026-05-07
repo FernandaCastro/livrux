@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { LivruxTransaction, BadgeSlug } from '../types';
 
@@ -7,38 +7,53 @@ export interface AwardedBadge {
   bonus_xp: number;
 }
 
-interface UseLivruxResult {
-  transactions: LivruxTransaction[];
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-}
+const PAGE_SIZE = 20;
 
 export const LIVRUX_KEY = (readerId: string) => ['livrux', readerId] as const;
 
-async function fetchLivruxTransactions(readerId: string): Promise<LivruxTransaction[]> {
+async function fetchTransactionsPage(readerId: string, page: number): Promise<LivruxTransaction[]> {
+  const from = page * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
   const { data, error } = await supabase
     .from('livrux_transactions')
     .select('*')
     .eq('reader_id', readerId)
-    .order('created_at', { ascending: false });
-
+    .order('created_at', { ascending: false })
+    .range(from, to);
   if (error) throw error;
   return (data ?? []) as LivruxTransaction[];
 }
 
-export function useLivrux(readerId: string | null): UseLivruxResult {
-  const { data: transactions = [], isLoading, error, refetch } = useQuery({
-    queryKey: readerId ? LIVRUX_KEY(readerId) : ['livrux', null],
-    queryFn: () => fetchLivruxTransactions(readerId!),
+export function useLivrux(readerId: string | null) {
+  const key = readerId ? LIVRUX_KEY(readerId) : null;
+
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: key ?? ['livrux', null],
+    queryFn: ({ pageParam }) => fetchTransactionsPage(readerId!, pageParam as number),
+    getNextPageParam: (lastPage: LivruxTransaction[], allPages: LivruxTransaction[][]) =>
+      lastPage.length === PAGE_SIZE ? allPages.length : undefined,
+    initialPageParam: 0,
     enabled: !!readerId,
   });
+
+  const transactions = data?.pages.flat() ?? [];
 
   return {
     transactions,
     isLoading,
     error: error ? (error as Error).message : null,
-    refresh: async () => { await refetch(); },
+    refresh: refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 }
 

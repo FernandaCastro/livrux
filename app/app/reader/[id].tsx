@@ -198,8 +198,8 @@ export default function ReaderDashboardScreen() {
             </View>
             <View style={styles.xpBadge}>
               <Text style={styles.badgeCoin}>⭐</Text>
-              <Text style={styles.balanceAmount}>{reader.xp}</Text>
-              <Text style={styles.balanceCurrency}>XP</Text>
+              <Text style={styles.xpAmount}>{reader.xp}</Text>
+              <Text style={styles.xpCurrency}>XP</Text>
             </View>
             <TouchableOpacity
               style={styles.badgesBadge}
@@ -400,11 +400,21 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: 'rgba(255,255,255,0.85)',
   },
+  xpAmount: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes.xl,
+    color: '#78350F',
+  },
+  xpCurrency: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: '#92400E',
+  },
   xpBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.chipXp,
+    backgroundColor: '#FCD34D',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,
@@ -414,7 +424,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: Colors.chipBadge,
+    backgroundColor: '#22C55E',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm,

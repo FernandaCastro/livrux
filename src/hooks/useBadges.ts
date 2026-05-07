@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Badge, ReaderBadge, BadgeSlug } from '../types';
 
@@ -19,59 +19,61 @@ interface UseBadgesResult {
   refresh: () => Promise<void>;
 }
 
+interface BadgesData {
+  allBadges: Badge[];
+  readerBadges: ReaderBadge[];
+}
+
+export const BADGES_KEY = (readerId: string) => ['badges', readerId] as const;
+
+async function fetchBadgesData(readerId: string): Promise<BadgesData> {
+  const [
+    { data: catalogData, error: catalogError },
+    { data: earnedData, error: earnedError },
+  ] = await Promise.all([
+    supabase.from('badges').select('*').order('sort_order'),
+    supabase.from('reader_badges').select('*').eq('reader_id', readerId),
+  ]);
+
+  if (catalogError) throw catalogError;
+  if (earnedError) throw earnedError;
+
+  return {
+    allBadges: (catalogData ?? []) as Badge[],
+    readerBadges: (earnedData ?? []) as ReaderBadge[],
+  };
+}
+
 export function useBadges(readerId: string | null): UseBadgesResult {
-  const [allBadges, setAllBadges] = useState<Badge[]>([]);
-  const [readerBadges, setReaderBadges] = useState<ReaderBadge[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const qc = useQueryClient();
+  const key = readerId ? BADGES_KEY(readerId) : null;
 
-  const fetch = useCallback(async () => {
-    if (!readerId) {
-      setAllBadges([]);
-      setReaderBadges([]);
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: key ?? ['badges', null],
+    queryFn: () => fetchBadgesData(readerId!),
+    enabled: !!readerId,
+  });
 
-    const [
-      { data: catalogData, error: catalogError },
-      { data: earnedData, error: earnedError },
-    ] = await Promise.all([
-      supabase.from('badges').select('*').order('sort_order'),
-      supabase.from('reader_badges').select('*').eq('reader_id', readerId),
-    ]);
+  const checkAndAwardMutation = useMutation({
+    mutationFn: async () => {
+      if (!readerId) return [] as { awarded_slug: BadgeSlug; bonus_livrux: number }[];
+      const { data: rpcData } = await supabase.rpc('check_and_award_badges', { p_reader_id: readerId });
+      return (rpcData ?? []) as { awarded_slug: BadgeSlug; bonus_livrux: number }[];
+    },
+    onSuccess: (awarded) => {
+      if (awarded.length > 0 && key) {
+        qc.invalidateQueries({ queryKey: key });
+      }
+    },
+  });
 
-    if (catalogError) {
-      console.error('[useBadges] catalog error:', catalogError.message);
-      setError(catalogError.message);
-    }
-    if (earnedError) {
-      console.error('[useBadges] reader_badges error:', earnedError.message);
-      setError(earnedError.message);
-    }
-
-    setAllBadges((catalogData ?? []) as Badge[]);
-    setReaderBadges((earnedData ?? []) as ReaderBadge[]);
-    setIsLoading(false);
-  }, [readerId]);
-
-  useEffect(() => { fetch(); }, [fetch]);
-
-  const checkAndAward = useCallback(async (): Promise<BadgeSlug[]> => {
-    if (!readerId) return [];
-
-    const { data } = await supabase.rpc('check_and_award_badges', { p_reader_id: readerId });
-    const awarded = (data ?? []) as { awarded_slug: BadgeSlug; bonus_livrux: number }[];
-
-    if (awarded.length > 0) {
-      await fetch();
-    }
-
+  const checkAndAward = async (): Promise<BadgeSlug[]> => {
+    const awarded = await checkAndAwardMutation.mutateAsync();
     return awarded.map((a) => a.awarded_slug);
-  }, [readerId, fetch]);
+  };
 
+  const allBadges = data?.allBadges ?? [];
+  const readerBadges = data?.readerBadges ?? [];
   const earnedSet = new Set(readerBadges.map((rb) => rb.badge_slug));
 
   const badges: BadgeWithStatus[] = allBadges.map((b) => {
@@ -88,5 +90,13 @@ export function useBadges(readerId: string | null): UseBadgesResult {
   const earnedBadges = badges.filter((b) => b.earned);
   const pendingBadges = badges.filter((b) => !b.earned);
 
-  return { badges, earnedBadges, pendingBadges, isLoading, error, checkAndAward, refresh: fetch };
+  return {
+    badges,
+    earnedBadges,
+    pendingBadges,
+    isLoading,
+    error: error ? (error as Error).message : null,
+    checkAndAward,
+    refresh: async () => { await refetch(); },
+  };
 }

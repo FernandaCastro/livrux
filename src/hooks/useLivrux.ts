@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
-import { useAuthStore } from '../stores/authStore';
 import type { LivruxTransaction, BadgeSlug } from '../types';
 
 export interface AwardedBadge {
@@ -15,38 +14,32 @@ interface UseLivruxResult {
   refresh: () => Promise<void>;
 }
 
-// Fetches the Livrux transaction history for a given reader.
+export const LIVRUX_KEY = (readerId: string) => ['livrux', readerId] as const;
+
+async function fetchLivruxTransactions(readerId: string): Promise<LivruxTransaction[]> {
+  const { data, error } = await supabase
+    .from('livrux_transactions')
+    .select('*')
+    .eq('reader_id', readerId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as LivruxTransaction[];
+}
+
 export function useLivrux(readerId: string | null): UseLivruxResult {
-  const [transactions, setTransactions] = useState<LivruxTransaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: transactions = [], isLoading, error, refetch } = useQuery({
+    queryKey: readerId ? LIVRUX_KEY(readerId) : ['livrux', null],
+    queryFn: () => fetchLivruxTransactions(readerId!),
+    enabled: !!readerId,
+  });
 
-  const fetch = useCallback(async () => {
-    if (!readerId) {
-      setTransactions([]);
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-
-    const { data, error: dbError } = await supabase
-      .from('livrux_transactions')
-      .select('*')
-      .eq('reader_id', readerId)
-      .order('created_at', { ascending: false });
-
-    if (dbError) {
-      setError(dbError.message);
-    } else {
-      setTransactions((data ?? []) as LivruxTransaction[]);
-    }
-    setIsLoading(false);
-  }, [readerId]);
-
-  useEffect(() => { fetch(); }, [fetch]);
-
-  return { transactions, isLoading, error, refresh: fetch };
+  return {
+    transactions,
+    isLoading,
+    error: error ? (error as Error).message : null,
+    refresh: async () => { await refetch(); },
+  };
 }
 
 export interface RevokedBadge {

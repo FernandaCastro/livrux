@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { StreakInfo } from '../types';
 
@@ -10,29 +10,22 @@ interface UseStreakResult {
 
 const DEFAULT_STREAK: StreakInfo = { current_streak: 0, best_streak: 0 };
 
+export const STREAK_KEY = (readerId: string) => ['streak', readerId] as const;
+
+async function fetchStreak(readerId: string): Promise<StreakInfo> {
+  const { data } = await supabase.rpc('get_streak_info', { p_reader_id: readerId });
+  if (data && data.length > 0) {
+    return { current_streak: data[0].current_streak, best_streak: data[0].best_streak };
+  }
+  return DEFAULT_STREAK;
+}
+
 export function useStreak(readerId: string | null): UseStreakResult {
-  const [streak, setStreak] = useState<StreakInfo>(DEFAULT_STREAK);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: streak = DEFAULT_STREAK, isLoading, refetch } = useQuery({
+    queryKey: readerId ? STREAK_KEY(readerId) : ['streak', null],
+    queryFn: () => fetchStreak(readerId!),
+    enabled: !!readerId,
+  });
 
-  const fetch = useCallback(async () => {
-    if (!readerId) {
-      setStreak(DEFAULT_STREAK);
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-
-    const { data } = await supabase.rpc('get_streak_info', { p_reader_id: readerId });
-
-    if (data && data.length > 0) {
-      setStreak({ current_streak: data[0].current_streak, best_streak: data[0].best_streak });
-    } else {
-      setStreak(DEFAULT_STREAK);
-    }
-    setIsLoading(false);
-  }, [readerId]);
-
-  useEffect(() => { fetch(); }, [fetch]);
-
-  return { streak, isLoading, refresh: fetch };
+  return { streak, isLoading, refresh: async () => { await refetch(); } };
 }

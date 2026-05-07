@@ -11,6 +11,7 @@ import {
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect } from 'react';
 
 import { useReaders } from '../src/hooks/useReaders';
@@ -20,6 +21,7 @@ import { useParentalStore } from '../src/stores/parentalStore';
 import { useParentalGuard } from '../src/hooks/useParentalGuard';
 import { PinModal } from '../src/components/PinModal';
 import { ReaderCard } from '../src/components/reader/ReaderCard';
+import { FloatingEmojis } from '../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../src/components/BottomMenu';
 import { ConfirmationBanner } from '../src/components/ConfirmationBanner';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../src/constants/theme';
@@ -46,8 +48,6 @@ export default function HomeScreen() {
     }, [])
   );
 
-  // Refresh the readers list whenever a book is successfully persisted to the
-  // DB so that the balance badge on each card stays up to date.
   useEffect(() => {
     if (bookPersistedCount > 0) refresh();
   }, [bookPersistedCount]);
@@ -72,9 +72,6 @@ export default function HomeScreen() {
     });
   };
 
-  // Add card is part of the grid so it occupies a proper column slot.
-  // A phantom item is appended when the add card would otherwise be alone
-  // in its row (even number of readers), keeping the grid symmetric.
   const gridData: GridItem[] = [
     ...readers,
     { __isAdd: true },
@@ -113,76 +110,89 @@ export default function HomeScreen() {
     ) : null;
 
   return (
-    <SafeAreaView style={styles.safe}>
-      {modalProps && <PinModal {...modalProps} />}
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <View style={styles.logoHeader}>
-            <Image source={require('../assets/icon.png')} style={{ width: 50, height: 50, marginBottom: 0 , marginLeft: -10 }} />
-            <Text style={styles.appName}>{t('common.appName')}</Text>
+      <SafeAreaView style={styles.safe}>
+        {modalProps && <PinModal {...modalProps} />}
+
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <View style={styles.logoHeader}>
+              <Image source={require('../assets/icon.png')} style={{ width: 50, height: 50, marginBottom: 0, marginLeft: -10 }} />
+              <Text style={styles.appName}>{t('common.appName')}</Text>
+            </View>
+            {profile?.display_name && (
+              <Text style={styles.greeting}>👋 {profile.display_name}</Text>
+            )}
           </View>
-          {profile?.display_name && (
-            <Text style={styles.greeting}>👋 {profile.display_name}</Text>
+          {!!profile?.parental_pin && (
+            <TouchableOpacity
+              onPress={toggleParentLock}
+              style={styles.lockButton}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.lockIcon}>{isParentUnlocked ? '🔓' : '🔒'}</Text>
+            </TouchableOpacity>
           )}
         </View>
-        {!!profile?.parental_pin && (
-          <TouchableOpacity
-            onPress={toggleParentLock}
-            style={styles.lockButton}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={styles.lockIcon}>{isParentUnlocked ? '🔓' : '🔒'}</Text>
-          </TouchableOpacity>
+
+        {pendingEmailConfirmation && (
+          <ConfirmationBanner style={styles.confirmationBanner} />
         )}
-      </View>
 
-      {pendingEmailConfirmation && (
-        <ConfirmationBanner style={styles.confirmationBanner} />
-      )}
+        {readersError && (
+          <Text style={{ color: 'red', padding: 12 }}>{readersError}</Text>
+        )}
 
-      {readersError && (
-        <Text style={{ color: 'red', padding: 12 }}>{readersError}</Text>
-      )}
-
-
-      {/* Readers grid — show the full-screen spinner only on the very first
-          load (no data yet). Background refreshes (focus, post-persist) use
-          the FlatList's RefreshControl so the list doesn't flash away. */}
-      {isLoading && readers.length === 0 ? (
-        <ActivityIndicator
-          color={Colors.primary}
-          size="large"
-          style={styles.loader}
-        />
-      ) : (
-        <FlatList
-          data={gridData}
-          keyExtractor={(item) =>
-            '__isAdd' in item ? '__add__' : '__isPhantom' in item ? '__phantom__' : item.id
-          }
-          contentContainerStyle={styles.list}
-          ListHeaderComponent={renderEmptyHeader}
-          refreshControl={
-            <RefreshControl
-              refreshing={isLoading}
-              onRefresh={refresh}
-              tintColor={Colors.primary}
-            />
-          }
-          renderItem={renderItem}
-        />
-      )}
-      <BottomMenu />
-    </SafeAreaView>
+        {isLoading && readers.length === 0 ? (
+          <ActivityIndicator
+            color={Colors.secondary}
+            size="large"
+            style={styles.loader}
+          />
+        ) : (
+          <FlatList
+            data={gridData}
+            keyExtractor={(item) =>
+              '__isAdd' in item ? '__add__' : '__isPhantom' in item ? '__phantom__' : item.id
+            }
+            contentContainerStyle={styles.list}
+            ListHeaderComponent={renderEmptyHeader}
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={refresh}
+                tintColor={Colors.secondary}
+              />
+            }
+            renderItem={renderItem}
+          />
+        )}
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const CARD_SIZE = 140;
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: {
+    flex: 1,
+  },
+  safe: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -190,15 +200,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.md,
-    backgroundColor: Colors.backgroundTinted,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    marginBottom: Spacing.sm,
-    shadowColor: Colors.secondary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
   },
   logoHeader: {
     flexDirection: 'row',
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
   },
   addCard: {
     height: CARD_SIZE,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
     borderRadius: Radius.lg,
     borderWidth: 2,
     borderColor: Colors.border,

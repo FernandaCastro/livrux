@@ -54,6 +54,7 @@ export default function SignUpScreen() {
   const [termsError, setTermsError] = useState(false);
   const schema = useSignUpSchema();
   const setPendingEmailConfirmation = useAuthStore((s) => s.setPendingEmailConfirmation);
+  const setConfirmationEmail = useAuthStore((s) => s.setConfirmationEmail);
 
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -87,6 +88,7 @@ export default function SignUpScreen() {
           : t('auth.errors.generic')
       );
     } else {
+      setConfirmationEmail(data.email);
       setPendingEmailConfirmation(true);
       router.replace('/');
     }

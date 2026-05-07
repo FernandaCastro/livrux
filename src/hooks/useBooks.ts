@@ -1,76 +1,78 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { deleteBookRpc, updateBookRpc } from './useLivrux';
 import type { RevokedBadge } from './useLivrux';
 import type { Book } from '../types';
 
-interface UseBooksResult {
-  books: Book[];
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-  deleteBook: (bookId: string) => Promise<{ revokedBadges: RevokedBadge[] }>;
-  updateBook: (params: Parameters<typeof updateBookRpc>[0]) => Promise<void>;
+export const BOOKS_KEY = (readerId: string) => ['books', readerId] as const;
+
+async function fetchBooks(readerId: string): Promise<Book[]> {
+  const { data, error } = await supabase
+    .from('books')
+    .select('*')
+    .eq('reader_id', readerId)
+    .order('date_completed', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as Book[];
 }
 
-// Fetches all books for a given reader, ordered newest first.
-export function useBooks(readerId: string | null): UseBooksResult {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function useBooks(readerId: string | null) {
+  const qc = useQueryClient();
+  const key = readerId ? BOOKS_KEY(readerId) : null;
 
-  const fetch = useCallback(async () => {
-    if (!readerId) {
-      setBooks([]);
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
+  const { data: books = [], isLoading, error, refetch } = useQuery({
+    queryKey: key ?? ['books', null],
+    queryFn: () => fetchBooks(readerId!),
+    enabled: !!readerId,
+  });
 
-    const { data, error: dbError } = await supabase
-      .from('books')
-      .select('*')
-      .eq('reader_id', readerId)
-      .order('date_completed', { ascending: false });
+  const deleteMutation = useMutation({
+    mutationFn: (bookId: string) => deleteBookRpc(bookId),
+    onSuccess: (_, bookId) => {
+      if (!key) return;
+      qc.setQueryData(key, (old: Book[] = []) => old.filter((b) => b.id !== bookId));
+    },
+  });
 
-    if (dbError) {
-      setError(dbError.message);
-    } else {
-      setBooks((data ?? []) as Book[]);
-    }
-    setIsLoading(false);
-  }, [readerId]);
+  const updateMutation = useMutation({
+    mutationFn: (params: Parameters<typeof updateBookRpc>[0]) => updateBookRpc(params),
+    onSuccess: (_, params) => {
+      if (!key) return;
+      qc.setQueryData(key, (old: Book[] = []) =>
+        old.map((b) =>
+          b.id === params.bookId
+            ? {
+                ...b,
+                title: params.title,
+                author: params.author,
+                total_pages: params.totalPages,
+                cover_url: params.coverUrl,
+                date_completed: params.dateCompleted,
+                is_foreign_language: params.isForeignLanguage,
+                livrux_earned: params.livruxEarned,
+                rating: params.rating,
+                review: params.review,
+              }
+            : b
+        )
+      );
+    },
+  });
 
-  useEffect(() => { fetch(); }, [fetch]);
-
-  const deleteBook = async (bookId: string): Promise<{ revokedBadges: RevokedBadge[] }> => {
-    const result = await deleteBookRpc(bookId);
-    setBooks((prev) => prev.filter((b) => b.id !== bookId));
-    return result;
-  };
+  const deleteBook = async (bookId: string): Promise<{ revokedBadges: RevokedBadge[] }> =>
+    deleteMutation.mutateAsync(bookId);
 
   const updateBook = async (params: Parameters<typeof updateBookRpc>[0]): Promise<void> => {
-    await updateBookRpc(params);
-    setBooks((prev) =>
-      prev.map((b) =>
-        b.id === params.bookId
-          ? {
-              ...b,
-              title: params.title,
-              author: params.author,
-              total_pages: params.totalPages,
-              cover_url: params.coverUrl,
-              date_completed: params.dateCompleted,
-              is_foreign_language: params.isForeignLanguage,
-              livrux_earned: params.livruxEarned,
-              rating: params.rating,
-              review: params.review,
-            }
-          : b
-      )
-    );
+    await updateMutation.mutateAsync(params);
   };
 
-  return { books, isLoading, error, refresh: fetch, deleteBook, updateBook };
+  return {
+    books,
+    isLoading,
+    error: error ? (error as Error).message : null,
+    refresh: refetch,
+    deleteBook,
+    updateBook,
+  };
 }

@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { Reader } from '../../types';
 import { MultiavatarView } from './MultiavatarView';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
@@ -21,126 +22,160 @@ export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardP
     <TouchableOpacity
       onPress={onPress}
       onLongPress={onLongPress}
-      activeOpacity={0.8}
-      style={styles.card}
+      activeOpacity={0.82}
+      style={styles.cardShell}
     >
-      {locked && (
-        <View style={styles.lockBadge}>
-          <Text style={styles.lockIcon}>🔒</Text>
+      <LinearGradient
+        colors={['#FEFBFF', '#FFFAF4']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.card}
+      >
+        {locked && (
+          <View style={styles.lockBadge}>
+            <Text style={styles.lockIcon}>🔒</Text>
+          </View>
+        )}
+
+        {/* Avatar with vibrant purple ring */}
+        <View style={styles.avatarContainer}>
+          <MultiavatarView
+            seed={reader.avatar_seed}
+            size={AVATAR_SIZE}
+            borderColor={Colors.secondary}
+            borderWidth={3}
+          />
         </View>
-      )}
 
-      {/* Avatar */}
-      <View style={styles.avatarContainer}>
-        <MultiavatarView
-          seed={reader.avatar_seed}
-          size={AVATAR_SIZE}
-          borderColor={Colors.readerBlueLight}
-          borderWidth={3}
-        />
-      </View>
+        {/* Right side */}
+        <View style={styles.content}>
+          <Text style={styles.name} numberOfLines={1}>
+            {reader.name}
+          </Text>
 
-      {/* Right side: name + chips */}
-      <View style={styles.content}>
-        <Text style={styles.name} numberOfLines={1}>
-          {reader.name}
-        </Text>
+          {/* Coin balance — hero stat */}
+          <View style={styles.coinPill}>
+            <Text style={styles.coinEmoji}>🪙</Text>
+            <Text style={styles.coinValue}>{reader.livrux_balance.toFixed(2)}</Text>
+          </View>
 
-        <View style={styles.chipsGrid}>
-          <View style={styles.chipsRow}>
-            <View style={[styles.chip, styles.livruxChip]}>
-              <Text style={styles.chipEmoji}>🪙</Text>
-              <Text style={styles.chipValue} numberOfLines={1}>{reader.livrux_balance.toFixed(2)}</Text>
+          {/* Secondary stats */}
+          <View style={styles.statsRow}>
+            <View style={[styles.statPill, styles.xpPill]}>
+              <Text style={styles.statEmoji}>⭐</Text>
+              <Text style={styles.statValueDark}>{reader.xp}</Text>
+              <Text style={styles.statLabelDark}>XP</Text>
             </View>
-            <View style={[styles.chip, styles.xpChip]}>
-              <Text style={styles.chipEmoji}>⭐</Text>
-              <Text style={styles.chipValue} numberOfLines={1}>{reader.xp}</Text>
-              <Text style={styles.chipLabel}>XP</Text>
+            <View style={[styles.statPill, styles.badgePill]}>
+              <Text style={styles.statEmoji}>🏅</Text>
+              <Text style={styles.statValueLight}>{reader.badge_count ?? 0}</Text>
+            </View>
+            <View style={[styles.statPill, styles.bookPill]}>
+              <Text style={styles.statEmoji}>📚</Text>
+              <Text style={styles.statValueLight}>{reader.book_count ?? 0}</Text>
             </View>
           </View>
-          <View style={styles.chipsRow}>
-            <View style={[styles.chip, styles.badgesChip]}>
-              <Text style={styles.chipEmoji}>🏅</Text>
-              <Text style={styles.chipValue} numberOfLines={1}>{reader.badge_count ?? 0}</Text>
-            </View>
-            <View style={[styles.chip, styles.booksChip]}>
-              <Text style={styles.chipEmoji}>📚</Text>
-              <Text style={styles.chipValue} numberOfLines={1}>{reader.book_count ?? 0}</Text>
-            </View>
-          </View>
         </View>
-      </View>
+      </LinearGradient>
     </TouchableOpacity>
   );
 }
 
-const AVATAR_SIZE = 64;
+const AVATAR_SIZE = 80;
 
 const styles = StyleSheet.create({
+  cardShell: {
+    borderRadius: Radius.xl,
+    marginHorizontal: Spacing.md,
+    marginVertical: Spacing.sm,
+    ...Shadows.lg,
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    borderWidth: 2,
-    borderColor: Colors.surfaceVariant,
-    paddingVertical: Spacing.xl,
+    borderRadius: Radius.xl,
+    paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.md,
-    marginHorizontal: Spacing.md,
-    marginVertical: Spacing.sm,
     gap: Spacing.md,
-    ...Shadows.md,
+    overflow: 'hidden',
   },
   lockBadge: {
     position: 'absolute',
-    top: Spacing.xs,
-    right: Spacing.xs,
+    top: Spacing.sm,
+    right: Spacing.sm,
     zIndex: 1,
   },
   lockIcon: { fontSize: 14 },
   avatarContainer: {
     flexShrink: 0,
+    shadowColor: Colors.secondary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+    elevation: 4,
   },
   content: {
     flex: 1,
-    gap: Spacing.sm,
+    gap: Spacing.xs,
   },
   name: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.secondary,
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes.lg,
+    color: Colors.textPrimary,
+    marginBottom: 2,
   },
-  chipsGrid: {
-    gap: 4,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  chip: {
-    flex: 1,
+  coinPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: Colors.coin,
     borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 3,
-    gap: 3,
-    overflow: 'hidden',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 5,
+    gap: 5,
+    alignSelf: 'flex-start',
+    shadowColor: Colors.coinShadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.30,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  livruxChip: { backgroundColor: Colors.chipCoin },
-  xpChip: { backgroundColor: Colors.chipXp },
-  badgesChip: { backgroundColor: Colors.chipBadge },
-  booksChip: { backgroundColor: Colors.chipBook },
-  chipEmoji: { fontSize: 11 },
-  chipValue: {
+  coinEmoji: { fontSize: 14 },
+  coinValue: {
     fontFamily: Fonts.bodyExtraBold,
-    fontSize: FontSizes.sm,
+    fontSize: FontSizes.md,
     color: Colors.textOnPrimary,
+    letterSpacing: 0.2,
   },
-  chipLabel: {
+  statsRow: {
+    flexDirection: 'row',
+    gap: 5,
+    marginTop: 2,
+  },
+  statPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    gap: 4,
+  },
+  xpPill: { backgroundColor: '#FCD34D' },
+  badgePill: { backgroundColor: '#22C55E' },
+  bookPill: { backgroundColor: '#38BDF8' },
+  statEmoji: { fontSize: 13 },
+  statValueDark: {
+    fontFamily: Fonts.bodyExtraBold,
+    fontSize: FontSizes.md,
+    color: '#78350F',
+  },
+  statLabelDark: {
     fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.xs,
-    color: 'rgba(255,255,255,0.85)',
+    fontSize: FontSizes.sm,
+    color: '#92400E',
+  },
+  statValueLight: {
+    fontFamily: Fonts.bodyExtraBold,
+    fontSize: FontSizes.md,
+    color: Colors.textOnPrimary,
   },
 });

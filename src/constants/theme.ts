@@ -2,17 +2,18 @@
 // Target audience: families with kids — warm, playful, and legible.
 
 export const Colors = {
-  // Brand
+  // Brand — orange is the coin/reward accent; purple is the dominant brand color
   primary: '#F5A623',       // warm gold — the Livrux coin color
   primaryLight: '#FFD580',
   primaryDark: '#C4800B',
 
-  secondary: '#7B5EA7',     // playful purple
-  secondaryLight: '#B09AC8',
-  secondaryDark: '#5A3D85',
+  secondary: '#7C3AED',     // vibrant electric purple — matches web
+  secondary2: '#A855F7',    // lighter purple for accents
+  secondaryLight: '#EDE9FE',
+  secondaryDark: '#5B21B6',
 
-  accent: '#FF6B6B',        // coral — highlights and CTAs
-  accentLight: '#FFA5A5',
+  accent: '#FF7F3E',        // warm orange-red — highlights and CTAs
+  accentLight: '#FFB38A',
 
   // Reader identity — dusty blue
   readerBlue: '#7A9CC8',        // hero background for reader screens
@@ -23,25 +24,26 @@ export const Colors = {
   friendEmeraldLight: '#C4E8D8',    // chips and surface accents
 
   // Neutral
-  background: '#FAFAF7',    // off-white — softer than pure white
+  background: '#FAFAF7',       // off-white — softer than pure white
+  backgroundTinted: '#F5F0FF', // light purple tint for hero/auth sections
   surface: '#FFFFFF',
-  surfaceVariant: '#F0EDF8', // light purple tint for cards
+  surfaceVariant: '#EDE9FE',   // light purple tint for cards
 
   // Text
-  textPrimary: '#2D2D2D',
-  textSecondary: '#7A7A7A',
+  textPrimary: '#1E1B4B',   // deep purple-blue — matches web
+  textSecondary: '#6B7280',
   textDisabled: '#BDBDBD',
   textOnPrimary: '#FFFFFF',
 
   // Feedback
-  success: '#4CAF50',
+  success: '#22C55E',
   error: '#E53935',
   warning: '#FB8C00',
   info: '#1E88E5',
 
   // Borders and dividers
   border: '#E8E4F0',
-  divider: '#F0EDF8',
+  divider: '#EDE9FE',
 
   // Coin / Livrux brand
   coin: '#F5A623',
@@ -52,7 +54,7 @@ export const Colors = {
   chipCoin: '#F5A623',    // 🪙 coin balance
   chipXp: '#B45309',      // ⭐ XP — amber
   chipBadge: '#2D6A4F',   // 🏅 badges — forest green
-  chipBook: '#7B5EA7',    // 📚 books
+  chipBook: '#7C3AED',    // 📚 books
   chipFriend: '#5FAF8A',  // 👦👧 friends
 } as const;
 
@@ -96,24 +98,24 @@ export const Radius = {
 
 export const Shadows = {
   sm: {
-    shadowColor: '#7B5EA7',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 6,
+    elevation: 3,
   },
   md: {
-    shadowColor: '#7B5EA7',
+    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    elevation: 5,
   },
   lg: {
-    shadowColor: '#7B5EA7',
+    shadowColor: '#7C3AED',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.16,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowOpacity: 0.22,
+    shadowRadius: 24,
+    elevation: 10,
   },
 } as const;

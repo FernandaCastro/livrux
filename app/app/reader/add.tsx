@@ -13,6 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useReaders } from '../../../src/hooks/useReaders';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -20,6 +21,7 @@ import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
 const AVATAR_DISPLAY_SIZE = 100;
@@ -40,8 +42,6 @@ function generateAvatarSeed(readerId?: string): string {
   return `${base}_${timestamp}_${random}`;
 }
 
-// This screen handles both "add new reader" and "edit existing reader".
-// When an editId query param is present, it switches to edit mode.
 export default function AddReaderScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -61,7 +61,6 @@ export default function AddReaderScreen() {
     defaultValues: { name: '' },
   });
 
-  // Reset form and generate fresh seed when entering add mode.
   useFocusEffect(
     useCallback(() => {
       if (!isEditing) {
@@ -73,7 +72,6 @@ export default function AddReaderScreen() {
     }, [isEditing])
   );
 
-  // Pre-fill form and load existing seed when editing.
   useEffect(() => {
     if (isEditing && selectedReader) {
       setValue('name', selectedReader.name);
@@ -115,79 +113,95 @@ export default function AddReaderScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backText}>←</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>
-            {isEditing ? t('reader.editReader') : t('reader.newReader')}
-          </Text>
-          <View style={{ width: 24 }} />
-        </View>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
 
-        {/* Avatar with navigation buttons */}
-        <View style={styles.avatarSection}>
-          <View style={styles.avatarRow}>
-            <TouchableOpacity
-              onPress={goPrev}
-              disabled={historyIndex === 0}
-              style={[styles.navButton, historyIndex === 0 && styles.navButtonDisabled]}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.navButtonText}>‹</Text>
+      <SafeAreaView style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Text style={styles.backText}>←</Text>
             </TouchableOpacity>
-
-            <MultiavatarView
-              seed={avatarSeed}
-              size={AVATAR_DISPLAY_SIZE}
-              borderColor={Colors.primaryLight}
-              borderWidth={3}
-            />
-
-            <TouchableOpacity onPress={goNext} style={styles.navButton} activeOpacity={0.7}>
-              <Text style={styles.navButtonText}>›</Text>
-            </TouchableOpacity>
+            <Text style={styles.title}>
+              {isEditing ? t('reader.editReader') : t('reader.newReader')}
+            </Text>
+            <View style={{ width: 24 }} />
           </View>
-        </View>
 
-        {/* Name input */}
-        <Controller
-          control={control}
-          name="name"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label={t('reader.readerName')}
-              placeholder={t('reader.readerNamePlaceholder')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              autoCapitalize="words"
-              error={errors.name?.message}
-            />
-          )}
-        />
+          {/* Avatar picker */}
+          <View style={styles.avatarSection}>
+            <View style={styles.avatarRow}>
+              <TouchableOpacity
+                onPress={goPrev}
+                disabled={historyIndex === 0}
+                style={[styles.navButton, historyIndex === 0 && styles.navButtonDisabled]}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.navButtonText}>‹</Text>
+              </TouchableOpacity>
 
-        <Button
-          label={t('common.save')}
-          onPress={handleSubmit(onSubmit)}
-          loading={isSubmitting}
-          fullWidth
-          style={styles.saveButton}
-        />
-      </ScrollView>
-      <BottomMenu />
-    </SafeAreaView>
+              <View style={styles.avatarGlow}>
+                <MultiavatarView
+                  seed={avatarSeed}
+                  size={AVATAR_DISPLAY_SIZE}
+                  borderColor={Colors.secondary}
+                  borderWidth={3}
+                />
+              </View>
+
+              <TouchableOpacity onPress={goNext} style={styles.navButton} activeOpacity={0.7}>
+                <Text style={styles.navButtonText}>›</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.avatarHint}>{t('reader.avatarHint', { defaultValue: '‹ › para trocar avatar' })}</Text>
+          </View>
+
+          {/* Name input */}
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label={t('reader.readerName')}
+                placeholder={t('reader.readerNamePlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                autoCapitalize="words"
+                error={errors.name?.message}
+              />
+            )}
+          />
+
+          <Button
+            label={t('common.save')}
+            variant="secondary"
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+            fullWidth
+            style={styles.saveButton}
+          />
+        </ScrollView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
@@ -213,20 +227,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing['2xl'],
     marginTop: Spacing.md,
+    gap: Spacing.sm,
   },
   avatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xl,
   },
+  avatarGlow: {
+    shadowColor: Colors.secondary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.30,
+    shadowRadius: 12,
+    elevation: 6,
+  },
   navButton: {
     width: 44,
     height: 44,
     borderRadius: Radius.full,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Shadows.sm,
+    ...Shadows.md,
   },
   navButtonDisabled: {
     opacity: 0.3,
@@ -236,6 +258,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: Colors.secondary,
     lineHeight: 32,
+  },
+  avatarHint: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
   },
   saveButton: { marginTop: Spacing.md },
 });

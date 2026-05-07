@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { logBookRpc } from '../../../src/hooks/useLivrux';
 import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
@@ -26,6 +27,7 @@ import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
 import { BookSearchBar } from '../../../src/components/book/BookSearchBar';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import type { GoogleBookResult } from '../../../src/lib/googleBooks';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
@@ -72,8 +74,6 @@ export default function AddBookScreen() {
     defaultValues: { title: '', author: '', totalPages: '', notes: '' },
   });
 
-  // Reset all form state every time the screen comes into focus so that
-  // a second (or third) book entry starts with a clean slate.
   useFocusEffect(
     useCallback(() => {
       reset({ title: '', author: '', totalPages: '', notes: '' });
@@ -87,7 +87,6 @@ export default function AddBookScreen() {
     }, [reset])
   );
 
-  // Watch pages to show the live Livrux preview.
   const pagesValue = watch('totalPages');
   const previewPages = Number(pagesValue) || 0;
   const previewCoins = previewPages > 0
@@ -110,7 +109,6 @@ export default function AddBookScreen() {
     const { selectedReader, triggerConfetti } = useReaderStore.getState();
     const originalBalance = selectedReader?.livrux_balance ?? 0;
 
-    // Optimistic balance + confetti fire before the network call.
     if (bookStatus === 'completed') {
       updateBalance(originalBalance + livruxEarned);
       triggerConfetti(prevBookCount, prevBookCount + 1);
@@ -142,7 +140,6 @@ export default function AddBookScreen() {
       useReaderStore.getState().notifyBookPersisted();
       if (badges.length > 0) {
         setAwardedBadges(badges);
-        // navigation is deferred to the toast's onDone so the animation plays
       } else {
         router.back();
       }
@@ -156,186 +153,204 @@ export default function AddBookScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.screenTitle}>{t('book.logBook')}</Text>
-        </View>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
 
-        {/* Status toggle */}
-        <View style={styles.statusToggle}>
-          {(['completed', 'reading'] as const).map((s) => (
-            <TouchableOpacity
-              key={s}
-              style={[styles.statusOption, bookStatus === s && styles.statusOptionActive]}
-              onPress={() => setBookStatus(s)}
-              activeOpacity={0.75}
-            >
-              <Text style={[styles.statusOptionText, bookStatus === s && styles.statusOptionTextActive]}>
-                {s === 'completed' ? `✅ ${t('book.statusCompleted')}` : `📖 ${t('book.statusReading')}`}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Search bar — type or scan to auto-fill */}
-        <BookSearchBar key={searchKey} onSelect={handleBookSelected} />
-
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>{t('common.or')} {t('book.fillManually')}</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        {/* Cover — displayed only when auto-filled by Google Books */}
-        {coverUri && (
-          <View style={styles.coverButton}>
-            <Image source={{ uri: coverUri }} style={styles.coverImage} resizeMode="cover" />
+      <SafeAreaView style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.screenTitle}>{t('book.logBook')}</Text>
           </View>
-        )}
 
-        {/* Form fields */}
-        <Controller
-          control={control}
-          name="title"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label={t('book.title')}
-              placeholder={t('book.titlePlaceholder')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.title?.message}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="author"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label={t('book.author')}
-              placeholder={t('book.authorPlaceholder')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="totalPages"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label={t('book.totalPages')}
-              placeholder={t('book.totalPagesPlaceholder')}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              keyboardType="number-pad"
-              error={errors.totalPages?.message}
-            />
-          )}
-        />
-
-        {/* Date start */}
-        <TextInput
-          label={t('book.dateStart')}
-          placeholder="DD/MM/AAAA"
-          value={dateStart}
-          onChangeText={setDateStart}
-          keyboardType="number-pad"
-        />
-
-        {/* Foreign language checkbox — only shown when the bonus rule is configured */}
-        {hasForeignLanguageBonus && (
-          <TouchableOpacity
-            style={styles.checkboxRow}
-            onPress={() => setIsForeignLanguage(v => !v)}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.checkbox, isForeignLanguage && styles.checkboxChecked]}>
-              {isForeignLanguage && <Text style={styles.checkmark}>✓</Text>}
-            </View>
-            <Text style={styles.checkboxLabel}>{t('book.foreignLanguage')}</Text>
-          </TouchableOpacity>
-        )}
-
-        {/* Live Livrux preview — only when completing */}
-        {bookStatus === 'completed' && previewPages > 0 && (
-          <View style={styles.previewCard}>
-            <Text style={styles.previewLabel}>{t('book.willEarn')}</Text>
-            <View style={styles.previewRow}>
-              <Text style={styles.previewCoin}>🪙</Text>
-              <Text style={styles.previewAmount}>{previewCoins.toFixed(2)}</Text>
-              <Text style={styles.previewCurrency}>Livrux</Text>
-            </View>
-          </View>
-        )}
-
-        {/* Rating and review — only when completing */}
-        {bookStatus === 'completed' && <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>}
-        {bookStatus === 'completed' && (
-          <View style={styles.ratingRow}>
-            {([
-              { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
-              { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
-              { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
-            ] as const).map((opt) => (
+          {/* Status toggle */}
+          <View style={styles.statusToggle}>
+            {(['completed', 'reading'] as const).map((s) => (
               <TouchableOpacity
-                key={opt.value}
-                style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
-                onPress={() => setRating(rating === opt.value ? null : opt.value)}
+                key={s}
+                style={[styles.statusOption, bookStatus === s && styles.statusOptionActive]}
+                onPress={() => setBookStatus(s)}
                 activeOpacity={0.75}
               >
-                <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
-                <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
-                  {opt.label}
+                <Text style={[styles.statusOptionText, bookStatus === s && styles.statusOptionTextActive]}>
+                  {s === 'completed' ? `✅ ${t('book.statusCompleted')}` : `📖 ${t('book.statusReading')}`}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
-        )}
 
-        {bookStatus === 'completed' && (
-          <View style={styles.reviewContainer}>
-            <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
-            <RNTextInput
-              style={styles.reviewInput}
-              value={review}
-              onChangeText={setReview}
-              placeholder={t('book.reviewPlaceholder')}
-              placeholderTextColor={Colors.textDisabled}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
+          {/* Search bar */}
+          <BookSearchBar key={searchKey} onSelect={handleBookSelected} />
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>{t('common.or')} {t('book.fillManually')}</Text>
+            <View style={styles.dividerLine} />
           </View>
-        )}
 
-        <Button
-          label={bookStatus === 'completed' ? t('book.logBook') : t('book.logReading')}
-          onPress={handleSubmit(onSubmit)}
-          loading={isSubmitting}
-          fullWidth
-          style={styles.saveButton}
-        />
-      </ScrollView>
-      <BottomMenu />
-      <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
-    </SafeAreaView>
+          {/* Cover */}
+          {coverUri && (
+            <View style={styles.coverButton}>
+              <Image source={{ uri: coverUri }} style={styles.coverImage} resizeMode="cover" />
+            </View>
+          )}
+
+          {/* Form fields */}
+          <Controller
+            control={control}
+            name="title"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label={t('book.title')}
+                placeholder={t('book.titlePlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.title?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="author"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label={t('book.author')}
+                placeholder={t('book.authorPlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="totalPages"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                label={t('book.totalPages')}
+                placeholder={t('book.totalPagesPlaceholder')}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                keyboardType="number-pad"
+                error={errors.totalPages?.message}
+              />
+            )}
+          />
+
+          <TextInput
+            label={t('book.dateStart')}
+            placeholder="DD/MM/AAAA"
+            value={dateStart}
+            onChangeText={setDateStart}
+            keyboardType="number-pad"
+          />
+
+          {/* Foreign language checkbox */}
+          {hasForeignLanguageBonus && (
+            <TouchableOpacity
+              style={styles.checkboxRow}
+              onPress={() => setIsForeignLanguage(v => !v)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, isForeignLanguage && styles.checkboxChecked]}>
+                {isForeignLanguage && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.checkboxLabel}>{t('book.foreignLanguage')}</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Live Livrux preview */}
+          {bookStatus === 'completed' && previewPages > 0 && (
+            <LinearGradient
+              colors={['#F5A623', '#FF7F3E']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.previewCard}
+            >
+              <Text style={styles.previewLabel}>{t('book.willEarn')}</Text>
+              <View style={styles.previewRow}>
+                <Text style={styles.previewCoin}>🪙</Text>
+                <Text style={styles.previewAmount}>{previewCoins.toFixed(2)}</Text>
+                <Text style={styles.previewCurrency}>Livrux</Text>
+              </View>
+            </LinearGradient>
+          )}
+
+          {/* Rating */}
+          {bookStatus === 'completed' && <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>}
+          {bookStatus === 'completed' && (
+            <View style={styles.ratingRow}>
+              {([
+                { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
+                { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
+                { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
+              ] as const).map((opt) => (
+                <TouchableOpacity
+                  key={opt.value}
+                  style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
+                  onPress={() => setRating(rating === opt.value ? null : opt.value)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
+                  <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Review */}
+          {bookStatus === 'completed' && (
+            <View style={styles.reviewContainer}>
+              <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
+              <RNTextInput
+                style={styles.reviewInput}
+                value={review}
+                onChangeText={setReview}
+                placeholder={t('book.reviewPlaceholder')}
+                placeholderTextColor={Colors.textDisabled}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            </View>
+          )}
+
+          <Button
+            label={bookStatus === 'completed' ? t('book.logBook') : t('book.logReading')}
+            variant="secondary"
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+            fullWidth
+            style={styles.saveButton}
+          />
+        </ScrollView>
+        <BottomMenu />
+        <BadgeUnlockToast badges={awardedBadges} onDone={() => { setAwardedBadges([]); router.back(); }} />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
@@ -352,6 +367,37 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
   },
+
+  /* Status toggle */
+  statusToggle: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    borderRadius: Radius.lg,
+    padding: 4,
+    marginBottom: Spacing.lg,
+    gap: 4,
+  },
+  statusOption: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+    borderRadius: Radius.md,
+  },
+  statusOptionActive: {
+    backgroundColor: Colors.secondary,
+    ...Shadows.sm,
+  },
+  statusOptionText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+  },
+  statusOptionTextActive: {
+    color: Colors.textOnPrimary,
+    fontFamily: Fonts.bodyBold,
+  },
+
+  /* Divider */
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -368,6 +414,8 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.textSecondary,
   },
+
+  /* Cover */
   coverButton: {
     alignSelf: 'center',
     marginBottom: Spacing.xl,
@@ -378,6 +426,8 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
     ...Shadows.md,
   },
+
+  /* Foreign language checkbox */
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -389,12 +439,13 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: Radius.sm,
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: Colors.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.secondary,
+    borderColor: Colors.secondary,
   },
   checkmark: {
     color: Colors.textOnPrimary,
@@ -406,18 +457,24 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: Colors.textPrimary,
   },
+
+  /* Livrux preview card */
   previewCard: {
-    backgroundColor: Colors.primary,
     borderRadius: Radius.lg,
     padding: Spacing.lg,
     alignItems: 'center',
     marginBottom: Spacing.lg,
-    ...Shadows.md,
+    overflow: 'hidden',
+    shadowColor: Colors.primaryDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
   },
   previewLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.85)',
+    color: 'rgba(255,255,255,0.9)',
     marginBottom: 4,
   },
   previewRow: {
@@ -438,6 +495,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginBottom: 4,
   },
+
+  /* Rating */
   ratingLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
@@ -454,7 +513,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
     borderRadius: Radius.lg,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: 'rgba(255,255,255,0.7)',
     borderWidth: 2,
     borderColor: 'transparent',
     gap: 4,
@@ -462,6 +521,7 @@ const styles = StyleSheet.create({
   ratingOptionSelected: {
     borderColor: Colors.secondary,
     backgroundColor: Colors.surface,
+    ...Shadows.sm,
   },
   ratingEmoji: { fontSize: 28 },
   ratingOptionLabel: {
@@ -473,6 +533,8 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
     color: Colors.secondary,
   },
+
+  /* Review */
   reviewContainer: {
     marginBottom: Spacing.lg,
   },
@@ -485,7 +547,7 @@ const styles = StyleSheet.create({
   reviewInput: {
     backgroundColor: Colors.surface,
     borderRadius: Radius.md,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.border,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
@@ -493,33 +555,8 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: Colors.textPrimary,
     minHeight: 80,
-  },
-  saveButton: { marginTop: Spacing.md },
-  statusToggle: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surfaceVariant,
-    borderRadius: Radius.lg,
-    padding: 4,
-    marginBottom: Spacing.lg,
-    gap: 4,
-  },
-  statusOption: {
-    flex: 1,
-    paddingVertical: Spacing.sm,
-    alignItems: 'center',
-    borderRadius: Radius.md,
-  },
-  statusOptionActive: {
-    backgroundColor: Colors.surface,
     ...Shadows.sm,
   },
-  statusOptionText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-  },
-  statusOptionTextActive: {
-    color: Colors.secondary,
-    fontFamily: Fonts.bodyBold,
-  },
+
+  saveButton: { marginTop: Spacing.md },
 });

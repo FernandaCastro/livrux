@@ -23,27 +23,48 @@ interface ButtonProps {
 
 const variantStyles: Record<Variant, { container: ViewStyle; text: TextStyle }> = {
   primary: {
-    container: { backgroundColor: Colors.primary },
+    container: {
+      backgroundColor: Colors.primary,
+      shadowColor: Colors.primaryDark,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.30,
+      shadowRadius: 12,
+      elevation: 5,
+    },
     text: { color: Colors.textOnPrimary },
   },
   secondary: {
-    container: { backgroundColor: Colors.secondary },
+    container: {
+      backgroundColor: Colors.secondary,
+      shadowColor: Colors.secondary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.35,
+      shadowRadius: 14,
+      elevation: 6,
+    },
     text: { color: Colors.textOnPrimary },
   },
   outline: {
     container: {
-      backgroundColor: 'transparent',
-      borderWidth: 2,
-      borderColor: Colors.primary,
+      backgroundColor: Colors.surface,
+      borderWidth: 2.5,
+      borderColor: Colors.secondary2,
     },
-    text: { color: Colors.primary },
+    text: { color: Colors.secondary },
   },
   ghost: {
     container: { backgroundColor: 'transparent' },
     text: { color: Colors.secondary },
   },
   danger: {
-    container: { backgroundColor: Colors.error },
+    container: {
+      backgroundColor: Colors.error,
+      shadowColor: Colors.error,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.25,
+      shadowRadius: 8,
+      elevation: 4,
+    },
     text: { color: Colors.textOnPrimary },
   },
 };
@@ -64,7 +85,7 @@ export function Button({
     <TouchableOpacity
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.75}
+      activeOpacity={0.80}
       style={[
         styles.base,
         vs.container,
@@ -97,8 +118,8 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   label: {
-    fontFamily: Fonts.bodyBold,
+    fontFamily: Fonts.bodyExtraBold,
     fontSize: FontSizes.md,
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
   },
 });

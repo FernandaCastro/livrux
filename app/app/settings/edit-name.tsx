@@ -15,11 +15,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { supabase } from '../../../src/lib/supabase';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing } from '../../../src/constants/theme';
 
@@ -78,54 +80,65 @@ export default function EditNameScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <View style={styles.headerRow}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.backText}>←</Text>
-            </TouchableOpacity>
-            <Text style={styles.screenTitle}>{t('settings.displayName')}</Text>
-            <View style={{ width: 32 }} />
-          </View>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+          <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+            <View style={styles.headerRow}>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.backText}>←</Text>
+              </TouchableOpacity>
+              <Text style={styles.screenTitle}>{t('settings.displayName')}</Text>
+              <View style={{ width: 32 }} />
+            </View>
 
-          <Controller
-            control={control}
-            name="displayName"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                label={t('settings.displayName')}
-                placeholder={t('settings.displayNamePlaceholder')}
-                value={value}
-                onChangeText={onChange}
-                autoCapitalize="words"
-                autoFocus
-                error={errors.displayName?.message}
-              />
-            )}
-          />
+            <Controller
+              control={control}
+              name="displayName"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  label={t('settings.displayName')}
+                  placeholder={t('settings.displayNamePlaceholder')}
+                  value={value}
+                  onChangeText={onChange}
+                  autoCapitalize="words"
+                  autoFocus
+                  error={errors.displayName?.message}
+                />
+              )}
+            />
 
-          <Button
-            label={t('common.save')}
-            onPress={handleSubmit(onSubmit)}
-            loading={saving}
-            style={styles.button}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
-      <BottomMenu />
-    </SafeAreaView>
+            <Button
+              label={t('common.save')}
+              onPress={handleSubmit(onSubmit)}
+              loading={saving}
+              style={styles.button}
+            />
+          </ScrollView>
+        </KeyboardAvoidingView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,

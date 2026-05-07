@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Modal, View, Text, TouchableOpacity, FlatList, StyleSheet, Pressable, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
@@ -27,7 +28,6 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
   const { setSelectedReader, selectedReader } = useReaderStore();
   const { requireReaderPin, modalProps } = useParentalGuard();
 
-  // Keep the Modal mounted while the close animation plays.
   const [mounted, setMounted] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(SHEET_TRANSLATE_Y)).current;
@@ -77,22 +77,30 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
     <Modal visible transparent animationType="none" onRequestClose={onClose}>
       {modalProps && <PinModal {...modalProps} />}
 
-      {/* Animated backdrop */}
+      {/* Backdrop */}
       <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
 
-      {/* Animated sheet */}
+      {/* Sheet */}
       <Animated.View
         style={[styles.sheetWrap, { transform: [{ translateY: slideAnim }] }]}
         pointerEvents="box-none"
       >
-        <View style={styles.sheet}>
+        <LinearGradient
+          colors={['#F5F0FF', '#FEFBFF', '#FFFAF4']}
+          locations={[0, 0.3, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.sheet}
+        >
+          {/* Handle */}
           <View style={styles.handle} />
 
+          {/* Home row */}
           <TouchableOpacity style={styles.homeRow} onPress={handleGoHome} activeOpacity={0.75}>
             <View style={styles.homeIconWrap}>
-              <Image source={require('../../assets/readers.png')} style={styles.homeIcon} resizeMode="contain"/>
+              <Image source={require('../../assets/readers.png')} style={styles.homeIcon} resizeMode="contain" />
             </View>
             <Text style={styles.homeLabel}>{t('home.title')}</Text>
           </TouchableOpacity>
@@ -111,7 +119,15 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
                   onPress={() => handleSelectReader(item)}
                   activeOpacity={0.75}
                 >
-                  <MultiavatarView seed={item.avatar_seed} size={40} />
+                  {/* Active accent strip */}
+                  {isActive && <View style={styles.activeStrip} />}
+
+                  <MultiavatarView
+                    seed={item.avatar_seed}
+                    size={40}
+                    borderColor={isActive ? Colors.secondary : undefined}
+                    borderWidth={isActive ? 2 : 0}
+                  />
                   <Text style={[styles.readerName, isActive && styles.readerNameActive]}>
                     {item.name}
                   </Text>
@@ -120,7 +136,7 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
               );
             }}
           />
-        </View>
+        </LinearGradient>
       </Animated.View>
     </Modal>
   );
@@ -138,10 +154,10 @@ const styles = StyleSheet.create({
     right: 0,
   },
   sheet: {
-    backgroundColor: Colors.background,
     borderTopLeftRadius: Radius.xl,
     borderTopRightRadius: Radius.xl,
     paddingBottom: Spacing['2xl'],
+    overflow: 'hidden',
     ...Shadows.lg,
   },
   handle: {
@@ -149,7 +165,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Colors.border,
+    backgroundColor: Colors.secondaryLight,
     marginTop: Spacing.md,
     marginBottom: Spacing.lg,
   },
@@ -164,7 +180,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 20,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: Colors.secondaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -186,9 +202,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     gap: Spacing.md,
+    overflow: 'hidden',
   },
   readerRowActive: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: Colors.secondaryLight,
+  },
+  activeStrip: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    backgroundColor: Colors.secondary,
+    borderTopRightRadius: 2,
+    borderBottomRightRadius: 2,
   },
   readerName: {
     flex: 1,
@@ -198,11 +225,11 @@ const styles = StyleSheet.create({
   },
   readerNameActive: {
     fontFamily: Fonts.bodyBold,
-    color: Colors.primary,
+    color: Colors.secondary,
   },
   activeCheck: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
-    color: Colors.primary,
+    color: Colors.secondary,
   },
 });

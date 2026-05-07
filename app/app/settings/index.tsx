@@ -11,10 +11,12 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import i18n, { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../src/i18n';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useAuthStore } from '../../../src/stores/authStore';
 import { supabase } from '../../../src/lib/supabase';
 import { PRIVACY_POLICY_URL, TERMS_URL } from '../../../src/constants/legal';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
 
@@ -68,7 +70,6 @@ export default function SettingsScreen() {
           text: t('settings.deleteAccount'),
           style: 'destructive',
           onPress: () => {
-            // Second confirmation — irreversible action
             Alert.alert(
               t('settings.deleteAccountFinal'),
               t('settings.deleteAccountFinalBody'),
@@ -105,110 +106,115 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.screenTitle}>{t('settings.title')}</Text>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.screenTitle}>{t('settings.title')}</Text>
 
-        {/* Account section */}
-        <Text style={styles.sectionLabel}>{t('settings.account')}</Text>
-        <View style={styles.card}>
-          <SettingsRow
-            icon="👤"
-            label={t('settings.displayName')}
-            value={profile?.display_name ?? '—'}
-            onPress={() => router.push('/app/settings/edit-name')}
-          />
-          <View style={styles.divider} />
-          <SettingsRow
-            icon="🔐"
-            label={t('settings.changePassword')}
-            onPress={() => router.push('/app/settings/change-password')}
-          />
-        </View>
+          <Text style={styles.sectionLabel}>{t('settings.account')}</Text>
+          <View style={styles.card}>
+            <SettingsRow
+              icon="👤"
+              label={t('settings.displayName')}
+              value={profile?.display_name ?? '—'}
+              onPress={() => router.push('/app/settings/edit-name')}
+            />
+            <View style={styles.divider} />
+            <SettingsRow
+              icon="🔐"
+              label={t('settings.changePassword')}
+              onPress={() => router.push('/app/settings/change-password')}
+            />
+          </View>
 
-        {/* Parental controls section */}
-        <Text style={styles.sectionLabel}>{t('settings.parentalControls')}</Text>
-        <View style={styles.card}>
-          <SettingsRow
-            icon="🛡️"
-            label={t('settings.parentalControlsTitle')}
-            onPress={() => router.push('/app/settings/parental')}
-          />
-        </View>
+          <Text style={styles.sectionLabel}>{t('settings.parentalControls')}</Text>
+          <View style={styles.card}>
+            <SettingsRow
+              icon="🛡️"
+              label={t('settings.parentalControlsTitle')}
+              onPress={() => router.push('/app/settings/parental')}
+            />
+          </View>
 
-        {/* Reward formula section */}
-        <Text style={styles.sectionLabel}>{t('settings.formula')}</Text>
-        <View style={styles.card}>
-          <SettingsRow
-            icon="🧮"
-            label={t('settings.formulaTitle')}
-            onPress={() => router.push('/app/settings/formula')}
-          />
-        </View>
+          <Text style={styles.sectionLabel}>{t('settings.formula')}</Text>
+          <View style={styles.card}>
+            <SettingsRow
+              icon="🧮"
+              label={t('settings.formulaTitle')}
+              onPress={() => router.push('/app/settings/formula')}
+            />
+          </View>
 
-        {/* Language section */}
-        <Text style={styles.sectionLabel}>{t('settings.language')}</Text>
-        <View style={styles.card}>
-          {SUPPORTED_LANGUAGES.map((lang, index) => (
-            <View key={lang}>
-              <TouchableOpacity
-                onPress={() => i18n.changeLanguage(lang)}
-                activeOpacity={0.75}
-                style={styles.langRow}
-              >
-                <Text style={styles.rowIcon}>
-                  {lang === 'en' ? '🇬🇧' : lang === 'de' ? '🇩🇪' : '🇧🇷'}
-                </Text>
-                <Text style={styles.rowLabel}>{t(`languages.${lang}`)}</Text>
-                {currentLang === lang && (
-                  <Text style={styles.checkmark}>✓</Text>
-                )}
-              </TouchableOpacity>
-              {index < SUPPORTED_LANGUAGES.length - 1 && <View style={styles.divider} />}
-            </View>
-          ))}
-        </View>
+          <Text style={styles.sectionLabel}>{t('settings.language')}</Text>
+          <View style={styles.card}>
+            {SUPPORTED_LANGUAGES.map((lang, index) => (
+              <View key={lang}>
+                <TouchableOpacity
+                  onPress={() => i18n.changeLanguage(lang)}
+                  activeOpacity={0.75}
+                  style={styles.langRow}
+                >
+                  <Text style={styles.rowIcon}>
+                    {lang === 'en' ? '🇬🇧' : lang === 'de' ? '🇩🇪' : '🇧🇷'}
+                  </Text>
+                  <Text style={styles.rowLabel}>{t(`languages.${lang}`)}</Text>
+                  {currentLang === lang && (
+                    <Text style={styles.checkmark}>✓</Text>
+                  )}
+                </TouchableOpacity>
+                {index < SUPPORTED_LANGUAGES.length - 1 && <View style={styles.divider} />}
+              </View>
+            ))}
+          </View>
 
-        {/* Legal section */}
-        <Text style={styles.sectionLabel}>{t('settings.legal')}</Text>
-        <View style={styles.card}>
-          <SettingsRow
-            icon="📄"
-            label={t('settings.privacyPolicy')}
-            onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
-          />
-          <View style={styles.divider} />
-          <SettingsRow
-            icon="📋"
-            label={t('settings.termsOfUse')}
-            onPress={() => Linking.openURL(TERMS_URL)}
-          />
-        </View>
+          <Text style={styles.sectionLabel}>{t('settings.legal')}</Text>
+          <View style={styles.card}>
+            <SettingsRow
+              icon="📄"
+              label={t('settings.privacyPolicy')}
+              onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+            />
+            <View style={styles.divider} />
+            <SettingsRow
+              icon="📋"
+              label={t('settings.termsOfUse')}
+              onPress={() => Linking.openURL(TERMS_URL)}
+            />
+          </View>
 
-        {/* Danger zone */}
-        <View style={styles.card}>
-          <SettingsRow
-            icon="🚪"
-            label={t('settings.signOut')}
-            onPress={handleSignOut}
-            danger
-          />
-          <View style={styles.divider} />
-          <SettingsRow
-            icon="🗑️"
-            label={t('settings.deleteAccount')}
-            onPress={handleDeleteAccount}
-            danger
-          />
-        </View>
-      </ScrollView>
-      <BottomMenu />
-    </SafeAreaView>
+          <View style={styles.card}>
+            <SettingsRow
+              icon="🚪"
+              label={t('settings.signOut')}
+              onPress={handleSignOut}
+              danger
+            />
+            <View style={styles.divider} />
+            <SettingsRow
+              icon="🗑️"
+              label={t('settings.deleteAccount')}
+              onPress={handleDeleteAccount}
+              danger
+            />
+          </View>
+        </ScrollView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
@@ -224,14 +230,14 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: Colors.secondary,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: Spacing.sm,
     marginTop: Spacing.md,
   },
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(255,255,255,0.75)',
     borderRadius: Radius.lg,
     overflow: 'hidden',
     marginBottom: Spacing.lg,
@@ -268,7 +274,7 @@ const styles = StyleSheet.create({
   },
   checkmark: {
     fontSize: FontSizes.lg,
-    color: Colors.primary,
+    color: Colors.secondary,
     fontFamily: Fonts.bodyBold,
   },
   divider: {

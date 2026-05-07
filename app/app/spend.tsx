@@ -5,11 +5,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { spendLivruxRpc } from '../../src/hooks/useLivrux';
 import { useReaderStore } from '../../src/stores/readerStore';
 import { Button } from '../../src/components/ui/Button';
 import { TextInput } from '../../src/components/ui/TextInput';
+import { FloatingEmojis } from '../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../src/constants/theme';
 
@@ -65,78 +67,90 @@ export default function SpendScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <Text style={styles.title}>{t('spend.title')}</Text>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>{t('spend.title')}</Text>
 
-        {/* Balance info */}
-        <View style={styles.balanceCard}>
-          <Text style={styles.balanceLabel}>{t('spend.availableBalance')}</Text>
-          <View style={styles.balanceRow}>
-            <Text style={styles.balanceCoin}>🪙</Text>
-            <Text style={styles.balanceAmount}>{balance.toFixed(2)}</Text>
-            <Text style={styles.balanceCurrency}>Livrux</Text>
+          <LinearGradient
+            colors={['#F5A623', '#FF7F3E']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.balanceCard}
+          >
+            <Text style={styles.balanceLabel}>{t('spend.availableBalance')}</Text>
+            <View style={styles.balanceRow}>
+              <Text style={styles.balanceCoin}>🪙</Text>
+              <Text style={styles.balanceAmount}>{balance.toFixed(2)}</Text>
+              <Text style={styles.balanceCurrency}>Livrux</Text>
+            </View>
+          </LinearGradient>
+
+          <View style={styles.form}>
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  label={t('spend.amount')}
+                  placeholder={t('spend.amountPlaceholder')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  keyboardType="decimal-pad"
+                  error={errors.amount?.message}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="description"
+              render={({ field: { value, onChange, onBlur } }) => (
+                <TextInput
+                  label={t('spend.description')}
+                  placeholder={t('spend.descriptionPlaceholder')}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.description?.message}
+                />
+              )}
+            />
           </View>
-        </View>
 
-        {/* Form */}
-        <View style={styles.form}>
-          <Controller
-            control={control}
-            name="amount"
-            render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
-                label={t('spend.amount')}
-                placeholder={t('spend.amountPlaceholder')}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                keyboardType="decimal-pad"
-                error={errors.amount?.message}
-              />
-            )}
+          <Button
+            label={t('spend.submit')}
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
           />
-
-          <Controller
-            control={control}
-            name="description"
-            render={({ field: { value, onChange, onBlur } }) => (
-              <TextInput
-                label={t('spend.description')}
-                placeholder={t('spend.descriptionPlaceholder')}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.description?.message}
-              />
-            )}
+          <Button
+            label={t('common.cancel')}
+            onPress={() => router.back()}
+            variant="ghost"
           />
-        </View>
-
-        {/* Actions */}
-        <Button
-          label={t('spend.submit')}
-          onPress={handleSubmit(onSubmit)}
-          loading={isSubmitting}
-        />
-        <Button
-          label={t('common.cancel')}
-          onPress={() => router.back()}
-          variant="ghost"
-        />
-      </ScrollView>
-      <BottomMenu />
-    </SafeAreaView>
+        </ScrollView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
     paddingHorizontal: Spacing.xl,
     paddingTop: Spacing.xl,
@@ -149,7 +163,6 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   balanceCard: {
-    backgroundColor: Colors.primary,
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,

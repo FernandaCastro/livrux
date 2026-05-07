@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     alignSelf: 'flex-start',
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: '#38BDF8',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
@@ -143,14 +143,14 @@ const styles = StyleSheet.create({
   bookCount: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,
-    color: Colors.secondary,
+    color: Colors.textOnPrimary,
   },
   xpBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     alignSelf: 'flex-start',
-    backgroundColor: '#FFF8E1',
+    backgroundColor: '#FCD34D',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   xpCount: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,
-    color: '#F59E0B',
+    color: '#78350F',
   },
   actions: {
     flexDirection: 'row',

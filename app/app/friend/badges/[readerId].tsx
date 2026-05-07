@@ -10,23 +10,14 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef } from 'react';
 
 import { useBadges } from '../../../../src/hooks/useBadges';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { BadgeCard } from '../../../../src/components/BadgeCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
-import type { BadgeTier } from '../../../../src/types';
-
-const TIER_COLORS: Record<BadgeTier, string> = {
-  bronze: '#CD7F32',
-  silver: '#A8A9AD',
-  gold: '#F5A623',
-};
-const TIER_ICON: Record<BadgeTier, string> = {
-  bronze: '🥉',
-  silver: '🥈',
-  gold: '🥇',
-};
 
 export default function FriendBadgesScreen() {
   const { t } = useTranslation();
@@ -46,118 +37,143 @@ export default function FriendBadgesScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safe}>
-        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
-      </SafeAreaView>
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.85, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.safe}>
+          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+        </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>← {t('common.back')}</Text>
-          </TouchableOpacity>
-          <Text style={styles.heading}>🏅 {t('badges.title')}</Text>
-        </View>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
 
-        {earnedBadges.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🏅</Text>
-            <Text style={styles.emptyText}>{t('badges.friendEmpty')}</Text>
-          </View>
-        ) : (
-          <View style={styles.grid}>
-            {earnedBadges.map((badge) => (
-              <View key={badge.slug} style={styles.badgeCard}>
-                <Text style={styles.tierIcon}>{TIER_ICON[badge.tier]}</Text>
-                <View style={[styles.iconCircle, { borderColor: TIER_COLORS[badge.tier] }]}>
-                  <Text style={styles.badgeIcon}>{badge.icon}</Text>
-                </View>
-                <Text style={styles.badgeName}>
-                  {t(`badges.${badge.slug}.name`)}
-                </Text>
-                <Text style={styles.badgeDesc}>
-                  {t(`badges.${badge.slug}.description`)}
-                </Text>
+        {/* ── Back button (fixed, above banner) ── */}
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={styles.backText}>← {t('common.back')}</Text>
+        </TouchableOpacity>
+
+        {/* ── Hero banner ── */}
+        <LinearGradient
+          colors={['#3ECA8C', '#0A6E48']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroBanner}
+        >
+          <View style={styles.heroContent}>
+            <Text style={styles.heroBannerEmoji}>🏅</Text>
+            <View style={styles.heroRight}>
+              <Text style={styles.heroTitle}>{t('badges.title')}</Text>
+              <View style={styles.countChip}>
+                <Text style={styles.countChipText}>🏆 {earnedBadges.length} {t('badges.earned')}</Text>
               </View>
-            ))}
+            </View>
           </View>
-        )}
-      </ScrollView>
+        </LinearGradient>
 
-      <BottomMenu />
-    </SafeAreaView>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+        >
+          {earnedBadges.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>🏅</Text>
+              <Text style={styles.emptyText}>{t('badges.friendEmpty')}</Text>
+            </View>
+          ) : (
+            <View style={styles.grid}>
+              {earnedBadges.map((badge) => (
+                <BadgeCard key={badge.slug} badge={badge} />
+              ))}
+            </View>
+          )}
+        </ScrollView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  container: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
-    paddingTop: Spacing.xl,
-  },
-  header: {
-    marginBottom: Spacing.xl,
-    gap: Spacing.xs,
-  },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
+
   backBtn: {
     alignSelf: 'flex-start',
-    marginBottom: Spacing.sm,
+    marginHorizontal: Spacing.xl,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.xs,
   },
   backText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.primary,
+    color: '#0A6E48',
   },
-  heading: {
+
+  heroBanner: {
+    borderRadius: Radius.xl,
+    marginHorizontal: Spacing.md,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.xl,
+    ...Shadows.lg,
+  },
+  heroContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  heroBannerEmoji: {
+    fontSize: 52,
+  },
+  heroRight: {
+    flex: 1,
+    gap: Spacing.sm,
+  },
+  heroTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
-    color: Colors.textPrimary,
+    color: Colors.textOnPrimary,
+  },
+  countChip: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 4,
+  },
+  countChipText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textOnPrimary,
+  },
+
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
+    paddingTop: Spacing.sm,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.md,
-  },
-  badgeCard: {
-    width: '47%',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    alignItems: 'center',
-    ...Shadows.sm,
-  },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: Radius.full,
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.sm,
-    backgroundColor: Colors.background,
-  },
-  badgeIcon: { fontSize: 28 },
-  badgeName: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.sm,
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  badgeDesc: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
-    textAlign: 'center',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -169,11 +185,5 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textSecondary,
     textAlign: 'center',
-  },
-  tierIcon: {
-    marginTop: -8,
-    marginBottom: -10,
-    marginLeft: 100, 
-    fontSize: 30 
   },
 });

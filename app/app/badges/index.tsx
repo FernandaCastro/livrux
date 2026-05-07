@@ -1,24 +1,15 @@
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, AppState } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef } from 'react';
 
 import { useBadges } from '../../../src/hooks/useBadges';
 import { useReaderStore } from '../../../src/stores/readerStore';
+import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
+import { BadgeCard } from '../../../src/components/BadgeCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
-import type { BadgeTier } from '../../../src/types';
-
-const TIER_COLORS: Record<BadgeTier, string> = {
-  bronze: '#CD7F32',
-  silver: '#A8A9AD',
-  gold: '#F5A623',
-};
-const TIER_ICON: Record<BadgeTier, string> = {
-  bronze: '🥉',
-  silver: '🥈',
-  gold: '🥇',
-};
 
 export default function BadgesScreen() {
   const { t } = useTranslation();
@@ -36,114 +27,190 @@ export default function BadgesScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safe}>
-        <ActivityIndicator color={Colors.primary} style={{ flex: 1 }} />
-      </SafeAreaView>
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.85, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.safe}>
+          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+        </SafeAreaView>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>⚠️</Text>
-          <Text style={styles.emptyText}>{t('common.error')}</Text>
-          <Text style={styles.emptySubtext}>{error}</Text>
-        </View>
-        <BottomMenu />
-      </SafeAreaView>
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          locations={[0, 0.6, 1]}
+          start={{ x: 0.15, y: 0 }}
+          end={{ x: 0.85, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.safe}>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>⚠️</Text>
+            <Text style={styles.emptyText}>{t('common.error')}</Text>
+            <Text style={styles.emptySubtext}>{error}</Text>
+          </View>
+          <BottomMenu />
+        </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.heading}>{t('badges.title')}</Text>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.15, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <FloatingEmojis />
+      <SafeAreaView style={styles.safe}>
 
-        {/* Empty state — catalog not loaded (migrations pending) */}
-        {earnedBadges.length === 0 && pendingBadges.length === 0 && (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🏅</Text>
-            <Text style={styles.emptyText}>{t('badges.empty')}</Text>
+        {/* ── Hero banner ── */}
+        <LinearGradient
+          colors={['#FF7F3E', '#C2410C']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroBanner}
+        >
+          <View style={styles.heroContent}>
+            <Text style={styles.heroBannerEmoji}>🏅</Text>
+            <View style={styles.heroRight}>
+              <Text style={styles.heroTitle}>{t('badges.title')}</Text>
+              {selectedReader && (
+                <Text style={styles.heroSubtitle}>{selectedReader.name}</Text>
+              )}
+            </View>
           </View>
-        )}
 
-        {/* Earned */}
-        {earnedBadges.length > 0 && (
-          <>
-            <Text style={styles.sectionLabel}>{t('badges.earned')}</Text>
-            <View style={styles.grid}>
-              {earnedBadges.map((badge) => (
-                <View key={badge.slug} style={[styles.badgeCard, styles.badgeCardEarned]}>
-                  <Text style={styles.tierIcon}>{TIER_ICON[badge.tier]}</Text>
-                  <View style={[styles.iconCircle, { borderColor: TIER_COLORS[badge.tier] }]}>
-                    <Text style={styles.badgeIcon}>{badge.icon}</Text>
-                  </View>
-                  <Text style={styles.badgeName}>
-                    {t(`badges.${badge.slug}.name`)}
-                  </Text>
-                  <Text style={styles.badgeDesc}>
-                    {t(`badges.${badge.slug}.description`)}
-                  </Text>
-                  {!!badge.bonus_livrux && badge.bonus_livrux > 0 && (
-                    <Text style={[styles.bonusText, { color: TIER_COLORS[badge.tier] }]}>
-                      {t('badges.bonusEarned', { amount: badge.bonus_livrux })}
-                    </Text>
-                  )}
-                </View>
-              ))}
+          <View style={styles.statsRow}>
+            <View style={styles.statChip}>
+              <Text style={styles.statChipText}>🏆 {earnedBadges.length} {t('badges.earned')}</Text>
             </View>
-          </>
-        )}
+            {pendingBadges.length > 0 && (
+              <View style={styles.statChip}>
+                <Text style={styles.statChipText}>🔒 {pendingBadges.length} {t('badges.pending')}</Text>
+              </View>
+            )}
+          </View>
+        </LinearGradient>
 
-        {/* Pending */}
-        {pendingBadges.length > 0 && (
-          <>
-            <Text style={styles.sectionLabel}>{t('badges.pending')}</Text>
-            <View style={styles.grid}>
-              {pendingBadges.map((badge) => (
-                <View key={badge.slug} style={[styles.badgeCard, styles.badgeCardLocked]}>
-                  <View style={[styles.iconCircle, styles.iconCircleLocked]}>
-                    <Text style={[styles.badgeIcon, styles.badgeIconLocked]}>{badge.icon}</Text>
-                  </View>
-                  <Text style={[styles.badgeName, styles.badgeNameLocked]}>
-                    {t(`badges.${badge.slug}.name`)}
-                  </Text>
-                  <Text style={styles.badgeDesc}>
-                    {t(`badges.${badge.slug}.description`)}
-                  </Text>
-                </View>
-              ))}
+        <ScrollView
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+        >
+          {earnedBadges.length === 0 && pendingBadges.length === 0 && (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>🏅</Text>
+              <Text style={styles.emptyText}>{t('badges.empty')}</Text>
             </View>
-          </>
-        )}
-      </ScrollView>
-      <BottomMenu />
-    </SafeAreaView>
+          )}
+
+          {earnedBadges.length > 0 && (
+            <>
+              <Text style={styles.sectionLabel}>{t('badges.earned')}</Text>
+              <View style={styles.grid}>
+                {earnedBadges.map((badge) => (
+                  <BadgeCard key={badge.slug} badge={badge} />
+                ))}
+              </View>
+            </>
+          )}
+
+          {pendingBadges.length > 0 && (
+            <>
+              <Text style={styles.sectionLabel}>{t('badges.pending')}</Text>
+              <View style={styles.grid}>
+                {pendingBadges.map((badge) => (
+                  <BadgeCard key={badge.slug} badge={badge} locked />
+                ))}
+              </View>
+            </>
+          )}
+        </ScrollView>
+        <BottomMenu />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
+  root: { flex: 1 },
+  safe: { flex: 1, backgroundColor: 'transparent' },
+
+  heroBanner: {
+    borderRadius: Radius.xl,
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.xl,
+    ...Shadows.lg,
+  },
+  heroContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    marginTop: Spacing['2xl'],
+    marginBottom: Spacing.md,
+  },
+  heroBannerEmoji: {
+    fontSize: 56,
+  },
+  heroRight: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  heroTitle: {
+    fontFamily: Fonts.heading,
+    fontSize: FontSizes['2xl'],
+    color: Colors.textOnPrimary,
+  },
+  heroSubtitle: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.sm,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    alignSelf: 'stretch',
+  },
+  statChip: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    alignItems: 'center',
+  },
+  statChipText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textOnPrimary,
+  },
+
   container: {
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
-    paddingTop: Spacing.xl,
-  },
-  heading: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['2xl'],
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xl,
+    paddingTop: Spacing.sm,
   },
   sectionLabel: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: '#C2410C',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: Spacing.md,
@@ -154,51 +221,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.md,
     marginBottom: Spacing.xl,
-  },
-  badgeCard: {
-    width: '47%',
-    borderRadius: Radius.xl,
-    padding: Spacing.md,
-    alignItems: 'center',
-    ...Shadows.sm,
-  },
-  badgeCardEarned: {
-    backgroundColor: Colors.surface,
-  },
-  badgeCardLocked: {
-    backgroundColor: Colors.surfaceVariant,
-    opacity: 0.7,
-  },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: Radius.full,
-    borderWidth: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.sm,
-    backgroundColor: Colors.background,
-  },
-  iconCircleLocked: {
-    borderColor: Colors.border,
-  },
-  badgeIcon: { fontSize: 28 },
-  badgeIconLocked: { opacity: 0.4 },
-  badgeName: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.sm,
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 2,
-  },
-  badgeNameLocked: {
-    color: Colors.textSecondary,
-  },
-  badgeDesc: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
-    textAlign: 'center',
   },
   emptyContainer: {
     flex: 1,
@@ -220,16 +242,5 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
     textAlign: 'center',
-  },
-  bonusText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xs,
-    marginTop: 4,
-  },
-  tierIcon: {
-    marginTop: -8,
-    marginBottom: -10,
-    marginLeft: 100, 
-    fontSize: 30 
   },
 });

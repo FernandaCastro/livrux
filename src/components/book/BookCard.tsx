@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Book } from '../../types';
@@ -20,55 +21,62 @@ const RATING_EMOJI: Record<string, string> = {
 export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
   const { t } = useTranslation();
   return (
-    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} activeOpacity={0.8} style={styles.card}>
-      {/* Accent strip */}
-      <View style={styles.accentStrip} />
+    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} activeOpacity={0.82} style={styles.shell}>
+      <LinearGradient
+        colors={['#FEFBFF', '#FFFAF4']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.card}
+      >
+        {/* Accent strip */}
+        <View style={styles.accentStrip} />
 
-      {/* Cover with rating badge */}
-      <View style={styles.coverWrapper}>
-        {book.cover_url ? (
-          <Image source={{ uri: book.cover_url }} style={styles.cover} resizeMode="cover" />
-        ) : (
-          <View style={styles.coverPlaceholder}>
-            <Text style={styles.coverIcon}>📕</Text>
-          </View>
-        )}
-        {book.rating && (
-          <View style={styles.ratingBadge}>
-            <Text style={styles.ratingEmoji}>{RATING_EMOJI[book.rating]}</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Info */}
-      <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={2}>{book.title}</Text>
-        {book.author && (
-          <Text style={styles.author} numberOfLines={1}>{book.author}</Text>
-        )}
-
-        <View style={styles.chips}>
-          <View style={styles.pageChip}>
-            <Text style={styles.pageChipText}>📄 {book.total_pages} p.</Text>
-          </View>
-          {book.is_foreign_language && (
-            <View style={styles.foreignChip}>
-              <Text style={styles.pageChipText}>🌍</Text>
+        {/* Cover with rating badge */}
+        <View style={styles.coverWrapper}>
+          {book.cover_url ? (
+            <Image source={{ uri: book.cover_url }} style={styles.cover} resizeMode="cover" />
+          ) : (
+            <View style={styles.coverPlaceholder}>
+              <Text style={styles.coverIcon}>📕</Text>
+            </View>
+          )}
+          {book.rating && (
+            <View style={styles.ratingBadge}>
+              <Text style={styles.ratingEmoji}>{RATING_EMOJI[book.rating]}</Text>
             </View>
           )}
         </View>
 
-        {/* Footer: coins + date */}
-        <View style={styles.footer}>
-          <View style={styles.coinBadge}>
-            <Text style={styles.coinEmoji}>🪙</Text>
-            <Text style={styles.coinAmount}>+{book.livrux_earned}</Text>
+        {/* Info */}
+        <View style={styles.info}>
+          <Text style={styles.title} numberOfLines={2}>{book.title}</Text>
+          {book.author && (
+            <Text style={styles.author} numberOfLines={1}>{book.author}</Text>
+          )}
+
+          <View style={styles.chips}>
+            <View style={styles.pageChip}>
+              <Text style={styles.pageChipText}>📄 {book.total_pages} p.</Text>
+            </View>
+            {book.is_foreign_language && (
+              <View style={styles.foreignChip}>
+                <Text style={styles.pageChipText}>🌍</Text>
+              </View>
+            )}
           </View>
-          <Text style={styles.date}>
-            {format(new Date(book.date_completed ?? book.date_start), 'dd/MM/yy')}
-          </Text>
+
+          {/* Footer: coins + date */}
+          <View style={styles.footer}>
+            <View style={styles.coinBadge}>
+              <Text style={styles.coinEmoji}>🪙</Text>
+              <Text style={styles.coinAmount}>+{book.livrux_earned}</Text>
+            </View>
+            <Text style={styles.date}>
+              {format(new Date(book.date_completed ?? book.date_start), 'dd/MM/yy')}
+            </Text>
+          </View>
         </View>
-      </View>
+      </LinearGradient>
     </TouchableOpacity>
   );
 }
@@ -77,18 +85,20 @@ const COVER_WIDTH = 64;
 const COVER_HEIGHT = 92;
 
 const styles = StyleSheet.create({
+  shell: {
+    borderRadius: Radius.xl,
+    marginBottom: Spacing.sm,
+    ...Shadows.md,
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    marginBottom: Spacing.sm,
+    borderRadius: Radius.xl,
     overflow: 'hidden',
-    ...Shadows.md,
   },
   accentStrip: {
     width: 5,
-    backgroundColor: Colors.readerBlue,
+    backgroundColor: Colors.secondary,
   },
   coverWrapper: {
     margin: Spacing.md,
@@ -105,7 +115,7 @@ const styles = StyleSheet.create({
     width: COVER_WIDTH,
     height: COVER_HEIGHT,
     borderRadius: Radius.sm,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: Colors.secondaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -149,21 +159,21 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   pageChip: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: Colors.secondaryLight,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
   },
   foreignChip: {
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: Colors.secondaryLight,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
   },
   pageChipText: {
-    fontFamily: Fonts.body,
+    fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
+    color: Colors.secondaryDark,
   },
   footer: {
     flexDirection: 'row',

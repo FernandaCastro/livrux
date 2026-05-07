@@ -12,6 +12,7 @@ import {
 } from '@expo-google-fonts/nunito';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { supabase } from '../src/lib/supabase';
 import { useAuthStore } from '../src/stores/authStore';
@@ -23,6 +24,15 @@ import '../src/i18n';
 
 // Keep the native splash visible until we explicitly hide it.
 SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2,
+      retry: 2,
+    },
+  },
+});
 
 // Supabase logs this internally before firing TOKEN_REFRESH_FAILED — the app
 // already handles it by redirecting to login, so the log is noise.
@@ -129,26 +139,30 @@ export default function RootLayout() {
   // (covers both font loading and auth check, regardless of order).
   if (!hasNavigated) {
     return (
-      <ErrorBoundary>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <SafeAreaProvider>
-            <StatusBar style="dark" backgroundColor={Colors.background} />
-            <AppLoadingScreen fontsReady={fontsLoaded} />
-          </SafeAreaProvider>
-        </GestureHandlerRootView>
-      </ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ErrorBoundary>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaProvider>
+              <StatusBar style="dark" backgroundColor={Colors.background} />
+              <AppLoadingScreen fontsReady={fontsLoaded} />
+            </SafeAreaProvider>
+          </GestureHandlerRootView>
+        </ErrorBoundary>
+      </QueryClientProvider>
     );
   }
 
   return (
-    <ErrorBoundary>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <StatusBar style="dark" backgroundColor={Colors.background} />
-          <Stack screenOptions={{ headerShown: false }} />
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ErrorBoundary>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider>
+            <StatusBar style="dark" backgroundColor={Colors.background} />
+            <Stack screenOptions={{ headerShown: false }} />
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </ErrorBoundary>
+    </QueryClientProvider>
   );
 }
 

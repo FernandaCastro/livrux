@@ -1,92 +1,117 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import type { Reader } from '../types';
 
-interface UseReadersResult {
-  readers: Reader[];
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-  createReader: (name: string, avatarSeed?: string | null) => Promise<Reader>;
-  updateReader: (id: string, updates: Partial<Pick<Reader, 'name' | 'avatar_seed' | 'old_avatar_seed'>>) => Promise<void>;
-  deleteReader: (id: string) => Promise<void>;
+export const READERS_KEY = (userId: string) => ['readers', userId] as const;
+
+function useReadersKey() {
+  const { user } = useAuthStore();
+  return user ? READERS_KEY(user.id) : null;
 }
 
-export function useReaders(): UseReadersResult {
+async function fetchReaders(userId: string): Promise<Reader[]> {
+  const { data, error } = await supabase
+    .from('readers')
+    .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, xp, friend_code, friends_autonomy, created_at, updated_at, books(count), reader_badges(count)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+
+  return (data ?? []).map((r: any) => ({
+    ...r,
+    book_count: (r.books?.[0]?.count ?? 0) as number,
+    badge_count: (r.reader_badges?.[0]?.count ?? 0) as number,
+    books: undefined,
+    reader_badges: undefined,
+  })) as Reader[];
+}
+
+export function useReaders() {
   const { user } = useAuthStore();
-  const [readers, setReaders] = useState<Reader[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const qc = useQueryClient();
+  const key = useReadersKey();
 
-  const fetch = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    setError(null);
+  const { data: readers = [], isLoading, error, refetch } = useQuery({
+    queryKey: key ?? ['readers', null],
+    queryFn: () => fetchReaders(user!.id),
+    enabled: !!user,
+  });
 
-    const { data, error: dbError } = await supabase
-      .from('readers')
-      .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, xp, friend_code, friends_autonomy, created_at, updated_at, books(count), reader_badges(count)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: true });
+  const createMutation = useMutation({
+    mutationFn: async ({ name, avatarSeed }: { name: string; avatarSeed?: string | null }) => {
+      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await supabase
+        .from('readers')
+        .insert({ user_id: user.id, name, avatar_seed: avatarSeed ?? null })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Reader;
+    },
+    onSuccess: (created) => {
+      if (!key) return;
+      qc.setQueryData(key, (old: Reader[] = []) => [...old, created]);
+    },
+  });
 
-    if (dbError) {
-      console.error('[useReaders] fetch error:', dbError);
-      setError(dbError.message);
-    } else {
-      const readers = (data ?? []).map((r: any) => ({
-        ...r,
-        book_count: (r.books?.[0]?.count ?? 0) as number,
-        badge_count: (r.reader_badges?.[0]?.count ?? 0) as number,
-        books: undefined,
-        reader_badges: undefined,
-      })) as Reader[];
-      setReaders(readers);
-    }
-    setIsLoading(false);
-  }, [user?.id]);
+  const updateMutation = useMutation({
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<Pick<Reader, 'name' | 'avatar_seed' | 'old_avatar_seed'>>;
+    }) => {
+      const { error } = await supabase
+        .from('readers')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+      return { id, updates };
+    },
+    onSuccess: ({ id, updates }) => {
+      if (!key) return;
+      qc.setQueryData(key, (old: Reader[] = []) =>
+        old.map((r) => (r.id === id ? { ...r, ...updates } : r))
+      );
+    },
+  });
 
-  useEffect(() => { fetch(); }, [fetch]);
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('readers').delete().eq('id', id);
+      if (error) throw error;
+      return id;
+    },
+    onSuccess: (id) => {
+      if (!key) return;
+      qc.setQueryData(key, (old: Reader[] = []) => old.filter((r) => r.id !== id));
+    },
+  });
 
-  const createReader = async (name: string, avatarSeed?: string | null): Promise<Reader> => {
-    if (!user) throw new Error('Not authenticated');
-
-    const { data, error: dbError } = await supabase
-      .from('readers')
-      .insert({ user_id: user.id, name, avatar_seed: avatarSeed ?? null })
-      .select()
-      .single();
-
-    if (dbError) throw dbError;
-    const created = data as Reader;
-    setReaders((prev) => [...prev, created]);
-    return created;
-  };
+  const createReader = async (name: string, avatarSeed?: string | null): Promise<Reader> =>
+    createMutation.mutateAsync({ name, avatarSeed });
 
   const updateReader = async (
     id: string,
     updates: Partial<Pick<Reader, 'name' | 'avatar_seed' | 'old_avatar_seed'>>
   ): Promise<void> => {
-    const { error: dbError } = await supabase
-      .from('readers')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (dbError) throw dbError;
-    setReaders((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, ...updates } : r))
-    );
+    await updateMutation.mutateAsync({ id, updates });
   };
 
   const deleteReader = async (id: string): Promise<void> => {
-    const { error: dbError } = await supabase
-      .from('readers')
-      .delete()
-      .eq('id', id);
-
-    if (dbError) throw dbError;
-    setReaders((prev) => prev.filter((r) => r.id !== id));
+    await deleteMutation.mutateAsync(id);
   };
 
-  return { readers, isLoading, error, refresh: fetch, createReader, updateReader, deleteReader };
+  return {
+    readers,
+    isLoading,
+    error: error ? (error as Error).message : null,
+    refresh: refetch,
+    createReader,
+    updateReader,
+    deleteReader,
+  };
 }

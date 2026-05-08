@@ -13,6 +13,7 @@ export default function AppLayout() {
         prevCount={confettiTrigger?.prev ?? 0}
         newCount={confettiTrigger?.next ?? 0}
         onDone={clearConfetti}
+        bookImageSource={require('../../assets/livrux-clean.png')}
       />
     </>
   );

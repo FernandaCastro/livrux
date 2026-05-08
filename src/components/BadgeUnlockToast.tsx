@@ -52,11 +52,11 @@ const TIER_THEME: Record<BadgeTier, TierTheme> = {
     nameColor: '#4E2600',
   },
   silver: {
-    border:    '#5C6BC0',
-    headerBg:  '#7986CB',
-    glow:      '#3949AB',
-    iconBg:    '#E8EAF6',
-    nameColor: '#1A237E',
+    border:    Colors.secondaryDark,
+    headerBg:  Colors.secondary,
+    glow:      Colors.secondary,
+    iconBg:    Colors.secondaryLight,
+    nameColor: Colors.textPrimary,
   },
   gold: {
     border:    '#F9A825',
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: 'rgba(30,27,75,0.55)',
   },
   cardWrapper: {
     width: CARD_WIDTH,

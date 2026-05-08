@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { STREAK_KEY } from './useStreak';
 import type { ReadingSession } from '../types';
 
 interface UseReadingSessionResult {
@@ -47,6 +48,7 @@ export function useReadingSession(readerId: string | null, bookId: string | null
     },
     onSuccess: () => {
       if (key) qc.invalidateQueries({ queryKey: key });
+      if (readerId) qc.invalidateQueries({ queryKey: STREAK_KEY(readerId) });
     },
   });
 

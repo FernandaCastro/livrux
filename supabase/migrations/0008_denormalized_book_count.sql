@@ -3,6 +3,8 @@
 -- Adds book_count to readers (completed books only) to avoid books(count)
 -- joins on every reader/friends fetch.
 -- RPCs log_book, complete_book, and delete_book are updated to maintain it.
+-- All three functions carry forward the fixes from 0006 (XP for long books)
+-- and 0007 (description field with book title in transactions).
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE public.readers
@@ -17,7 +19,7 @@ SET book_count = (
 
 
 -- ---------------------------------------------------------------------------
--- log_book — increment book_count when logging a completed book directly
+-- log_book — base: 0007 (XP for all completed + description); adds book_count
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.log_book(
   p_reader_id           UUID,
@@ -75,8 +77,8 @@ BEGIN
   END IF;
 
   IF p_status = 'completed' AND p_livrux_earned > 0 THEN
-    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason)
-    VALUES (p_reader_id, v_user_id, v_book_id, p_livrux_earned, 'book_completed');
+    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason, description)
+    VALUES (p_reader_id, v_user_id, v_book_id, p_livrux_earned, 'book_completed', p_title);
 
     UPDATE public.readers
     SET livrux_balance = livrux_balance + p_livrux_earned,
@@ -84,35 +86,35 @@ BEGIN
     WHERE id = p_reader_id;
   END IF;
 
-  -- XP for completing a short book (≤ 100 pages) = total page count
-  IF p_status = 'completed' AND p_total_pages <= 100 THEN
+  -- XP = total pages for any book added directly as completed (no reading sessions).
+  -- Short books (≤ 100p) and long books alike get XP here because log_book is used
+  -- for retroactive entries that bypass the reading-session flow entirely.
+  IF p_status = 'completed' THEN
     v_xp_earned := p_total_pages;
 
     INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
-    VALUES (p_reader_id, v_user_id, v_xp_earned, 'book_completed_short');
+    VALUES (p_reader_id, v_user_id, v_xp_earned, 'book_completed');
 
     UPDATE public.readers
     SET xp = xp + v_xp_earned, updated_at = NOW()
     WHERE id = p_reader_id;
   END IF;
 
-  IF p_status = 'completed' THEN
-    FOR v_badge_row IN
-      SELECT awarded_slug, bonus_xp
-      FROM public.check_and_award_badges(p_reader_id)
-    LOOP
-      v_badges := v_badges || jsonb_build_object(
-        'slug',     v_badge_row.awarded_slug,
-        'bonus_xp', v_badge_row.bonus_xp
-      );
-    END LOOP;
+  FOR v_badge_row IN
+    SELECT awarded_slug, bonus_xp
+    FROM public.check_and_award_badges(p_reader_id)
+  LOOP
+    v_badges := v_badges || jsonb_build_object(
+      'slug',     v_badge_row.awarded_slug,
+      'bonus_xp', v_badge_row.bonus_xp
+    );
+  END LOOP;
 
-    IF public.check_book_club_badge(p_reader_id) THEN
-      v_badges := v_badges || jsonb_build_object(
-        'slug',     'book_club',
-        'bonus_xp', 100
-      );
-    END IF;
+  IF public.check_book_club_badge(p_reader_id) THEN
+    v_badges := v_badges || jsonb_build_object(
+      'slug',     'book_club',
+      'bonus_xp', 100
+    );
   END IF;
 
   RETURN jsonb_build_object(
@@ -125,7 +127,7 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- complete_book — increment book_count on reading→completed transition
+-- complete_book — base: 0007 (v_title + description); adds book_count
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.complete_book(
   p_book_id        UUID,
@@ -141,14 +143,15 @@ AS $$
 DECLARE
   v_reader_id   UUID;
   v_user_id     UUID;
+  v_title       TEXT;
   v_status      TEXT;
   v_total_pages INTEGER;
   v_badges      JSONB   := '[]'::JSONB;
   v_badge_row   RECORD;
   v_xp_earned   INTEGER := 0;
 BEGIN
-  SELECT reader_id, user_id, status, total_pages
-  INTO v_reader_id, v_user_id, v_status, v_total_pages
+  SELECT reader_id, user_id, title, status, total_pages
+  INTO v_reader_id, v_user_id, v_title, v_status, v_total_pages
   FROM public.books
   WHERE id = p_book_id AND user_id = auth.uid();
 
@@ -174,8 +177,8 @@ BEGIN
   WHERE id = v_reader_id;
 
   IF p_livrux_earned > 0 THEN
-    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason)
-    VALUES (v_reader_id, v_user_id, p_book_id, p_livrux_earned, 'book_completed');
+    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason, description)
+    VALUES (v_reader_id, v_user_id, p_book_id, p_livrux_earned, 'book_completed', v_title);
 
     UPDATE public.readers
     SET livrux_balance = livrux_balance + p_livrux_earned,
@@ -221,7 +224,7 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- delete_book — decrement book_count only when deleting a completed book
+-- delete_book — base: 0007 (v_title + description); adds v_status + book_count
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.delete_book(p_book_id UUID)
 RETURNS JSONB
@@ -231,13 +234,14 @@ AS $$
 DECLARE
   v_reader_id     UUID;
   v_user_id       UUID;
+  v_title         TEXT;
   v_status        TEXT;
   v_livrux_earned NUMERIC;
   v_revoked       JSONB := '[]'::JSONB;
   v_row           RECORD;
 BEGIN
-  SELECT reader_id, user_id, status, livrux_earned
-  INTO v_reader_id, v_user_id, v_status, v_livrux_earned
+  SELECT reader_id, user_id, title, status, livrux_earned
+  INTO v_reader_id, v_user_id, v_title, v_status, v_livrux_earned
   FROM public.books
   WHERE id = p_book_id AND user_id = auth.uid();
 
@@ -257,8 +261,8 @@ BEGIN
 
   -- Deduct Livrux earned (0 for 'reading' books, so always safe).
   IF v_livrux_earned > 0 THEN
-    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason)
-    VALUES (v_reader_id, v_user_id, NULL, -v_livrux_earned, 'book_deleted');
+    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason, description)
+    VALUES (v_reader_id, v_user_id, NULL, -v_livrux_earned, 'book_deleted', v_title);
 
     UPDATE public.readers
     SET livrux_balance = livrux_balance - v_livrux_earned,

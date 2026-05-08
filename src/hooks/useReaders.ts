@@ -13,7 +13,7 @@ function useReadersKey() {
 async function fetchReaders(userId: string): Promise<Reader[]> {
   const { data, error } = await supabase
     .from('readers')
-    .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, xp, friend_code, friends_autonomy, created_at, updated_at, books(count), reader_badges(count)')
+    .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, xp, book_count, friend_code, friends_autonomy, created_at, updated_at, reader_badges(count)')
     .eq('user_id', userId)
     .order('created_at', { ascending: true });
 
@@ -21,9 +21,7 @@ async function fetchReaders(userId: string): Promise<Reader[]> {
 
   return (data ?? []).map((r: any) => ({
     ...r,
-    book_count: (r.books?.[0]?.count ?? 0) as number,
     badge_count: (r.reader_badges?.[0]?.count ?? 0) as number,
-    books: undefined,
     reader_badges: undefined,
   })) as Reader[];
 }

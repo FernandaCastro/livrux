@@ -43,3 +43,6 @@ google-play-service-account.json
 # generated native folders
 /ios
 /android
+
+#claude
+.claude

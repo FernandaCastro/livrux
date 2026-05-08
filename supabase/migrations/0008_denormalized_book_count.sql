@@ -225,6 +225,7 @@ $$;
 
 -- ---------------------------------------------------------------------------
 -- delete_book — base: 0007 (v_title + description); adds v_status + book_count
+--              + XP deduction based on last reading session or total_pages
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.delete_book(p_book_id UUID)
 RETURNS JSONB
@@ -232,21 +233,51 @@ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_reader_id     UUID;
-  v_user_id       UUID;
-  v_title         TEXT;
-  v_status        TEXT;
-  v_livrux_earned NUMERIC;
-  v_revoked       JSONB := '[]'::JSONB;
-  v_row           RECORD;
+  v_reader_id         UUID;
+  v_user_id           UUID;
+  v_title             TEXT;
+  v_status            TEXT;
+  v_total_pages       INTEGER;
+  v_livrux_earned     NUMERIC;
+  v_session_last_page INTEGER;
+  v_xp_to_deduct      INTEGER := 0;
+  v_revoked           JSONB := '[]'::JSONB;
+  v_row               RECORD;
 BEGIN
-  SELECT reader_id, user_id, title, status, livrux_earned
-  INTO v_reader_id, v_user_id, v_title, v_status, v_livrux_earned
+  SELECT reader_id, user_id, title, status, total_pages, livrux_earned
+  INTO v_reader_id, v_user_id, v_title, v_status, v_total_pages, v_livrux_earned
   FROM public.books
   WHERE id = p_book_id AND user_id = auth.uid();
 
   IF v_reader_id IS NULL THEN
     RAISE EXCEPTION 'Book not found or access denied';
+  END IF;
+
+  -- Capture last reading session before CASCADE removes them.
+  SELECT last_page INTO v_session_last_page
+  FROM public.reading_sessions
+  WHERE book_id = p_book_id AND reader_id = v_reader_id
+  ORDER BY session_date DESC
+  LIMIT 1;
+
+  -- Calculate XP to deduct:
+  --   Completed book via log_book (no sessions): XP = total_pages (0006 rule).
+  --   Completed via reading flow, short book (≤ 100p): XP = total_pages (completion bonus).
+  --   Completed via reading flow, long book (> 100p): XP = last session last_page
+  --     (equals the cumulative sum of all session page-deltas).
+  --   Reading book, long (> 100p): same as above — session XP only.
+  --   Reading book, short: no XP was ever awarded.
+  IF v_status = 'completed' THEN
+    IF v_session_last_page IS NOT NULL THEN
+      v_xp_to_deduct := CASE
+        WHEN v_total_pages <= 100 THEN v_total_pages
+        ELSE v_session_last_page
+      END;
+    ELSE
+      v_xp_to_deduct := v_total_pages;
+    END IF;
+  ELSIF v_total_pages > 100 AND v_session_last_page IS NOT NULL THEN
+    v_xp_to_deduct := v_session_last_page;
   END IF;
 
   -- Delete the book; reading_sessions cascade automatically.
@@ -255,6 +286,16 @@ BEGIN
   IF v_status = 'completed' THEN
     UPDATE public.readers
     SET book_count = book_count - 1,
+        updated_at = NOW()
+    WHERE id = v_reader_id;
+  END IF;
+
+  IF v_xp_to_deduct > 0 THEN
+    INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
+    VALUES (v_reader_id, v_user_id, -v_xp_to_deduct, 'book_deleted');
+
+    UPDATE public.readers
+    SET xp        = GREATEST(0, xp - v_xp_to_deduct),
         updated_at = NOW()
     WHERE id = v_reader_id;
   END IF;

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 
 import { Colors, Fonts, FontSizes, Radius, Spacing } from '../constants/theme';
@@ -48,7 +49,12 @@ export function BadgeRevokedModal({ badges, onClose }: Props) {
   return (
     <Modal transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <LinearGradient
+          colors={['#FEFBFF', '#FFFAF4']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.card}
+        >
           {/* Sad header */}
           <View style={styles.header}>
             <Text style={styles.sadEmoji}>😢</Text>
@@ -89,7 +95,7 @@ export function BadgeRevokedModal({ badges, onClose }: Props) {
               <Text style={styles.btnText}>{t('common.done')}</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </LinearGradient>
       </View>
     </Modal>
   );
@@ -100,24 +106,23 @@ const CARD_WIDTH = Math.min(SCREEN_WIDTH - Spacing['2xl'] * 2, 340);
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(30,27,75,0.55)',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: Spacing.xl,
   },
   card: {
     width: CARD_WIDTH,
-    backgroundColor: '#F0EEF8',
     borderRadius: Radius.xl,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: Colors.secondary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowRadius: 18,
+    elevation: 12,
   },
   header: {
-    backgroundColor: '#6B5B9A',
+    backgroundColor: Colors.secondary,
     alignItems: 'center',
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.lg,
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
   badgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.backgroundTinted,
     borderRadius: Radius.lg,
     borderWidth: 2,
     paddingVertical: Spacing.sm,
@@ -163,7 +168,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F5F3FF',
+    backgroundColor: Colors.secondaryLight,
   },
   badgeIcon: {
     fontSize: 24,
@@ -190,7 +195,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#E0DCF0',
+    borderTopColor: Colors.secondaryLight,
   },
   encouragement: {
     fontFamily: Fonts.bodySemiBold,
@@ -199,10 +204,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   btn: {
-    backgroundColor: '#6B5B9A',
+    backgroundColor: Colors.secondary,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing['2xl'],
     paddingVertical: Spacing.sm + 2,
+    shadowColor: Colors.secondary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 5,
   },
   btnText: {
     fontFamily: Fonts.bodyBold,

@@ -36,8 +36,8 @@ async function fetchFriendsData(readerId: string): Promise<FriendsData> {
       .from('reader_friendships')
       .select(`
         id, requester_id, addressee_id,
-        requester:requester_id(id, name, avatar_seed, xp, books(count)),
-        addressee:addressee_id(id, name, avatar_seed, xp, books(count))
+        requester:requester_id(id, name, avatar_seed, xp, book_count),
+        addressee:addressee_id(id, name, avatar_seed, xp, book_count)
       `)
       .or(`requester_id.eq.${readerId},addressee_id.eq.${readerId}`)
       .eq('status', 'accepted'),
@@ -45,7 +45,7 @@ async function fetchFriendsData(readerId: string): Promise<FriendsData> {
       .from('reader_friendships')
       .select(`
         id, requester_id,
-        requester:requester_id(id, name, avatar_seed, xp, books(count))
+        requester:requester_id(id, name, avatar_seed, xp, book_count)
       `)
       .eq('addressee_id', readerId)
       .eq('status', 'pending'),
@@ -65,7 +65,7 @@ async function fetchFriendsData(readerId: string): Promise<FriendsData> {
           id: friend.id,
           name: friend.name,
           avatar_seed: friend.avatar_seed ?? null,
-          book_count: (friend.books?.[0]?.count ?? 0) as number,
+          book_count: (friend.book_count ?? 0) as number,
           xp: (friend.xp ?? 0) as number,
         },
       } satisfies FriendData;
@@ -79,7 +79,7 @@ async function fetchFriendsData(readerId: string): Promise<FriendsData> {
         id: rf.requester.id,
         name: rf.requester.name,
         avatar_seed: rf.requester.avatar_seed ?? null,
-        book_count: (rf.requester.books?.[0]?.count ?? 0) as number,
+        book_count: (rf.requester.book_count ?? 0) as number,
         xp: (rf.requester.xp ?? 0) as number,
       },
     } satisfies FriendRequest));

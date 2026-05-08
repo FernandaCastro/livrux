@@ -239,7 +239,7 @@ DECLARE
   v_status            TEXT;
   v_total_pages       INTEGER;
   v_livrux_earned     NUMERIC;
-  v_session_last_page INTEGER;
+  v_session_xp INTEGER := 0;
   v_xp_to_deduct      INTEGER := 0;
   v_revoked           JSONB := '[]'::JSONB;
   v_row               RECORD;
@@ -253,31 +253,32 @@ BEGIN
     RAISE EXCEPTION 'Book not found or access denied';
   END IF;
 
-  -- Capture last reading session before CASCADE removes them.
-  SELECT last_page INTO v_session_last_page
+  -- Compute XP earned from reading sessions before CASCADE removes them.
+  -- Mirrors log_reading_session: XP = GREATEST(last_page - prev_last_page, 0) per session.
+  -- Summing all deltas is necessary because GREATEST(0) means last_page alone
+  -- under-counts when the reader ever reported going backwards.
+  SELECT COALESCE(SUM(GREATEST(last_page - LAG(last_page, 1, 0) OVER (ORDER BY session_date, id), 0)), 0)
+  INTO v_session_xp
   FROM public.reading_sessions
-  WHERE book_id = p_book_id AND reader_id = v_reader_id
-  ORDER BY session_date DESC
-  LIMIT 1;
+  WHERE book_id = p_book_id AND reader_id = v_reader_id;
 
   -- Calculate XP to deduct:
   --   Completed book via log_book (no sessions): XP = total_pages (0006 rule).
   --   Completed via reading flow, short book (≤ 100p): XP = total_pages (completion bonus).
-  --   Completed via reading flow, long book (> 100p): XP = last session last_page
-  --     (equals the cumulative sum of all session page-deltas).
-  --   Reading book, long (> 100p): same as above — session XP only.
+  --   Completed via reading flow, long book (> 100p): XP = sum of session page-deltas.
+  --   Reading book, long (> 100p): XP = sum of session page-deltas.
   --   Reading book, short: no XP was ever awarded.
   IF v_status = 'completed' THEN
-    IF v_session_last_page IS NOT NULL THEN
+    IF v_session_xp > 0 THEN
       v_xp_to_deduct := CASE
         WHEN v_total_pages <= 100 THEN v_total_pages
-        ELSE v_session_last_page
+        ELSE v_session_xp
       END;
     ELSE
       v_xp_to_deduct := v_total_pages;
     END IF;
-  ELSIF v_total_pages > 100 AND v_session_last_page IS NOT NULL THEN
-    v_xp_to_deduct := v_session_last_page;
+  ELSIF v_total_pages > 100 THEN
+    v_xp_to_deduct := v_session_xp;
   END IF;
 
   -- Delete the book; reading_sessions cascade automatically.

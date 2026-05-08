@@ -282,6 +282,13 @@ const de = {
     streak_30: { name: 'Unaufhaltsamer Monat', description: '30 Tage in Folge gelesen' },
     book_club: { name: 'Buchclub', description: 'Das gleiche Buch wie ein Freund gelesen' },
   },
+  ranking: {
+    title: 'Rangliste',
+    you: 'ich',
+    yourPosition: 'Platz {{position}}',
+    noFriends: 'Noch keine Rivalen! 🤔',
+    noFriendsHint: 'Füge Freunde hinzu und zeig, wer am meisten liest! 🏆',
+  },
 };
 
 export default de;

@@ -249,6 +249,13 @@ const en = {
     streak_30: { name: 'Unstoppable Month', description: '30 days reading in a row' },
     book_club: { name: 'Book Club', description: 'Read the same book as a friend' },
   },
+  ranking: {
+    title: 'Ranking',
+    you: 'you',
+    yourPosition: 'Ranked #{{position}}',
+    noFriends: 'No rivals yet! 🤔',
+    noFriendsHint: 'Add friends and find out who reads the most! 🏆',
+  },
   languages: {
     en: 'English',
     de: 'German',

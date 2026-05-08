@@ -249,6 +249,13 @@ const pt = {
     streak_30: { name: 'Mês Incansável', description: '30 dias seguidos lendo' },
     book_club: { name: 'Clube do Livro', description: 'Leu o mesmo livro que um amigo' },
   },
+  ranking: {
+    title: 'Ranking',
+    you: 'eu',
+    yourPosition: '{{position}}º lugar',
+    noFriends: 'Sem rivais por enquanto! 🤔',
+    noFriendsHint: 'Adicione amigos e descubra quem lê mais na turma! 🏆',
+  },
   languages: {
     en: 'Inglês',
     de: 'Alemão',

@@ -2,9 +2,10 @@ import { Stack } from 'expo-router';
 
 import { useReaderStore } from '../../src/stores/readerStore';
 import { ConfettiOverlay } from '../../src/components/ConfettiOverlay';
+import { ReaderSelectorSheet } from '../../src/components/ReaderSelectorSheet';
 
 export default function AppLayout() {
-  const { confettiTrigger, clearConfetti } = useReaderStore();
+  const { confettiTrigger, clearConfetti, readerSelectorVisible, closeReaderSelector } = useReaderStore();
   return (
     <>
       <Stack screenOptions={{ headerShown: false }} />
@@ -15,6 +16,7 @@ export default function AppLayout() {
         onDone={clearConfetti}
         bookImageSource={require('../../assets/livrux-clean.png')}
       />
+      <ReaderSelectorSheet visible={readerSelectorVisible} onClose={closeReaderSelector} />
     </>
   );
 }

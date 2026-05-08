@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -7,14 +6,14 @@ import { useAuthStore } from '../stores/authStore';
 import { useParentalStore } from '../stores/parentalStore';
 import { useReaderStore } from '../stores/readerStore';
 import { MultiavatarView } from './reader/MultiavatarView';
-import { ReaderSelectorSheet } from './ReaderSelectorSheet';
 import { Colors, Fonts, FontSizes, Spacing, Radius } from '../constants/theme';
 
 export const BOTTOM_MENU_HEIGHT = 62;
 
-const ACCENT_READER  = Colors.secondary;   // purple
-const ACCENT_REWARDS = Colors.primary;     // gold
-const ACCENT_FRIENDS = '#3ECA8C';          // jade
+const ACCENT_READER   = Colors.secondary;   // purple
+const ACCENT_REWARDS  = Colors.primary;     // gold
+const ACCENT_FRIENDS  = '#3ECA8C';          // jade
+const ACCENT_RANKING  = '#FF6B35';          // orange
 const ACCENT_SETTINGS = Colors.textSecondary;
 
 function TabIndicator({ color }: { color: string }) {
@@ -27,15 +26,15 @@ export function BottomMenu() {
   const pathname = usePathname();
   const { profile } = useAuthStore();
   const { isParentUnlocked } = useParentalStore();
-  const { selectedReader } = useReaderStore();
-  const [sheetVisible, setSheetVisible] = useState(false);
+  const { selectedReader, openReaderSelector } = useReaderStore();
 
   const showSettingsTab = !profile?.parental_pin || isParentUnlocked;
 
   const isSettings   = pathname.startsWith('/app/settings');
   const isWallet     = pathname.startsWith('/app/rewards');
   const isFriends    = pathname.startsWith('/app/friends') || pathname.startsWith('/app/friend/');
-  const isReader     = !isSettings && !isWallet && !isFriends;
+  const isRanking    = pathname.startsWith('/app/ranking');
+  const isReader     = !isSettings && !isWallet && !isFriends && !isRanking;
 
   if (!selectedReader) {
     return (
@@ -58,7 +57,6 @@ export function BottomMenu() {
           >
             {isSettings && <TabIndicator color={ACCENT_SETTINGS} />}
             <Text style={styles.icon}>⚙️</Text>
-            {/* <Text style={[styles.label, isSettings && { color: ACCENT_SETTINGS }]}>{t('settings.title')}</Text> */}
           </TouchableOpacity>
         )}
       </View>
@@ -67,13 +65,12 @@ export function BottomMenu() {
 
   return (
     <>
-      <ReaderSelectorSheet visible={sheetVisible} onClose={() => setSheetVisible(false)} />
       <View style={styles.container}>
 
         {/* Reader — purple */}
         <TouchableOpacity
           style={styles.tab}
-          onPress={() => setSheetVisible(true)}
+          onPress={openReaderSelector}
           activeOpacity={0.7}
         >
           {isReader && <TabIndicator color={ACCENT_READER} />}
@@ -106,9 +103,20 @@ export function BottomMenu() {
         >
           {isFriends && <TabIndicator color={ACCENT_FRIENDS} />}
           <View style={[styles.iconWrap, isFriends && { backgroundColor: '#D1FAE5' }]}>
-          <Image source={require('../../assets/friends.png')} style={styles.iconIcon} resizeMode="contain" />
+            <Image source={require('../../assets/friends.png')} style={styles.iconIcon} resizeMode="contain" />
           </View>
-          {/* <Text style={[styles.label, isFriends && { color: ACCENT_FRIENDS }]}>{t('friends.title')}</Text> */}
+        </TouchableOpacity>
+
+        {/* Ranking — orange */}
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => router.push('/app/ranking' as any)}
+          activeOpacity={0.7}
+        >
+          {isRanking && <TabIndicator color={ACCENT_RANKING} />}
+          <View style={[styles.iconWrap, isRanking && { backgroundColor: '#FFE8DF' }]}>
+            <Text style={styles.icon}>🏆</Text>
+          </View>
         </TouchableOpacity>
 
         {/* Settings — grey */}
@@ -122,7 +130,6 @@ export function BottomMenu() {
             <View style={[styles.iconWrap, isSettings && { backgroundColor: Colors.border }]}>
               <Text style={styles.icon}>⚙️</Text>
             </View>
-            {/* <Text style={[styles.label, isSettings && { color: ACCENT_SETTINGS }]}>{t('settings.title')}</Text> */}
           </TouchableOpacity>
         )}
       </View>

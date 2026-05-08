@@ -15,12 +15,18 @@ interface ReaderState {
   // screens holding a readers list can react and refresh stale data.
   bookPersistedCount: number;
   notifyBookPersisted: () => void;
+  // Reader selector sheet visibility — controlled via store so the sheet can
+  // be rendered at the root layout level (avoids Android Modal double-tap bug).
+  readerSelectorVisible: boolean;
+  openReaderSelector: () => void;
+  closeReaderSelector: () => void;
 }
 
 export const useReaderStore = create<ReaderState>((set) => ({
   selectedReader: null,
   confettiTrigger: null,
   bookPersistedCount: 0,
+  readerSelectorVisible: false,
 
   setSelectedReader: (reader) => set({ selectedReader: reader }),
 
@@ -36,4 +42,7 @@ export const useReaderStore = create<ReaderState>((set) => ({
   clearConfetti: () => set({ confettiTrigger: null }),
   notifyBookPersisted: () =>
     set((state) => ({ bookPersistedCount: state.bookPersistedCount + 1 })),
+
+  openReaderSelector: () => set({ readerSelectorVisible: true }),
+  closeReaderSelector: () => set({ readerSelectorVisible: false }),
 }));

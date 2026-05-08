@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Modal, View, Text, TouchableOpacity, FlatList, StyleSheet, Pressable, Image } from 'react-native';
+import { Animated, View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +25,7 @@ interface ReaderSelectorSheetProps {
 export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetProps) {
   const { t } = useTranslation();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { readers } = useReaders();
   const { setSelectedReader, selectedReader } = useReaderStore();
   const { requireReaderPin, modalProps } = useParentalGuard();
@@ -74,17 +76,17 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
   if (!mounted) return null;
 
   return (
-    <Modal visible transparent animationType="none" onRequestClose={onClose}>
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
       {modalProps && <PinModal {...modalProps} />}
 
       {/* Backdrop */}
-      <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
+      <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]} pointerEvents="auto">
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
 
       {/* Sheet */}
       <Animated.View
-        style={[styles.sheetWrap, { transform: [{ translateY: slideAnim }] }]}
+        style={[styles.sheetWrap, { bottom: insets.bottom, transform: [{ translateY: slideAnim }] }]}
         pointerEvents="box-none"
       >
         <LinearGradient
@@ -98,12 +100,12 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
           <View style={styles.handle} />
 
           {/* Home row */}
-          <TouchableOpacity style={styles.homeRow} onPress={handleGoHome} activeOpacity={0.75}>
+          <Pressable style={styles.homeRow} onPress={handleGoHome} android_ripple={{ color: Colors.secondaryLight }}>
             <View style={styles.homeIconWrap}>
               <Image source={require('../../assets/readers.png')} style={styles.homeIcon} resizeMode="contain" />
             </View>
             <Text style={styles.homeLabel}>{t('home.title')}</Text>
-          </TouchableOpacity>
+          </Pressable>
 
           <View style={styles.divider} />
 
@@ -114,10 +116,10 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
             renderItem={({ item }) => {
               const isActive = selectedReader?.id === item.id;
               return (
-                <TouchableOpacity
+                <Pressable
                   style={[styles.readerRow, isActive && styles.readerRowActive]}
                   onPress={() => handleSelectReader(item)}
-                  activeOpacity={0.75}
+                  android_ripple={{ color: Colors.secondaryLight }}
                 >
                   {/* Active accent strip */}
                   {isActive && <View style={styles.activeStrip} />}
@@ -132,13 +134,13 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
                     {item.name}
                   </Text>
                   {isActive && <Text style={styles.activeCheck}>✓</Text>}
-                </TouchableOpacity>
+                </Pressable>
               );
             }}
           />
         </LinearGradient>
       </Animated.View>
-    </Modal>
+    </View>
   );
 }
 

@@ -7,6 +7,7 @@ import {
   RefreshControl,
   AppState,
   Alert,
+  Image,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
@@ -75,7 +76,7 @@ export default function ReaderDashboardScreen() {
       refreshReading();
       refreshBadges();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookPersistedCount]);
 
   useFocusEffect(
@@ -221,7 +222,10 @@ export default function ReaderDashboardScreen() {
               )}
             </View>
             <View style={styles.booksChip}>
-              <Text style={styles.booksCount}>📚 {completedBooks.length} </Text>
+              <View style={styles.bookRow}>
+                <Image source={require('../../../assets/livrux-clean.png')} style={styles.bookIcon} />
+                <Text style={styles.booksCount}>{completedBooks.length} </Text>
+              </View>
               <Text style={styles.booksChipText}>{t('reader.books')}</Text>
             </View>
           </View>
@@ -281,7 +285,7 @@ export default function ReaderDashboardScreen() {
           ListEmptyComponent={
             !isLoading && readingBooks.length === 0 ? (
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyIcon}>📚</Text>
+                <Image source={require('../../../assets/livrux-clean.png')} style={styles.emptyIcon} />
                 <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>
                 <Text style={styles.emptySubtext}>{t('reader.noBooksHint')}</Text>
               </View>
@@ -396,7 +400,7 @@ const styles = StyleSheet.create({
   badgeCoin: { fontSize: 20 },
   balanceAmount: {
     fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
+    fontSize: FontSizes.lg,
     color: Colors.textOnPrimary,
   },
   balanceCurrency: {
@@ -406,7 +410,7 @@ const styles = StyleSheet.create({
   },
   xpAmount: {
     fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
+    fontSize: FontSizes.lg,
     color: '#78350F',
   },
   xpCurrency: {
@@ -436,8 +440,9 @@ const styles = StyleSheet.create({
   },
   badgeIcon: { fontSize: 18 },
   booksCount: {
+    marginTop:3,
     fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
+    fontSize: FontSizes.lg,
     color: Colors.textOnPrimary,
   },
 
@@ -446,14 +451,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     gap: Spacing.sm,
-    marginTop: Spacing.md,
+    marginTop: Spacing.sm,
   },
   streakChip: {
     flex: 1,
     backgroundColor: 'rgba(255,255,255,0.18)',
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     alignItems: 'center',
   },
   streakText: {
@@ -472,8 +477,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.18)',
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.xs,
     alignItems: 'center',
+  },
+  bookRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: Spacing.xs,
+    marginTop: Spacing.sm,
   },
   booksChipText: {
     fontFamily: Fonts.bodySemiBold,
@@ -521,7 +532,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: Spacing['2xl'],
   },
-  emptyIcon: { fontSize: 56, marginBottom: Spacing.md },
+  emptyIcon: { width: 56, height: 56, marginBottom: Spacing.md },
   emptyTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.xl,
@@ -536,5 +547,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: Spacing.xl,
     lineHeight: 20,
+  },
+  bookIcon: {
+    width: 25,
+    height: 25,
+    resizeMode: 'contain',
   },
 });

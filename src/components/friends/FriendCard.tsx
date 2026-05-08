@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MultiavatarView } from '../reader/MultiavatarView';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
@@ -46,7 +46,7 @@ export function FriendCard({ name, avatarSeed, bookCount, xp, onPress, onAccept,
         <Text style={styles.name} numberOfLines={1}>{name}</Text>
         <View style={styles.statsRow}>
           <View style={styles.bookBadge}>
-            <Text style={styles.bookIcon}>📚</Text>
+            <Image source={require('../../../assets/livrux-clean.png')} style={styles.bookIcon} />
             <Text style={styles.bookCount}>{bookCount} {t('friends.booksRead')}</Text>
           </View>
           {xp !== undefined && xp > 0 && (
@@ -137,9 +137,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#38BDF8',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
+    paddingVertical: 0,
   },
-  bookIcon: { fontSize: 13 },
+  bookIcon: {
+    width: 25,
+    height: 25,
+    resizeMode: 'contain',
+  },
   bookCount: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,
@@ -153,10 +157,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCD34D',
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
   },
-  xpIcon: { fontSize: 11 },
+  xpIcon: { fontSize: 13 },
   xpCount: {
+    marginTop: 1,
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.xs,
     color: '#78350F',

@@ -4,6 +4,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { Reader } from '../../types';
@@ -71,7 +72,7 @@ export function ReaderCard({ reader, onPress, onLongPress, locked }: ReaderCardP
               <Text style={styles.statValueLight}>{reader.badge_count ?? 0}</Text>
             </View>
             <View style={[styles.statPill, styles.bookPill]}>
-              <Text style={styles.statEmoji}>📚</Text>
+              <Image source={require('../../../assets/livrux-clean.png')} style={styles.bookIcon} />
               <Text style={styles.statValueLight}>{reader.book_count ?? 0}</Text>
             </View>
           </View>
@@ -86,7 +87,7 @@ const AVATAR_SIZE = 80;
 const styles = StyleSheet.create({
   cardShell: {
     borderRadius: Radius.xl,
-    marginHorizontal: Spacing.md,
+    marginHorizontal: Spacing.xs,
     marginVertical: Spacing.sm,
     ...Shadows.lg,
   },
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
     paddingVertical: Spacing.lg,
     paddingHorizontal: Spacing.md,
-    gap: Spacing.md,
+    gap: Spacing.xs,
     overflow: 'hidden',
   },
   lockBadge: {
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 3,
   },
-  coinEmoji: { fontSize: 14 },
+  coinEmoji: { marginTop: -2, fontSize: 15 },
   coinValue: {
     fontFamily: Fonts.bodyExtraBold,
     fontSize: FontSizes.md,
@@ -162,20 +163,25 @@ const styles = StyleSheet.create({
   xpPill: { backgroundColor: '#FCD34D' },
   badgePill: { backgroundColor: '#22C55E' },
   bookPill: { backgroundColor: '#38BDF8' },
-  statEmoji: { fontSize: 13 },
+  statEmoji: { marginTop: -3, fontSize: 15 },
   statValueDark: {
     fontFamily: Fonts.bodyExtraBold,
-    fontSize: FontSizes.md,
+    fontSize: FontSizes.sm,
     color: '#78350F',
   },
   statLabelDark: {
     fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
+    fontSize: FontSizes.xs,
     color: '#92400E',
   },
   statValueLight: {
     fontFamily: Fonts.bodyExtraBold,
-    fontSize: FontSizes.md,
+    fontSize: FontSizes.sm,
     color: Colors.textOnPrimary,
+  },
+  bookIcon: {
+    width: 25,
+    height: 25,
+    resizeMode: 'contain',
   },
 });

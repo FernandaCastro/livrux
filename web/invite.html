@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livrux – Invitation / Convite / Einladung</title>
+  <meta name="description" content="You've been invited to manage a family on Livrux." />
+  <link rel="icon" href="../assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #F5A623;
+      --purple: #7C3AED;
+      --purple2: #A855F7;
+      --bg: #FAFAF7;
+      --card: #FFFFFF;
+      --text: #1E1B4B;
+      --muted: #6B7280;
+      --radius: 1.5rem;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 2rem;
+      background: rgba(250, 250, 247, 0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem;
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    .lang-switcher { display: flex; gap: .4rem; }
+
+    .lang-btn {
+      padding: .35rem .7rem;
+      border: 2px solid transparent;
+      border-radius: 2rem;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .lang-btn:hover { color: var(--purple); border-color: var(--purple2); }
+    .lang-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+    .page-header {
+      background: linear-gradient(160deg, #fff7ed 0%, #f0e6ff 60%, #fafaf7 100%);
+      padding: 3.5rem 1.5rem 2.5rem;
+      text-align: center;
+    }
+
+    .page-header .emoji { font-size: 3rem; margin-bottom: 0.75rem; }
+
+    .page-header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--purple);
+      margin-bottom: .5rem;
+    }
+
+    .page-header p {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .lang-content { display: none; }
+    .lang-content.active { display: block; }
+
+    .content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .token-box {
+      background: #F3F0FF;
+      border-left: 4px solid var(--purple);
+      border-radius: .5rem;
+      padding: 1.5rem 1.25rem;
+      margin: 0 0 2rem;
+      text-align: center;
+    }
+
+    .token-label {
+      font-size: .8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+
+    .token-value {
+      font-family: monospace;
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 6px;
+      color: var(--purple);
+    }
+
+    .token-hint {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: .4rem;
+    }
+
+    .content h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: var(--purple);
+      margin-top: 2rem;
+      margin-bottom: .75rem;
+    }
+
+    .content ol {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 2rem;
+    }
+
+    .content ol li {
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      margin-bottom: .85rem;
+      font-size: .97rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .content strong { color: var(--text); }
+
+    .download-row {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      background: var(--text);
+      color: #fff;
+      text-decoration: none;
+      padding: .7rem 1.4rem;
+      border-radius: .75rem;
+      font-size: .9rem;
+      font-weight: 700;
+      transition: opacity .15s;
+    }
+    .store-btn:hover { opacity: 0.85; }
+
+    .highlight-box {
+      background: #fff7ed;
+      border-left: 4px solid var(--orange);
+      border-radius: .5rem;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0 0;
+    }
+    .highlight-box p {
+      color: var(--text);
+      font-size: .92rem;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid rgba(0,0,0,.06);
+    }
+    footer a { color: var(--purple); text-decoration: none; }
+
+    @media (max-width: 500px) {
+      nav { padding: .9rem 1.2rem; }
+      .nav-logo { font-size: 1.3rem; }
+      .token-value { font-size: 1.6rem; letter-spacing: 3px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <img src="./assets/livrux.png" alt="Livrux Logo" style="width:80px;height:80px;">
+      Livrux
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="pt">PT</button>
+      <button class="lang-btn" data-lang="de">DE</button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="lang-content" id="header-en">
+      <div class="emoji">🎉</div>
+      <h1>You've been invited!</h1>
+      <p>Someone invited you to manage a family on <strong>Livrux</strong> — the app that turns reading into rewards for kids.</p>
+    </div>
+    <div class="lang-content" id="header-pt">
+      <div class="emoji">🎉</div>
+      <h1>Você foi convidado!</h1>
+      <p>Alguém convidou você para gerenciar uma família no <strong>Livrux</strong> — o app que transforma leitura em recompensas para as crianças.</p>
+    </div>
+    <div class="lang-content" id="header-de">
+      <div class="emoji">🎉</div>
+      <h1>Du wurdest eingeladen!</h1>
+      <p>Jemand hat dich eingeladen, eine Familie in <strong>Livrux</strong> zu verwalten — der App, die Lesen in Belohnungen für Kinder verwandelt.</p>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- Token box — shared across all languages, filled by JS -->
+    <div class="token-box">
+      <div class="token-label" id="token-label-text">Invitation code</div>
+      <div class="token-value" id="token-display">—</div>
+      <div class="token-hint" id="token-hint"></div>
+    </div>
+
+    <!-- ══════════ ENGLISH ══════════ -->
+    <div class="lang-content" id="content-en">
+
+      <h2>How to accept</h2>
+      <ol>
+        <li><span class="step-num">1</span><span>Download <strong>Livrux</strong> on your phone</span></li>
+        <li><span class="step-num">2</span><span>Create an account or sign in if you already have one — use the same email this invitation was sent to</span></li>
+        <li><span class="step-num">3</span><span>Go to <strong>Settings → Co-guardians</strong></span></li>
+        <li><span class="step-num">4</span><span>Tap <strong>"I have an invitation"</strong> and enter the code above</span></li>
+      </ol>
+
+      <h2>Download</h2>
+      <div class="download-row">
+        <a href="#" class="store-btn">🍎&nbsp; App Store</a>
+        <a href="#" class="store-btn">🤖&nbsp; Google Play</a>
+      </div>
+
+      <div class="highlight-box">
+        <p>This invitation is personal. You must sign in with the same email address it was sent to. If you didn't expect this email, you can safely ignore it.</p>
+      </div>
+
+    </div><!-- /content-en -->
+
+    <!-- ══════════ PORTUGUÊS ══════════ -->
+    <div class="lang-content" id="content-pt">
+
+      <h2>Como aceitar</h2>
+      <ol>
+        <li><span class="step-num">1</span><span>Baixe o <strong>Livrux</strong> no seu celular</span></li>
+        <li><span class="step-num">2</span><span>Crie sua conta ou entre se já tiver uma — use o mesmo e-mail para o qual este convite foi enviado</span></li>
+        <li><span class="step-num">3</span><span>Vá em <strong>Configurações → Co-responsáveis</strong></span></li>
+        <li><span class="step-num">4</span><span>Toque em <strong>"Tenho um convite"</strong> e insira o código acima</span></li>
+      </ol>
+
+      <h2>Baixar</h2>
+      <div class="download-row">
+        <a href="#" class="store-btn">🍎&nbsp; App Store</a>
+        <a href="#" class="store-btn">🤖&nbsp; Google Play</a>
+      </div>
+
+      <div class="highlight-box">
+        <p>Este convite é pessoal. Você precisa entrar com o mesmo e-mail para o qual ele foi enviado. Se você não esperava receber este e-mail, pode ignorá-lo.</p>
+      </div>
+
+    </div><!-- /content-pt -->
+
+    <!-- ══════════ DEUTSCH ══════════ -->
+    <div class="lang-content" id="content-de">
+
+      <h2>So nimmst du an</h2>
+      <ol>
+        <li><span class="step-num">1</span><span>Lade <strong>Livrux</strong> auf dein Smartphone</span></li>
+        <li><span class="step-num">2</span><span>Erstelle ein Konto oder melde dich an — nutze dieselbe E-Mail-Adresse, an die diese Einladung gesendet wurde</span></li>
+        <li><span class="step-num">3</span><span>Gehe zu <strong>Einstellungen → Mitverantwortliche</strong></span></li>
+        <li><span class="step-num">4</span><span>Tippe auf <strong>„Ich habe eine Einladung"</strong> und gib den Code oben ein</span></li>
+      </ol>
+
+      <h2>Herunterladen</h2>
+      <div class="download-row">
+        <a href="#" class="store-btn">🍎&nbsp; App Store</a>
+        <a href="#" class="store-btn">🤖&nbsp; Google Play</a>
+      </div>
+
+      <div class="highlight-box">
+        <p>Diese Einladung ist persönlich. Du musst dich mit derselben E-Mail-Adresse anmelden, an die sie gesendet wurde. Wenn du diese E-Mail nicht erwartet hast, kannst du sie einfach ignorieren.</p>
+      </div>
+
+    </div><!-- /content-de -->
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      <a href="index.html">← Livrux</a>
+      &nbsp;·&nbsp;
+      <a href="privacy.html">Privacy Policy</a>
+      &nbsp;·&nbsp;
+      <a href="terms.html">Terms of Use</a>
+      &nbsp;·&nbsp;
+      <span id="year"></span>
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const SECTIONS = ['header', 'content'];
+      const LANGS = ['en', 'pt', 'de'];
+
+      const TOKEN_LABELS = { en: 'Invitation code', pt: 'Código de convite', de: 'Einladungscode' };
+      const TOKEN_HINTS  = {
+        en: 'Short code from your invitation email',
+        pt: 'Código resumido do seu e-mail de convite',
+        de: 'Kurzcode aus deiner Einladungs-E-Mail',
+      };
+      const NO_TOKEN_HINTS = {
+        en: 'Open this link from your invitation email',
+        pt: 'Abra este link pelo seu e-mail de convite',
+        de: 'Öffne diesen Link aus deiner Einladungs-E-Mail',
+      };
+
+      function detectLang() {
+        const stored = localStorage.getItem('livrux_lang');
+        if (stored && LANGS.includes(stored)) return stored;
+        const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        return LANGS.includes(browser) ? browser : 'en';
+      }
+
+      function applyLang(lang) {
+        localStorage.setItem('livrux_lang', lang);
+        document.documentElement.lang = lang;
+
+        SECTIONS.forEach(section => {
+          LANGS.forEach(l => {
+            const el = document.getElementById(`${section}-${l}`);
+            if (el) el.classList.toggle('active', l === lang);
+          });
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        document.getElementById('token-label-text').textContent = TOKEN_LABELS[lang];
+        const hasToken = document.getElementById('token-display').textContent !== '—';
+        document.getElementById('token-hint').textContent =
+          hasToken ? TOKEN_HINTS[lang] : NO_TOKEN_HINTS[lang];
+      }
+
+      // Resolve invitation token from URL
+      const params = new URLSearchParams(window.location.search);
+      const token  = params.get('token');
+      if (token) {
+        const shortCode = token.replace(/-/g, '').substring(0, 8).toUpperCase();
+        document.getElementById('token-display').textContent = shortCode;
+      }
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+      });
+
+      applyLang(detectLang());
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+  </script>
+
+</body>
+</html>

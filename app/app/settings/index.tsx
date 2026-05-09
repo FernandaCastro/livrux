@@ -142,6 +142,12 @@ export default function SettingsScreen() {
               label={t('settings.parentalControlsTitle')}
               onPress={() => router.push('/app/settings/parental')}
             />
+            <View style={styles.divider} />
+            <SettingsRow
+              icon="👨‍👩‍👧‍👦"
+              label={t('guardians.menuLabel')}
+              onPress={() => router.push('/app/settings/guardians')}
+            />
           </View>
 
           <Text style={styles.sectionLabel}>{t('settings.formula')}</Text>

@@ -27,7 +27,7 @@ import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src
 export default function FormulaScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { user, formula, fetchFormula } = useAuthStore();
+  const { user, ownerId, formula, fetchFormula } = useAuthStore();
 
   const active = formula ?? getDefaultFormula();
 
@@ -105,7 +105,7 @@ export default function FormulaScreen() {
         bonus_rules: bonusRules,
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', user.id);
+      .eq('user_id', ownerId ?? user!.id);
 
     setIsSaving(false);
 

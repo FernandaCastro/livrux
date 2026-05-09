@@ -168,3 +168,22 @@ export interface LivruxTransaction {
   description: string | null;
   created_at: string;
 }
+
+export interface CoGuardian {
+  owner_id: string;
+  guardian_id: string;
+  created_at: string;
+  // Joined from user_profiles:
+  display_name?: string | null;
+  email?: string | null;
+}
+
+export interface GuardianInvitation {
+  id: string;
+  owner_id: string;
+  email: string;
+  token: string;
+  status: 'pending' | 'accepted' | 'cancelled';
+  created_at: string;
+  accepted_at: string | null;
+}

@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  RefreshControl,
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
@@ -182,6 +183,7 @@ export default function GuardiansScreen() {
     acceptInvitation,
     removeCoGuardian,
     leaveFamily,
+    refresh,
     isSending,
     isAccepting,
     isLeaving,
@@ -189,6 +191,13 @@ export default function GuardiansScreen() {
 
   const [inviteVisible, setInviteVisible] = useState(false);
   const [acceptVisible, setAcceptVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refresh();
+    setRefreshing(false);
+  };
 
   const handleRemove = (g: CoGuardian) => {
     const name = g.display_name ?? g.email ?? t('guardians.thisGuardian');
@@ -240,7 +249,17 @@ export default function GuardiansScreen() {
       <FloatingEmojis />
 
       <SafeAreaView style={styles.safe}>
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={Colors.primary}
+              colors={[Colors.primary]}
+            />
+          }
+        >
           {/* Header */}
           <TouchableOpacity onPress={() => router.back()} style={styles.backRow}>
             <Text style={styles.backChevron}>‹</Text>

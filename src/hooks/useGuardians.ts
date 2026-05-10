@@ -8,20 +8,29 @@ export const GUARDIANS_KEY   = (ownerId: string) => ['guardians', ownerId] as co
 export const INVITATIONS_KEY = (ownerId: string) => ['guardian_invitations', ownerId] as const;
 
 async function fetchCoGuardians(ownerId: string): Promise<CoGuardian[]> {
-  // Fetch all co-guardians for this family and join their display_name from user_profiles.
   const { data, error } = await supabase
     .from('co_guardians')
-    .select('owner_id, guardian_id, created_at, user_profiles!guardian_id(display_name)')
+    .select('owner_id, guardian_id, created_at')
     .eq('owner_id', ownerId)
     .order('created_at', { ascending: true });
 
   if (error) throw error;
+  if (!data || data.length === 0) return [];
 
-  return (data ?? []).map((row: any) => ({
+  const guardianIds = data.map((r) => r.guardian_id);
+  const { data: profiles } = await supabase
+    .from('user_profiles')
+    .select('id, display_name')
+    .in('id', guardianIds);
+
+  const nameMap: Record<string, string | null> = {};
+  for (const p of profiles ?? []) nameMap[p.id] = p.display_name ?? null;
+
+  return data.map((row) => ({
     owner_id: row.owner_id,
     guardian_id: row.guardian_id,
     created_at: row.created_at,
-    display_name: row.user_profiles?.display_name ?? null,
+    display_name: nameMap[row.guardian_id] ?? null,
   })) as CoGuardian[];
 }
 
@@ -49,6 +58,7 @@ export function useGuardians() {
     queryFn: () => fetchCoGuardians(ownerId!),
     enabled: !!ownerId,
     retry: 1,
+    refetchOnMount: 'always',
   });
 
   const { data: invitations = [], isLoading: invitationsLoading } = useQuery({
@@ -56,6 +66,7 @@ export function useGuardians() {
     queryFn: () => fetchInvitations(ownerId!),
     enabled: !!ownerId,
     retry: 1,
+    refetchOnMount: 'always',
   });
 
   // Send an invitation email to a new co-guardian.
@@ -162,6 +173,14 @@ export function useGuardians() {
 
   const isCoGuardian = !!user && ownerId !== null && ownerId !== user.id;
 
+  const refresh = async () => {
+    if (!guardiansKey || !invitationsKey) return;
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: guardiansKey }),
+      qc.invalidateQueries({ queryKey: invitationsKey }),
+    ]);
+  };
+
   return {
     coGuardians,
     invitations,
@@ -169,6 +188,7 @@ export function useGuardians() {
     // fetchCoGuardianStatus() completes and the queries actually run.
     isLoading: !ownerId || guardiansLoading || invitationsLoading,
     isCoGuardian,
+    refresh,
     sendInvitation: (email: string) => sendInvitationMutation.mutateAsync(email),
     cancelInvitation: (id: string) => cancelInvitationMutation.mutateAsync(id),
     acceptInvitation: (token: string) => acceptInvitationMutation.mutateAsync(token),

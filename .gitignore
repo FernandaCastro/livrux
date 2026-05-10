@@ -46,3 +46,6 @@ google-play-service-account.json
 
 #claude
 .claude
+
+#supabase
+/supabase/.temp

@@ -6,13 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Alert,
   ActivityIndicator,
   Modal,
   Pressable,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useToastStore } from '../../../src/stores/toastStore';
+import { useDialogStore } from '../../../src/stores/dialogStore';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -36,21 +37,22 @@ interface InviteModalProps {
 
 function InviteModal({ visible, onClose, onSend, isSending }: InviteModalProps) {
   const { t } = useTranslation();
+  const showToast = useToastStore((s) => s.show);
   const [email, setEmail] = useState('');
 
   const handleSend = async () => {
     const trimmed = email.trim().toLowerCase();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      Alert.alert(t('common.error'), t('guardians.invalidEmail'));
+      showToast({ type: 'warning', title: t('guardians.invalidEmail') });
       return;
     }
     try {
       await onSend(trimmed);
       setEmail('');
       onClose();
-      Alert.alert(t('guardians.inviteSentTitle'), t('guardians.inviteSentBody', { email: trimmed }));
+      showToast({ type: 'success', title: t('guardians.inviteSentTitle'), message: t('guardians.inviteSentBody', { email: trimmed }) });
     } catch (err) {
-      Alert.alert(t('common.error'), (err as Error).message);
+      showToast({ type: 'error', title: t('common.error'), message: (err as Error).message });
     }
   };
 
@@ -104,21 +106,22 @@ interface AcceptModalProps {
 
 function AcceptModal({ visible, onClose, onAccept, isAccepting }: AcceptModalProps) {
   const { t } = useTranslation();
+  const showToast = useToastStore((s) => s.show);
   const [token, setToken] = useState('');
 
   const handleAccept = async () => {
     const trimmed = token.trim();
     if (!trimmed) {
-      Alert.alert(t('common.error'), t('guardians.tokenRequired'));
+      showToast({ type: 'warning', title: t('guardians.tokenRequired') });
       return;
     }
     try {
       await onAccept(trimmed);
       setToken('');
       onClose();
-      Alert.alert(t('guardians.acceptedTitle'), t('guardians.acceptedBody'));
+      showToast({ type: 'success', title: t('guardians.acceptedTitle'), message: t('guardians.acceptedBody') });
     } catch (err) {
-      Alert.alert(t('common.error'), (err as Error).message);
+      showToast({ type: 'error', title: t('common.error'), message: (err as Error).message });
     }
   };
 
@@ -167,6 +170,8 @@ export default function GuardiansScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
+  const showToast  = useToastStore((s) => s.show);
+  const showDialog = useDialogStore((s) => s.show);
   const {
     coGuardians,
     invitations,
@@ -187,55 +192,40 @@ export default function GuardiansScreen() {
 
   const handleRemove = (g: CoGuardian) => {
     const name = g.display_name ?? g.email ?? t('guardians.thisGuardian');
-    Alert.alert(
-      t('guardians.removeTitle'),
-      t('guardians.removeConfirm', { name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => removeCoGuardian(g.guardian_id),
-        },
-      ],
-    );
+    showDialog({
+      title: t('guardians.removeTitle'),
+      message: t('guardians.removeConfirm', { name }),
+      confirmLabel: t('common.delete'),
+      danger: true,
+      onConfirm: () => removeCoGuardian(g.guardian_id),
+    });
   };
 
   const handleLeave = () => {
-    Alert.alert(
-      t('guardians.leaveTitle'),
-      t('guardians.leaveConfirm'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('guardians.leaveBtn'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await leaveFamily();
-              router.replace('/app/settings');
-            } catch (err) {
-              Alert.alert(t('common.error'), (err as Error).message);
-            }
-          },
-        },
-      ],
-    );
+    showDialog({
+      title: t('guardians.leaveTitle'),
+      message: t('guardians.leaveConfirm'),
+      confirmLabel: t('guardians.leaveBtn'),
+      danger: true,
+      onConfirm: async () => {
+        try {
+          await leaveFamily();
+          router.replace('/app/settings');
+        } catch (err) {
+          showToast({ type: 'error', title: t('common.error'), message: (err as Error).message });
+        }
+      },
+    });
   };
 
   const handleCancelInvitation = (inv: GuardianInvitation) => {
-    Alert.alert(
-      t('guardians.cancelInviteTitle'),
-      t('guardians.cancelInviteConfirm', { email: inv.email }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => cancelInvitation(inv.id),
-        },
-      ],
-    );
+    showDialog({
+      title: t('guardians.cancelInviteTitle'),
+      message: t('guardians.cancelInviteConfirm', { email: inv.email }),
+      confirmLabel: t('common.delete'),
+      danger: true,
+      onConfirm: () => cancelInvitation(inv.id),
+    });
   };
 
   return (

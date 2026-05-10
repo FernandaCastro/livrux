@@ -9,7 +9,6 @@ import {
   ScrollView,
   Switch,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -21,6 +20,7 @@ import { supabase } from '../../../src/lib/supabase';
 import { hashPin } from '../../../src/lib/pinHash';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
+import { useDialogStore } from '../../../src/stores/dialogStore';
 import { useReaders } from '../../../src/hooks/useReaders';
 import { PinModal } from '../../../src/components/PinModal';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
@@ -118,6 +118,7 @@ export default function ParentalControlsScreen() {
 
   const [saving, setSaving] = useState(false);
   const [flow, setFlow] = useState<FlowState>(IDLE);
+  const showDialog = useDialogStore((s) => s.show);
 
   const hasParentalPin = !!profile?.parental_pin;
 
@@ -139,19 +140,14 @@ export default function ParentalControlsScreen() {
     setFlow({ step: 'verify_current', action: 'change', context: reader, pendingHash: null });
 
   const confirmRemoveReaderPin = (reader: Reader) => {
-    Alert.alert(
-      t('parental.removeReaderPinTitle'),
-      t('parental.removeReaderPinConfirm', { name: reader.name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () =>
-            setFlow({ step: 'verify_current', action: 'remove', context: reader, pendingHash: null }),
-        },
-      ]
-    );
+    showDialog({
+      title: t('parental.removeReaderPinTitle'),
+      message: t('parental.removeReaderPinConfirm', { name: reader.name }),
+      confirmLabel: t('common.delete'),
+      danger: true,
+      onConfirm: () =>
+        setFlow({ step: 'verify_current', action: 'remove', context: reader, pendingHash: null }),
+    });
   };
 
   const saveParentalPin = async (hash: string | null) => {

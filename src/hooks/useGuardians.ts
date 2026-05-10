@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
+import i18n from '../i18n';
 import type { CoGuardian, GuardianInvitation } from '../types';
 
 export const GUARDIANS_KEY   = (ownerId: string) => ['guardians', ownerId] as const;
@@ -47,20 +48,23 @@ export function useGuardians() {
     queryKey: guardiansKey ?? ['guardians', null],
     queryFn: () => fetchCoGuardians(ownerId!),
     enabled: !!ownerId,
+    retry: 1,
   });
 
   const { data: invitations = [], isLoading: invitationsLoading } = useQuery({
     queryKey: invitationsKey ?? ['guardian_invitations', null],
     queryFn: () => fetchInvitations(ownerId!),
     enabled: !!ownerId,
+    retry: 1,
   });
 
   // Send an invitation email to a new co-guardian.
   const sendInvitationMutation = useMutation({
     mutationFn: async (email: string) => {
+      const lang = i18n.language?.slice(0, 2) ?? 'en';
       const { error } = await supabase.functions.invoke('invite-guardian', {
         method: 'POST',
-        body: { email },
+        body: { email, lang },
       });
       if (error) throw new Error(error.message);
     },
@@ -161,7 +165,9 @@ export function useGuardians() {
   return {
     coGuardians,
     invitations,
-    isLoading: guardiansLoading || invitationsLoading,
+    // Treat unresolved ownerId as loading — prevents content from flashing before
+    // fetchCoGuardianStatus() completes and the queries actually run.
+    isLoading: !ownerId || guardiansLoading || invitationsLoading,
     isCoGuardian,
     sendInvitation: (email: string) => sendInvitationMutation.mutateAsync(email),
     cancelInvitation: (id: string) => cancelInvitationMutation.mutateAsync(id),

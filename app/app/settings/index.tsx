@@ -4,7 +4,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -15,6 +14,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { useAuthStore } from '../../../src/stores/authStore';
 import { supabase } from '../../../src/lib/supabase';
+import { useToastStore } from '../../../src/stores/toastStore';
+import { useDialogStore } from '../../../src/stores/dialogStore';
 import { PRIVACY_POLICY_URL, TERMS_URL } from '../../../src/constants/legal';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -43,66 +44,57 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { profile, signOut } = useAuthStore();
+  const showToast = useToastStore((s) => s.show);
+  const showDialog = useDialogStore((s) => s.show);
 
   const currentLang = i18n.language as SupportedLanguage;
 
   const handleSignOut = () => {
-    Alert.alert(t('auth.signOut'), t('auth.signOut') + '?', [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('auth.signOut'),
-        style: 'destructive',
-        onPress: async () => {
-          await signOut();
-          router.replace('/auth/sign-in');
-        },
+    showDialog({
+      title: t('auth.signOut'),
+      message: t('auth.signOut') + '?',
+      confirmLabel: t('auth.signOut'),
+      danger: false,
+      onConfirm: async () => {
+        await signOut();
+        router.replace('/auth/sign-in');
       },
-    ]);
+    });
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      t('settings.deleteAccount'),
-      t('settings.deleteAccountConfirm'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('settings.deleteAccount'),
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              t('settings.deleteAccountFinal'),
-              t('settings.deleteAccountFinalBody'),
-              [
-                { text: t('common.cancel'), style: 'cancel' },
-                {
-                  text: t('settings.deleteAccountFinal'),
-                  style: 'destructive',
-                  onPress: async () => {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    const token = session?.access_token;
-                    if (!token) return;
+    showDialog({
+      title: t('settings.deleteAccount'),
+      message: t('settings.deleteAccountConfirm'),
+      confirmLabel: t('settings.deleteAccount'),
+      danger: true,
+      onConfirm: () => {
+        showDialog({
+          title: t('settings.deleteAccountFinal'),
+          message: t('settings.deleteAccountFinalBody'),
+          confirmLabel: t('settings.deleteAccountFinal'),
+          danger: true,
+          onConfirm: async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token;
+            if (!token) return;
 
-                    const res = await supabase.functions.invoke('delete-account', {
-                      method: 'POST',
-                    });
+            const res = await supabase.functions.invoke('delete-account', {
+              method: 'POST',
+            });
 
-                    if (res.error) {
-                      const detail = (res.data as { error?: string } | null)?.error;
-                      Alert.alert(t('common.error'), detail ?? res.error.message);
-                      return;
-                    }
+            if (res.error) {
+              const detail = (res.data as { error?: string } | null)?.error;
+              showToast({ type: 'error', title: t('common.error'), message: detail ?? res.error.message });
+              return;
+            }
 
-                    await signOut();
-                    router.replace('/auth/sign-in');
-                  },
-                },
-              ],
-            );
+            await signOut();
+            router.replace('/auth/sign-in');
           },
-        },
-      ],
-    );
+        });
+      },
+    });
   };
 
   return (

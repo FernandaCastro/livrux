@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { supabase } from '../../../src/lib/supabase';
 import { useAuthStore } from '../../../src/stores/authStore';
+import { useToastStore } from '../../../src/stores/toastStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
@@ -45,6 +45,7 @@ export default function FormulaScreen() {
   const [foreignLangBonus, setForeignLangBonus] = useState(String(existingForeignLang?.bonus_amount ?? 5));
 
   const [isSaving, setIsSaving] = useState(false);
+  const showToast = useToastStore((s) => s.show);
 
   const previewBonusRules: BonusRule[] = minPagesEnabled
     ? [{ type: 'min_pages', threshold: Number(minPagesThreshold) || 0, bonus_amount: Number(minPagesBonus) || 0, label: '' }]
@@ -62,7 +63,7 @@ export default function FormulaScreen() {
     const rate = Number(perPageRate);
 
     if (isNaN(base) || base < 0 || isNaN(rate) || rate < 0) {
-      Alert.alert(t('common.error'), t('common.error'));
+      showToast({ type: 'error', title: t('common.error') });
       return;
     }
 
@@ -72,7 +73,7 @@ export default function FormulaScreen() {
       const threshold = Number(minPagesThreshold);
       const bonus = Number(minPagesBonus);
       if (isNaN(threshold) || threshold <= 0 || isNaN(bonus) || bonus < 0) {
-        Alert.alert(t('common.error'), t('common.error'));
+        showToast({ type: 'error', title: t('common.error') });
         return;
       }
       bonusRules.push({
@@ -86,7 +87,7 @@ export default function FormulaScreen() {
     if (foreignLangEnabled) {
       const bonus = Number(foreignLangBonus);
       if (isNaN(bonus) || bonus < 0) {
-        Alert.alert(t('common.error'), t('common.error'));
+        showToast({ type: 'error', title: t('common.error') });
         return;
       }
       bonusRules.push({
@@ -110,7 +111,7 @@ export default function FormulaScreen() {
     setIsSaving(false);
 
     if (error) {
-      Alert.alert(t('common.error'), error.message);
+      showToast({ type: 'error', title: t('common.error'), message: error.message });
     } else {
       await fetchFormula();
       router.back();

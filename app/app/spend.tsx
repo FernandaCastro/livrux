@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { spendLivruxRpc } from '../../src/hooks/useLivrux';
 import { useReaderStore } from '../../src/stores/readerStore';
+import { useToastStore } from '../../src/stores/toastStore';
 import { Button } from '../../src/components/ui/Button';
 import { TextInput } from '../../src/components/ui/TextInput';
 import { FloatingEmojis } from '../../src/components/FloatingEmojis';
@@ -34,6 +35,7 @@ export default function SpendScreen() {
   const router = useRouter();
   const { readerId } = useLocalSearchParams<{ readerId: string }>();
   const { selectedReader, updateBalance } = useReaderStore();
+  const showToast = useToastStore((s) => s.show);
 
   const balance = selectedReader?.livrux_balance ?? 0;
   const schema = useSpendSchema(balance);
@@ -62,7 +64,7 @@ export default function SpendScreen() {
       router.back();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('common.error');
-      Alert.alert(t('common.error'), message);
+      showToast({ type: 'error', title: t('common.error'), message });
     }
   };
 

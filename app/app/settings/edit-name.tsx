@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -19,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { supabase } from '../../../src/lib/supabase';
 import { useAuthStore } from '../../../src/stores/authStore';
+import { useToastStore } from '../../../src/stores/toastStore';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
@@ -45,6 +45,7 @@ export default function EditNameScreen() {
   const { profile, fetchProfile } = useAuthStore();
   const schema = useSchema();
   const [saving, setSaving] = useState(false);
+  const showToast = useToastStore((s) => s.show);
 
   const {
     control,
@@ -70,12 +71,11 @@ export default function EditNameScreen() {
     setSaving(false);
 
     if (error) {
-      Alert.alert(t('common.error'), error.message);
+      showToast({ type: 'error', title: t('common.error'), message: error.message });
     } else {
       await fetchProfile();
-      Alert.alert(t('settings.displayNameSaved'), t('settings.displayNameSavedBody'), [
-        { text: t('common.ok'), onPress: () => router.back() },
-      ]);
+      showToast({ type: 'success', title: t('settings.displayNameSaved'), message: t('settings.displayNameSavedBody') });
+      router.back();
     }
   };
 

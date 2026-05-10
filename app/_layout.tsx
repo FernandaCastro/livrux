@@ -19,6 +19,8 @@ import { useAuthStore } from '../src/stores/authStore';
 import { useParentalStore } from '../src/stores/parentalStore';
 import { useReaderStore } from '../src/stores/readerStore';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
+import { ToastContainer } from '../src/components/ToastContainer';
+import { ConfirmSheet } from '../src/components/ConfirmSheet';
 import { Colors, Fonts, FontSizes } from '../src/constants/theme';
 import '../src/i18n';
 
@@ -161,6 +163,8 @@ export default function RootLayout() {
           <SafeAreaProvider>
             <StatusBar style="dark" backgroundColor={Colors.background} />
             <Stack screenOptions={{ headerShown: false }} />
+            <ToastContainer />
+            <ConfirmSheet />
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </ErrorBoundary>

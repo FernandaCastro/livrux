@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -17,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { useReaders } from '../../../src/hooks/useReaders';
 import { useReaderStore } from '../../../src/stores/readerStore';
+import { useToastStore } from '../../../src/stores/toastStore';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -50,6 +50,7 @@ export default function AddReaderScreen() {
 
   const { createReader, updateReader } = useReaders();
   const { selectedReader } = useReaderStore();
+  const showToast = useToastStore((s) => s.show);
 
   const [avatarHistory, setAvatarHistory] = useState<string[]>(() => [generateAvatarSeed()]);
   const [historyIndex, setHistoryIndex] = useState(0);
@@ -108,7 +109,7 @@ export default function AddReaderScreen() {
       }
       router.back();
     } catch {
-      Alert.alert(t('common.error'), t('common.error'));
+      showToast({ type: 'error', title: t('common.error') });
     }
   };
 

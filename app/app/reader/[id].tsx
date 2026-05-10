@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   AppState,
-  Alert,
   Image,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
@@ -19,6 +18,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useBooks, useReadingBooks } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useReaders } from '../../../src/hooks/useReaders';
+import { useDialogStore } from '../../../src/stores/dialogStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { useStreak } from '../../../src/hooks/useStreak';
 import { useBadges } from '../../../src/hooks/useBadges';
@@ -36,6 +36,7 @@ export default function ReaderDashboardScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { selectedReader, setSelectedReader, bookPersistedCount } = useReaderStore();
   const { deleteReader } = useReaders();
+  const showDialog = useDialogStore((s) => s.show);
   const { books, isLoading, refresh, fetchNextPage, hasNextPage, isFetchingNextPage } = useBooks(id ?? null);
   const { readingBooks, refresh: refreshReading } = useReadingBooks(id ?? null);
   const { streak } = useStreak(id ?? null);
@@ -115,21 +116,16 @@ export default function ReaderDashboardScreen() {
   }
 
   const handleDelete = () => {
-    Alert.alert(
-      t('reader.deleteReader'),
-      t('reader.deleteConfirm', { name: reader.name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteReader(reader.id);
-            router.replace('/app');
-          },
-        },
-      ]
-    );
+    showDialog({
+      title: t('reader.deleteReader'),
+      message: t('reader.deleteConfirm', { name: reader.name }),
+      confirmLabel: t('common.delete'),
+      danger: true,
+      onConfirm: async () => {
+        await deleteReader(reader.id);
+        router.replace('/app');
+      },
+    });
   };
 
   return (

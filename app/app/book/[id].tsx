@@ -5,7 +5,6 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   TextInput,
   Modal,
@@ -19,6 +18,8 @@ import { useState } from 'react';
 
 import { useBook } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
+import { useToastStore } from '../../../src/stores/toastStore';
+import { useDialogStore } from '../../../src/stores/dialogStore';
 import { useReadingSession } from '../../../src/hooks/useReadingSession';
 import { completeBookRpc } from '../../../src/hooks/useLivrux';
 import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
@@ -49,6 +50,8 @@ export default function BookDetailScreen() {
   const { selectedReader, updateBalance } = useReaderStore();
   const { book, isLoading, deleteBook } = useBook(id ?? null);
   const { formula } = useAuthStore();
+  const showToast = useToastStore((s) => s.show);
+  const showDialog = useDialogStore((s) => s.show);
   const { loggedToday, lastPageRead, logSession } = useReadingSession(selectedReader?.id ?? null, id ?? null);
   const [sessionModalVisible, setSessionModalVisible] = useState(false);
   const [pagesInput, setPagesInput] = useState('');
@@ -101,28 +104,23 @@ export default function BookDetailScreen() {
   }
 
   const handleDelete = () => {
-    Alert.alert(
-      t('book.deleteBook'),
-      t('book.deleteConfirm', { title: book.title }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            const { revokedBadges: revoked } = await deleteBook(book.id);
-            if (selectedReader) {
-              updateBalance(selectedReader.livrux_balance - book.livrux_earned);
-            }
-            if (revoked.length > 0) {
-              setRevokedBadges(revoked);
-            } else {
-              handleBack();
-            }
-          },
-        },
-      ]
-    );
+    showDialog({
+      title: t('book.deleteBook'),
+      message: t('book.deleteConfirm', { title: book.title }),
+      confirmLabel: t('common.delete'),
+      danger: true,
+      onConfirm: async () => {
+        const { revokedBadges: revoked } = await deleteBook(book.id);
+        if (selectedReader) {
+          updateBalance(selectedReader.livrux_balance - book.livrux_earned);
+        }
+        if (revoked.length > 0) {
+          setRevokedBadges(revoked);
+        } else {
+          handleBack();
+        }
+      },
+    });
   };
 
   return (
@@ -362,7 +360,7 @@ export default function BookDetailScreen() {
                         router.back();
                       }
                     } catch {
-                      Alert.alert(t('common.error'), t('common.error'));
+                      showToast({ type: 'error', title: t('common.error') });
                     } finally {
                       setIsCompleting(false);
                     }

@@ -31,9 +31,7 @@
       --radius: 1.5rem;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: 'Nunito', sans-serif;
@@ -65,10 +63,7 @@
       text-decoration: none;
     }
 
-    .lang-switcher {
-      display: flex;
-      gap: .4rem;
-    }
+    .lang-switcher { display: flex; gap: .4rem; }
 
     .lang-btn {
       padding: .35rem .7rem;
@@ -82,38 +77,72 @@
       cursor: pointer;
       transition: all .2s;
     }
+    .lang-btn:hover { color: var(--purple); border-color: var(--purple2); }
+    .lang-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
 
-    .lang-btn:hover {
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 1.5rem 3rem;
+      background: linear-gradient(160deg, #f0e6ff 0%, #fff7ed 60%, #fafaf7 100%);
+      overflow: hidden;
+    }
+
+    .hero .emoji { font-size: 4rem; margin-bottom: 0.75rem; }
+
+    .hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 5vw, 3.2rem);
       color: var(--purple);
-      border-color: var(--purple2);
+      margin-bottom: .5rem;
     }
 
-    .lang-btn.active {
-      background: var(--purple);
-      color: #fff;
-      border-color: var(--purple);
-    }
-
-    .lang-content {
-      display: none;
-    }
-
-    .lang-content.active {
-      display: block;
-    }
-
-    .content {
-      max-width: 680px;
+    .hero p {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 520px;
       margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
+      line-height: 1.6;
     }
 
-    .token-box {
+    /* ── FLOATING EMOJIS ── */
+    .floaters {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .floater {
+      position: absolute;
+      font-size: 2rem;
+      opacity: .18;
+      animation: float linear infinite;
+    }
+
+    @keyframes float {
+      0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
+      10%  { opacity: .18; }
+      90%  { opacity: .18; }
+      100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+    }
+
+     /* -- TOKEN BOX ── */
+     .token-box {
+      display: flex;
+      flex-direction: column;
+      max-width: 680px;
+      margin: 2rem auto 0;
       background: #F3F0FF;
       border-left: 4px solid var(--purple);
       border-radius: .5rem;
       padding: 1.5rem 1.25rem;
-      margin: 0 0 2rem;
       text-align: center;
     }
 
@@ -140,6 +169,14 @@
       margin-top: .4rem;
     }
 
+
+    /* ── CONTENT ── */
+    .content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
     .content h2 {
       font-family: 'Fredoka One', cursive;
       font-size: 1.5rem;
@@ -164,10 +201,6 @@
       line-height: 1.6;
     }
 
-    .step-text{
-      text-align: left;
-    }
-
     .step-num {
       flex-shrink: 0;
       width: 28px;
@@ -183,117 +216,17 @@
       margin-top: 1px;
     }
 
-    .content strong {
-      color: var(--text);
-    }
+    .step-text { text-align: left; }
 
-    .download-row {
-      display: flex;
-      gap: .75rem;
-      flex-wrap: wrap;
-      margin-bottom: 2rem;
-    }
+    .content strong { color: var(--text); }
 
-    .highlight-box {
-      background: #fff7ed;
-      border-left: 4px solid var(--orange);
-      border-radius: .5rem;
-      padding: 1rem 1.25rem;
-      margin: 1.5rem 0 0;
-    }
-
-    .highlight-box p {
-      color: var(--text);
-      font-size: .92rem;
-      line-height: 1.6;
-    }
-
-    footer {
-      text-align: center;
-      padding: 2rem 1.5rem;
-      color: var(--muted);
-      font-size: .85rem;
-      border-top: 1px solid rgba(0, 0, 0, .06);
-    }
-
-    footer a {
-      color: var(--purple);
-      text-decoration: none;
-    }
-
-    /* Floating emojis */
-    .floaters {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .floater {
-      position: absolute;
-      font-size: 2rem;
-      opacity: .18;
-      animation: float linear infinite;
-    }
-
-    @keyframes float {
-      0% {
-        transform: translateY(110vh) rotate(0deg);
-        opacity: 0;
-      }
-
-      10% {
-        opacity: .18;
-      }
-
-      90% {
-        opacity: .18;
-      }
-
-      100% {
-        transform: translateY(-10vh) rotate(720deg);
-        opacity: 0;
-      }
-    }
-
-    .hero {
-      min-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 4rem 1.5rem 3rem;
-      background: linear-gradient(160deg, #f0e6ff 0%, #fff7ed 60%, #fafaf7 100%);
-      overflow: hidden;
-    }
-
-    .hero .emoji {
-      font-size: 4rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .hero h1 {
-      font-family: 'Fredoka One', cursive;
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      color: var(--purple);
-      margin-bottom: .5rem;
-    }
-
-    .hero p {
-      font-size: 1rem;
-      color: var(--muted);
-      max-width: 520px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
+    /* ── DOWNLOAD BUTTONS ── */
     .hero-actions {
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
       justify-content: center;
-      animation: slideUp .7s .3s both;
+      margin-bottom: 2rem;
     }
 
     .btn {
@@ -310,38 +243,44 @@
       cursor: pointer;
       border: none;
     }
-
-    .btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-    }
+    .btn:hover  { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--purple), var(--purple2));
       color: #fff;
       box-shadow: 0 4px 20px rgba(124, 58, 237, .35);
     }
+    .btn-primary:hover { box-shadow: 0 8px 28px rgba(124, 58, 237, .45); }
 
-    .btn-primary:hover {
-      box-shadow: 0 8px 28px rgba(124, 58, 237, .45);
+    /* ── NOTICE BOX ── */
+    .highlight-box {
+      background: #fff7ed;
+      border-left: 4px solid var(--orange);
+      border-radius: .5rem;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0 0;
+    }
+    .highlight-box p {
+      color: var(--text);
+      font-size: .92rem;
+      line-height: 1.6;
     }
 
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid rgba(0, 0, 0, .06);
+    }
+    footer a { color: var(--purple); text-decoration: none; }
+
     @media (max-width: 500px) {
-      nav {
-        padding: .9rem 1.2rem;
-      }
-
-      .nav-logo {
-        font-size: 1.3rem;
-      }
-
-      .token-value {
-        font-size: 1.6rem;
-        letter-spacing: 3px;
-      }
+      nav { padding: .9rem 1.2rem; }
+      .nav-logo { font-size: 1.3rem; }
+      .token-value { font-size: 1.6rem; letter-spacing: 3px; }
     }
   </style>
 </head>
@@ -361,129 +300,65 @@
     </div>
   </nav>
 
-  <!-- PAGE HEADER -->
+  <!-- HERO -->
   <div class="hero">
     <div class="floaters" id="header-floaters"></div>
-    <div class="lang-content" id="header-en">
-      <div class="emoji">🎉</div>
-      <h1>You've been invited!</h1>
-      <p data-i18n="cta.subtitle">Someone invited you to manage a family on <strong>Livrux</strong> — the app that turns
-        reading into rewards for
-        kids.</p>
-    </div>
-    <div class="lang-content" id="header-pt">
-      <div class="emoji">🎉</div>
-      <h1>Você foi convidado!</h1>
-      <p>Alguém convidou você para gerenciar uma família no <strong>Livrux</strong> — o app que transforma leitura em
-        recompensas para as crianças.</p>
-    </div>
-    <div class="lang-content" id="header-de">
-      <div class="emoji">🎉</div>
-      <h1>Du wurdest eingeladen!</h1>
-      <p>Jemand hat dich eingeladen, eine Familie in <strong>Livrux</strong> zu verwalten — der App, die Lesen in
-        Belohnungen für Kinder verwandelt.</p>
+    <div class="emoji">🎉</div>
+    <h1 data-i18n="header.title">You've been invited!</h1>
+    <p data-i18n="header.subtitle">Someone invited you to manage a family on <strong>Livrux</strong> — the app that turns reading into rewards for kids.</p>
+  
+    <!-- TOKEN DISPLAY -->
+    <div class="token-box">
+      <div class="token-label" data-i18n="token.label">Invitation code</div>
+      <div class="token-value" id="token-display">-</div>
+      <div class="token-hint" id="token-hint"></div>
     </div>
 
-
-    <!-- CONTENT -->
-    <div class="content">
-
-      <!-- Token box — shared across all languages, filled by JS -->
-      <div class="token-box">
-        <div class="token-label" id="token-label-text">Invitation code</div>
-        <div class="token-value" id="token-display">—</div>
-        <div class="token-hint" id="token-hint"></div>
-      </div>
-
-      <!-- ══════════ ENGLISH ══════════ -->
-      <div class="lang-content" id="content-en">
-
-        <h2>How to accept</h2>
-        <ol>
-          <li><span class="step-num">1</span><span class="step-text">Download <strong>Livrux</strong> on your phone</span></li>
-          <li><span class="step-num">2</span><span class="step-text">Create an account or sign in if you already have one — use the same email this invitation was sent to</span></li>
-          <li><span class="step-num">3</span><span class="step-text">Go to <strong>Settings → Co-guardians</strong></span></li>
-          <li><span class="step-num">4</span><span class="step-text">Tap <strong>"I have an invitation"</strong> and enter the code
-              above</span></li>
-        </ol>
-
-        <h2>Download</h2>
-        <div class="hero-actions">
-          <a href="#" class="btn btn-primary">Apple Store</a>
-          <a href="#" class="btn btn-primary">Google Play</a>
-        </div>
-
-        <div class="highlight-box">
-          <p>This invitation is personal. You must sign in with the same email address it was sent to. If you didn't
-            expect this email, you can safely ignore it.</p>
-        </div>
-
-      </div><!-- /content-en -->
-
-      <!-- ══════════ PORTUGUÊS ══════════ -->
-      <div class="lang-content" id="content-pt">
-
-        <h2>Como aceitar</h2>
-        <ol>
-          <li><span class="step-num">1</span><span>Baixe o <strong>Livrux</strong> no seu celular</span></li>
-          <li><span class="step-num">2</span><span>Crie sua conta ou entre se já tiver uma — use o mesmo e-mail para o
-              qual este convite foi enviado</span></li>
-          <li><span class="step-num">3</span><span>Vá em <strong>Configurações → Co-responsáveis</strong></span></li>
-          <li><span class="step-num">4</span><span>Toque em <strong>"Tenho um convite"</strong> e insira o código
-              acima</span></li>
-        </ol>
-
-        <h2>Baixar</h2>
-        <div class="download-row">
-          <a href="#" class="store-btn">🍎&nbsp; Apple Store</a>
-          <a href="#" class="store-btn">🤖&nbsp; Google Play</a>
-        </div>
-
-        <div class="highlight-box">
-          <p>Este convite é pessoal. Você precisa entrar com o mesmo e-mail para o qual ele foi enviado. Se você não
-            esperava receber este e-mail, pode ignorá-lo.</p>
-        </div>
-
-      </div><!-- /content-pt -->
-
-      <!-- ══════════ DEUTSCH ══════════ -->
-      <div class="lang-content" id="content-de">
-
-        <h2>So nimmst du an</h2>
-        <ol>
-          <li><span class="step-num">1</span><span>Lade <strong>Livrux</strong> auf dein Smartphone</span></li>
-          <li><span class="step-num">2</span><span>Erstelle ein Konto oder melde dich an — nutze dieselbe
-              E-Mail-Adresse,
-              an die diese Einladung gesendet wurde</span></li>
-          <li><span class="step-num">3</span><span>Gehe zu <strong>Einstellungen → Mitverantwortliche</strong></span>
-          </li>
-          <li><span class="step-num">4</span><span>Tippe auf <strong>„Ich habe eine Einladung"</strong> und gib den Code
-              oben ein</span></li>
-        </ol>
-
-        <h2>Herunterladen</h2>
-        <div class="download-row">
-          <a href="#" class="store-btn">🍎&nbsp; App Store</a>
-          <a href="#" class="store-btn">🤖&nbsp; Google Play</a>
-        </div>
-
-        <div class="highlight-box">
-          <p>Diese Einladung ist persönlich. Du musst dich mit derselben E-Mail-Adresse anmelden, an die sie gesendet
-            wurde. Wenn du diese E-Mail nicht erwartet hast, kannst du sie einfach ignorieren.</p>
-        </div>
-
-      </div><!-- /content-de -->
-
-    </div><!-- /content -->
   </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <h2 data-i18n="steps.title">How to accept</h2>
+    <ol>
+      <li>
+        <span class="step-num">1</span>
+        <span class="step-text" data-i18n="steps.1">Download <strong>Livrux</strong> on your phone</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span class="step-text" data-i18n="steps.2">Create an account or sign in if you already have one — use the same email this invitation was sent to</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span class="step-text" data-i18n="steps.3">Go to <strong>Settings → Co-guardians</strong></span>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <span class="step-text" data-i18n="steps.4">Tap <strong>"I have an invitation"</strong> and enter the code above</span>
+      </li>
+    </ol>
+
+    <h2 data-i18n="download.title">Download</h2>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Apple Store</a>
+      <a href="#" class="btn btn-primary">Google Play</a>
+    </div>
+
+    <div class="highlight-box">
+      <p data-i18n="notice">This invitation is personal. You must sign in with the same email address it was sent to. If you didn't expect this email, you can safely ignore it.</p>
+    </div>
+
+  </div><!-- /content -->
+
   <!-- FOOTER -->
   <footer>
     <p>
       <a href="index.html">← Livrux</a>
       &nbsp;·&nbsp;
-      <a href="privacy.html">Privacy Policy</a>
+      <a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a>
       &nbsp;·&nbsp;
-      <a href="terms.html">Terms of Use</a>
+      <a href="terms.html" data-i18n="footer.terms">Terms of Use</a>
       &nbsp;·&nbsp;
       <span id="year"></span>
     </p>
@@ -493,50 +368,86 @@
     (function () {
       'use strict';
 
-      const SECTIONS = ['header', 'content'];
-      const LANGS = ['en', 'pt', 'de'];
-
-      const TOKEN_LABELS = { en: 'Invitation code', pt: 'Código de convite', de: 'Einladungscode' };
-      const TOKEN_HINTS = {
-        en: 'Short code from your invitation email',
-        pt: 'Código resumido do seu e-mail de convite',
-        de: 'Kurzcode aus deiner Einladungs-E-Mail',
+      /* ─── TRANSLATIONS ─── */
+      const i18n = {
+        en: {
+          'header.title':   "You've been invited!",
+          'header.subtitle': 'Someone invited you to manage a family on <strong>Livrux</strong> — the app that turns reading into rewards for kids.',
+          'token.label':    'Invitation code',
+          'token.hint':     'Short code from your invitation email',
+          'token.hint.none':'Use this code in the app',
+          'steps.title':    'How to accept',
+          'steps.1':        'Download <strong>Livrux</strong> on your phone',
+          'steps.2':        'Create an account or sign in if you already have one — use the same email this invitation was sent to',
+          'steps.3':        'Go to <strong>Settings → Co-guardians</strong>',
+          'steps.4':        'Tap <strong>"I have an invitation"</strong> and enter the code above',
+          'download.title': 'Download',
+          'notice':         "This invitation is personal. You must sign in with the same email address it was sent to. If you didn't expect this email, you can safely ignore it.",
+          'footer.privacy': 'Privacy Policy',
+          'footer.terms':   'Terms of Use',
+        },
+        pt: {
+          'header.title':   'Você foi convidado!',
+          'header.subtitle': 'Alguém convidou você para gerenciar uma família no <strong>Livrux</strong> — o app que transforma leitura em recompensas para as crianças.',
+          'token.label':    'Código de convite',
+          'token.hint':     'Código resumido do seu e-mail de convite',
+          'token.hint.none':'Use este código no app',
+          'steps.title':    'Como aceitar',
+          'steps.1':        'Baixe o <strong>Livrux</strong> no seu celular',
+          'steps.2':        'Crie sua conta ou entre se já tiver uma — use o mesmo e-mail para o qual este convite foi enviado',
+          'steps.3':        'Vá em <strong>Configurações → Co-responsáveis</strong>',
+          'steps.4':        'Toque em <strong>"Tenho um convite"</strong> e insira o código acima',
+          'download.title': 'Baixar',
+          'notice':         'Este convite é pessoal. Você precisa entrar com o mesmo e-mail para o qual ele foi enviado. Se você não esperava receber este e-mail, pode ignorá-lo.',
+          'footer.privacy': 'Política de Privacidade',
+          'footer.terms':   'Termos de Uso',
+        },
+        de: {
+          'header.title':   'Du wurdest eingeladen!',
+          'header.subtitle': 'Jemand hat dich eingeladen, eine Familie in <strong>Livrux</strong> zu verwalten — der App, die Lesen in Belohnungen für Kinder verwandelt.',
+          'token.label':    'Einladungscode',
+          'token.hint':     'Kurzcode aus deiner Einladungs-E-Mail',
+          'token.hint.none':'Gib diesen Code in der App ein',
+          'steps.title':    'So nimmst du an',
+          'steps.1':        'Lade <strong>Livrux</strong> auf dein Smartphone',
+          'steps.2':        'Erstelle ein Konto oder melde dich an — nutze dieselbe E-Mail-Adresse, an die diese Einladung gesendet wurde',
+          'steps.3':        'Gehe zu <strong>Einstellungen → Mitverantwortliche</strong>',
+          'steps.4':        'Tippe auf <strong>„Ich habe eine Einladung"</strong> und gib den Code oben ein',
+          'download.title': 'Herunterladen',
+          'notice':         'Diese Einladung ist persönlich. Du musst dich mit derselben E-Mail-Adresse anmelden, an die sie gesendet wurde. Wenn du diese E-Mail nicht erwartet hast, kannst du sie einfach ignorieren.',
+          'footer.privacy': 'Datenschutzerklärung',
+          'footer.terms':   'Nutzungsbedingungen',
+        },
       };
-      const NO_TOKEN_HINTS = {
-        en: 'Open this link from your invitation email',
-        pt: 'Abra este link pelo seu e-mail de convite',
-        de: 'Öffne diesen Link aus deiner Einladungs-E-Mail',
-      };
 
+      /* ─── LANGUAGE DETECTION ─── */
       function detectLang() {
         const stored = localStorage.getItem('livrux_lang');
-        if (stored && LANGS.includes(stored)) return stored;
+        if (stored && i18n[stored]) return stored;
         const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
-        return LANGS.includes(browser) ? browser : 'en';
+        return i18n[browser] ? browser : 'en';
       }
 
+      /* ─── APPLY LANGUAGE ─── */
       function applyLang(lang) {
         localStorage.setItem('livrux_lang', lang);
         document.documentElement.lang = lang;
 
-        SECTIONS.forEach(section => {
-          LANGS.forEach(l => {
-            const el = document.getElementById(`${section}-${l}`);
-            if (el) el.classList.toggle('active', l === lang);
-          });
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (i18n[lang][key] !== undefined) el.innerHTML = i18n[lang][key];
         });
 
         document.querySelectorAll('.lang-btn').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.lang === lang);
         });
 
-        document.getElementById('token-label-text').textContent = TOKEN_LABELS[lang];
         const hasToken = document.getElementById('token-display').textContent !== '—';
         document.getElementById('token-hint').textContent =
-          hasToken ? TOKEN_HINTS[lang] : NO_TOKEN_HINTS[lang];
+          i18n[lang][hasToken ? 'token.hint' : 'token.hint.none'];
       }
 
-      // Resolve invitation token from URL
+      /* ─── TOKEN FROM URL ─── */
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
       if (token) {
@@ -551,6 +462,7 @@
       applyLang(detectLang());
       document.getElementById('year').textContent = new Date().getFullYear();
 
+      /* ─── FLOATING EMOJIS ─── */
       const emojis = ['📚', '📖', '🪙', '⭐', '🌟', '✨', '🎉', '🎈', '🦋', '🌈'];
       const container = document.getElementById('header-floaters');
       for (let i = 0; i < 18; i++) {

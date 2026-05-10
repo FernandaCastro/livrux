@@ -170,7 +170,7 @@ export default function GuardiansScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuthStore();
-  const showToast  = useToastStore((s) => s.show);
+  const showToast = useToastStore((s) => s.show);
   const showDialog = useDialogStore((s) => s.show);
   const {
     coGuardians,
@@ -551,10 +551,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
   },
   primaryBtn: {
-    width: '100%',
+    // width: '100%',
     backgroundColor: Colors.primary,
     borderRadius: Radius.lg,
     paddingVertical: 14,
+    paddingHorizontal: Spacing.lg,
     alignItems: 'center',
     marginBottom: Spacing.sm,
   },

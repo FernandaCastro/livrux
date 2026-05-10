@@ -1,5 +1,5 @@
 -- Allow family members (co-guardians and their owner) to view each other's
--- user_profiles so the co-guardians list can show display names.
+-- user_profiles so the co-guardians list can show display names .
 DROP POLICY IF EXISTS "Users can view their own profile" ON public.user_profiles;
 DROP POLICY IF EXISTS "Users can view their own or family members profile" ON public.user_profiles;
 

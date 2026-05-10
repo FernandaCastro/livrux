@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -18,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { supabase } from '../../../src/lib/supabase';
+import { useToastStore } from '../../../src/stores/toastStore';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
@@ -46,6 +46,7 @@ export default function ChangePasswordScreen() {
   const router = useRouter();
   const schema = useSchema();
   const [saving, setSaving] = useState(false);
+  const showToast = useToastStore((s) => s.show);
 
   const {
     control,
@@ -59,11 +60,10 @@ export default function ChangePasswordScreen() {
     setSaving(false);
 
     if (error) {
-      Alert.alert(t('common.error'), error.message);
+      showToast({ type: 'error', title: t('common.error'), message: error.message });
     } else {
-      Alert.alert(t('auth.passwordChanged'), t('auth.passwordChangedBody'), [
-        { text: t('common.ok'), onPress: () => router.back() },
-      ]);
+      showToast({ type: 'success', title: t('auth.passwordChanged'), message: t('auth.passwordChangedBody') });
+      router.back();
     }
   };
 

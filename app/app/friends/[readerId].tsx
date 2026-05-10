@@ -8,7 +8,6 @@ import {
   Modal,
   Pressable,
   ActivityIndicator,
-  Alert,
   RefreshControl,
   AppState,
 } from 'react-native';
@@ -22,6 +21,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useFriends } from '../../../src/hooks/useFriends';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
+import { useDialogStore } from '../../../src/stores/dialogStore';
 import { FriendCard } from '../../../src/components/friends/FriendCard';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
@@ -50,6 +50,7 @@ export default function FriendsScreen() {
   } = useFriends(readerId ?? null);
 
   const { isParentUnlocked } = useParentalStore();
+  const showDialog = useDialogStore((s) => s.show);
   const appStateRef = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -114,18 +115,13 @@ export default function FriendsScreen() {
   };
 
   const handleUnfriend = (friendshipId: string, name: string) => {
-    Alert.alert(
-      t('friends.unfriendTitle'),
-      t('friends.unfriendConfirm', { name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('friends.unfriend'),
-          style: 'destructive',
-          onPress: () => unfriend(friendshipId),
-        },
-      ]
-    );
+    showDialog({
+      title: t('friends.unfriendTitle'),
+      message: t('friends.unfriendConfirm', { name }),
+      confirmLabel: t('friends.unfriend'),
+      danger: true,
+      onConfirm: () => unfriend(friendshipId),
+    });
   };
 
   return (

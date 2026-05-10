@@ -19,6 +19,8 @@ import { useAuthStore } from '../src/stores/authStore';
 import { useParentalStore } from '../src/stores/parentalStore';
 import { useReaderStore } from '../src/stores/readerStore';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
+import { ToastContainer } from '../src/components/ToastContainer';
+import { ConfirmSheet } from '../src/components/ConfirmSheet';
 import { Colors, Fonts, FontSizes } from '../src/constants/theme';
 import '../src/i18n';
 
@@ -56,7 +58,7 @@ function AppLoadingScreen({ fontsReady }: { fontsReady: boolean }) {
 export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
-  const { session, isLoading, setSession, fetchProfile, fetchFormula } = useAuthStore();
+  const { session, isLoading, setSession, fetchProfile, fetchCoGuardianStatus, fetchFormula } = useAuthStore();
   const { lock } = useParentalStore();
   const { setSelectedReader } = useReaderStore();
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
@@ -114,7 +116,9 @@ export default function RootLayout() {
       lock();
       setSelectedReader(null);
       fetchProfile();
-      fetchFormula();
+      // fetchCoGuardianStatus must complete before fetchFormula so that the
+      // formula is fetched for the correct owner (not the co-guardian's own row).
+      fetchCoGuardianStatus().then(fetchFormula);
     }
   }, [session?.user?.id]);
 
@@ -159,6 +163,8 @@ export default function RootLayout() {
           <SafeAreaProvider>
             <StatusBar style="dark" backgroundColor={Colors.background} />
             <Stack screenOptions={{ headerShown: false }} />
+            <ToastContainer />
+            <ConfirmSheet />
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </ErrorBoundary>

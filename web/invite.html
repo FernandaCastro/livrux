@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livrux – Invitation / Convite / Einladung</title>
+  <meta name="description" content="You've been invited to manage a family on Livrux." />
+  <link rel="icon" href="../assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --orange: #F5A623;
+      --purple: #7C3AED;
+      --purple2: #A855F7;
+      --bg: #FAFAF7;
+      --card: #FFFFFF;
+      --text: #1E1B4B;
+      --muted: #6B7280;
+      --radius: 1.5rem;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 2rem;
+      background: rgba(250, 250, 247, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 0, 0, .06);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem;
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    .lang-switcher { display: flex; gap: .4rem; }
+
+    .lang-btn {
+      padding: .35rem .7rem;
+      border: 2px solid transparent;
+      border-radius: 2rem;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .lang-btn:hover { color: var(--purple); border-color: var(--purple2); }
+    .lang-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 1.5rem 3rem;
+      background: linear-gradient(160deg, #f0e6ff 0%, #fff7ed 60%, #fafaf7 100%);
+      overflow: hidden;
+    }
+
+    .hero .emoji { font-size: 4rem; margin-bottom: 0.75rem; }
+
+    .hero h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--purple);
+      margin-bottom: .5rem;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── FLOATING EMOJIS ── */
+    .floaters {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .floater {
+      position: absolute;
+      font-size: 2rem;
+      opacity: .18;
+      animation: float linear infinite;
+    }
+
+    @keyframes float {
+      0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
+      10%  { opacity: .18; }
+      90%  { opacity: .18; }
+      100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+    }
+
+     /* -- TOKEN BOX ── */
+     .token-box {
+      display: flex;
+      flex-direction: column;
+      max-width: 680px;
+      margin: 2rem auto 0;
+      background: #F3F0FF;
+      border-left: 4px solid var(--purple);
+      border-radius: .5rem;
+      padding: 1.5rem 1.25rem;
+      text-align: center;
+    }
+
+    .token-label {
+      font-size: .8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+
+    .token-value {
+      font-family: monospace;
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 6px;
+      color: var(--purple);
+    }
+
+    .token-hint {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: .4rem;
+    }
+
+
+    /* ── CONTENT ── */
+    .content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .content h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.5rem;
+      color: var(--purple);
+      margin-top: 2rem;
+      margin-bottom: .75rem;
+    }
+
+    .content ol {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 2rem;
+    }
+
+    .content ol li {
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      margin-bottom: .85rem;
+      font-size: .97rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    .step-text { text-align: left; }
+
+    .content strong { color: var(--text); }
+
+    /* ── DOWNLOAD BUTTONS ── */
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .85rem 1.8rem;
+      border-radius: 2rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform .15s, box-shadow .15s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn:hover  { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--purple2));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124, 58, 237, .35);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 28px rgba(124, 58, 237, .45); }
+
+    /* ── NOTICE BOX ── */
+    .highlight-box {
+      background: #fff7ed;
+      border-left: 4px solid var(--orange);
+      border-radius: .5rem;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0 0;
+    }
+    .highlight-box p {
+      color: var(--text);
+      font-size: .92rem;
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid rgba(0, 0, 0, .06);
+    }
+    footer a { color: var(--purple); text-decoration: none; }
+
+    @media (max-width: 500px) {
+      nav { padding: .9rem 1.2rem; }
+      .nav-logo { font-size: 1.3rem; }
+      .token-value { font-size: 1.6rem; letter-spacing: 3px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <img src="./assets/livrux.png" alt="Livrux Logo" style="width:80px;height:80px;">
+      Livrux
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="pt">PT</button>
+      <button class="lang-btn" data-lang="de">DE</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="floaters" id="header-floaters"></div>
+    <div class="emoji">🎉</div>
+    <h1 data-i18n="header.title">You've been invited!</h1>
+    <p data-i18n="header.subtitle">Someone invited you to manage a family on <strong>Livrux</strong> — the app that turns reading into rewards for kids.</p>
+  
+    <!-- TOKEN DISPLAY -->
+    <div class="token-box">
+      <div class="token-label" data-i18n="token.label">Invitation code</div>
+      <div class="token-value" id="token-display">-</div>
+      <div class="token-hint" id="token-hint"></div>
+    </div>
+
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <h2 data-i18n="steps.title">How to accept</h2>
+    <ol>
+      <li>
+        <span class="step-num">1</span>
+        <span class="step-text" data-i18n="steps.1">Download <strong>Livrux</strong> on your phone</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span class="step-text" data-i18n="steps.2">Create an account or sign in if you already have one — use the same email this invitation was sent to</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span class="step-text" data-i18n="steps.3">Go to <strong>Settings → Co-guardians</strong></span>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <span class="step-text" data-i18n="steps.4">Tap <strong>"I have an invitation"</strong> and enter the code above</span>
+      </li>
+    </ol>
+
+    <h2 data-i18n="download.title">Download</h2>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Apple Store</a>
+      <a href="#" class="btn btn-primary">Google Play</a>
+    </div>
+
+    <div class="highlight-box">
+      <p data-i18n="notice">This invitation is personal. You must sign in with the same email address it was sent to. If you didn't expect this email, you can safely ignore it.</p>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      <a href="index.html">← Livrux</a>
+      &nbsp;·&nbsp;
+      <a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a>
+      &nbsp;·&nbsp;
+      <a href="terms.html" data-i18n="footer.terms">Terms of Use</a>
+      &nbsp;·&nbsp;
+      <span id="year"></span>
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ─── TRANSLATIONS ─── */
+      const i18n = {
+        en: {
+          'header.title':   "You've been invited!",
+          'header.subtitle': 'Someone invited you to manage a family on <strong>Livrux</strong> — the app that turns reading into rewards for kids.',
+          'token.label':    'Invitation code',
+          'token.hint':     'Short code from your invitation email',
+          'token.hint.none':'Use this code in the app',
+          'steps.title':    'How to accept',
+          'steps.1':        'Download <strong>Livrux</strong> on your phone',
+          'steps.2':        'Create an account or sign in if you already have one — use the same email this invitation was sent to',
+          'steps.3':        'Go to <strong>Settings → Co-guardians</strong>',
+          'steps.4':        'Tap <strong>"I have an invitation"</strong> and enter the code above',
+          'download.title': 'Download',
+          'notice':         "This invitation is personal. You must sign in with the same email address it was sent to. If you didn't expect this email, you can safely ignore it.",
+          'footer.privacy': 'Privacy Policy',
+          'footer.terms':   'Terms of Use',
+        },
+        pt: {
+          'header.title':   'Você foi convidado!',
+          'header.subtitle': 'Alguém convidou você para gerenciar uma família no <strong>Livrux</strong> — o app que transforma leitura em recompensas para as crianças.',
+          'token.label':    'Código de convite',
+          'token.hint':     'Código resumido do seu e-mail de convite',
+          'token.hint.none':'Use este código no app',
+          'steps.title':    'Como aceitar',
+          'steps.1':        'Baixe o <strong>Livrux</strong> no seu celular',
+          'steps.2':        'Crie sua conta ou entre se já tiver uma — use o mesmo e-mail para o qual este convite foi enviado',
+          'steps.3':        'Vá em <strong>Configurações → Co-responsáveis</strong>',
+          'steps.4':        'Toque em <strong>"Tenho um convite"</strong> e insira o código acima',
+          'download.title': 'Baixar',
+          'notice':         'Este convite é pessoal. Você precisa entrar com o mesmo e-mail para o qual ele foi enviado. Se você não esperava receber este e-mail, pode ignorá-lo.',
+          'footer.privacy': 'Política de Privacidade',
+          'footer.terms':   'Termos de Uso',
+        },
+        de: {
+          'header.title':   'Du wurdest eingeladen!',
+          'header.subtitle': 'Jemand hat dich eingeladen, eine Familie in <strong>Livrux</strong> zu verwalten — der App, die Lesen in Belohnungen für Kinder verwandelt.',
+          'token.label':    'Einladungscode',
+          'token.hint':     'Kurzcode aus deiner Einladungs-E-Mail',
+          'token.hint.none':'Gib diesen Code in der App ein',
+          'steps.title':    'So nimmst du an',
+          'steps.1':        'Lade <strong>Livrux</strong> auf dein Smartphone',
+          'steps.2':        'Erstelle ein Konto oder melde dich an — nutze dieselbe E-Mail-Adresse, an die diese Einladung gesendet wurde',
+          'steps.3':        'Gehe zu <strong>Einstellungen → Mitverantwortliche</strong>',
+          'steps.4':        'Tippe auf <strong>„Ich habe eine Einladung"</strong> und gib den Code oben ein',
+          'download.title': 'Herunterladen',
+          'notice':         'Diese Einladung ist persönlich. Du musst dich mit derselben E-Mail-Adresse anmelden, an die sie gesendet wurde. Wenn du diese E-Mail nicht erwartet hast, kannst du sie einfach ignorieren.',
+          'footer.privacy': 'Datenschutzerklärung',
+          'footer.terms':   'Nutzungsbedingungen',
+        },
+      };
+
+      /* ─── LANGUAGE DETECTION ─── */
+      function detectLang() {
+        const stored = localStorage.getItem('livrux_lang');
+        if (stored && i18n[stored]) return stored;
+        const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        return i18n[browser] ? browser : 'en';
+      }
+
+      /* ─── APPLY LANGUAGE ─── */
+      function applyLang(lang) {
+        localStorage.setItem('livrux_lang', lang);
+        document.documentElement.lang = lang;
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (i18n[lang][key] !== undefined) el.innerHTML = i18n[lang][key];
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        const hasToken = document.getElementById('token-display').textContent !== '—';
+        document.getElementById('token-hint').textContent =
+          i18n[lang][hasToken ? 'token.hint' : 'token.hint.none'];
+      }
+
+      /* ─── TOKEN FROM URL ─── */
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (token) {
+        const shortCode = token.replace(/-/g, '').substring(0, 8).toUpperCase();
+        document.getElementById('token-display').textContent = shortCode;
+      }
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+      });
+
+      applyLang(detectLang());
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      /* ─── FLOATING EMOJIS ─── */
+      const emojis = ['📚', '📖', '🪙', '⭐', '🌟', '✨', '🎉', '🎈', '🦋', '🌈'];
+      const container = document.getElementById('header-floaters');
+      for (let i = 0; i < 18; i++) {
+        const el = document.createElement('span');
+        el.className = 'floater';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = Math.random() * 100 + '%';
+        el.style.fontSize = (1.2 + Math.random() * 2.2) + 'rem';
+        el.style.animationDuration = (8 + Math.random() * 14) + 's';
+        el.style.animationDelay = (Math.random() * 10) + 's';
+        container.appendChild(el);
+      }
+    })();
+  </script>
+
+</body>
+
+</html>

@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Alert,
   TextInput as RNTextInput,
 } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
@@ -23,6 +22,7 @@ import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
 import type { AwardedBadge } from '../../../src/hooks/useLivrux';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useReaderStore } from '../../../src/stores/readerStore';
+import { useToastStore } from '../../../src/stores/toastStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
@@ -55,6 +55,7 @@ export default function AddBookScreen() {
 
   const { user, formula } = useAuthStore();
   const { updateBalance } = useReaderStore();
+  const showToast = useToastStore((s) => s.show);
 
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [searchKey, setSearchKey] = useState(0);
@@ -148,7 +149,7 @@ export default function AddBookScreen() {
         updateBalance(originalBalance);
         useReaderStore.getState().clearConfetti();
       }
-      Alert.alert(t('common.error'), t('common.error'));
+      showToast({ type: 'error', title: t('common.error') });
     }
   };
 

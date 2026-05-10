@@ -8,6 +8,9 @@ interface AuthState {
   user: User | null;
   profile: UserProfile | null;
   formula: RewardFormula | null;
+  // ID of the root family owner. Equals user.id for owners; equals the
+  // owner's ID for co-guardians. Used to scope all shared-data queries.
+  ownerId: string | null;
   isLoading: boolean;
   pendingEmailConfirmation: boolean;
   confirmationEmail: string | null;
@@ -15,6 +18,7 @@ interface AuthState {
   // Actions
   setSession: (session: Session | null) => void;
   fetchProfile: () => Promise<void>;
+  fetchCoGuardianStatus: () => Promise<void>;
   fetchFormula: () => Promise<void>;
   signOut: () => Promise<void>;
   setPendingEmailConfirmation: (value: boolean) => void;
@@ -26,6 +30,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   formula: null,
+  ownerId: null,
   isLoading: true,
   pendingEmailConfirmation: false,
   confirmationEmail: null,
@@ -55,14 +60,30 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!error && data) set({ profile: data as UserProfile });
   },
 
-  fetchFormula: async () => {
+  // Checks if the current user is a co-guardian and sets ownerId accordingly.
+  // Must be called before fetchFormula so the formula is fetched for the right owner.
+  fetchCoGuardianStatus: async () => {
     const { user } = get();
     if (!user) return;
 
+    const { data } = await supabase
+      .from('co_guardians')
+      .select('owner_id')
+      .eq('guardian_id', user.id)
+      .maybeSingle();
+
+    set({ ownerId: data?.owner_id ?? user.id });
+  },
+
+  fetchFormula: async () => {
+    const { user, ownerId } = get();
+    if (!user) return;
+
+    const targetId = ownerId ?? user.id;
     const { data, error } = await supabase
       .from('reward_formulas')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', targetId)
       .single();
 
     if (!error && data) set({ formula: data as RewardFormula });
@@ -70,6 +91,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signOut: async () => {
     await supabase.auth.signOut();
-    set({ session: null, user: null, profile: null, formula: null });
+    set({ session: null, user: null, profile: null, formula: null, ownerId: null });
   },
 }));

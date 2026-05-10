@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
   TextInput as RNTextInput,
 } from 'react-native';
@@ -22,6 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useBook } from '../../../src/hooks/useBooks';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useReaderStore } from '../../../src/stores/readerStore';
+import { useToastStore } from '../../../src/stores/toastStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
@@ -63,6 +63,7 @@ export default function EditBookScreen() {
   const { formula } = useAuthStore();
   const { selectedReader, updateBalance } = useReaderStore();
   const { book, updateBook } = useBook(bookId ?? null);
+  const showToast = useToastStore((s) => s.show);
 
   const handleBack = () => {
     router.back();
@@ -142,7 +143,7 @@ export default function EditBookScreen() {
 
       handleBack();
     } catch {
-      Alert.alert(t('common.error'), t('common.error'));
+      showToast({ type: 'error', title: t('common.error') });
     }
   };
 

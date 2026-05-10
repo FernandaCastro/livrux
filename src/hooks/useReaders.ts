@@ -3,18 +3,18 @@ import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import type { Reader } from '../types';
 
-export const READERS_KEY = (userId: string) => ['readers', userId] as const;
+export const READERS_KEY = (ownerId: string) => ['readers', ownerId] as const;
 
 function useReadersKey() {
-  const { user } = useAuthStore();
-  return user ? READERS_KEY(user.id) : null;
+  const { ownerId } = useAuthStore();
+  return ownerId ? READERS_KEY(ownerId) : null;
 }
 
-async function fetchReaders(userId: string): Promise<Reader[]> {
+async function fetchReaders(ownerId: string): Promise<Reader[]> {
   const { data, error } = await supabase
     .from('readers')
     .select('id, user_id, name, avatar_seed, old_avatar_seed, pin, livrux_balance, xp, book_count, friend_code, friends_autonomy, created_at, updated_at, reader_badges(count)')
-    .eq('user_id', userId)
+    .eq('user_id', ownerId)
     .order('created_at', { ascending: true });
 
   if (error) throw error;
@@ -27,22 +27,22 @@ async function fetchReaders(userId: string): Promise<Reader[]> {
 }
 
 export function useReaders() {
-  const { user } = useAuthStore();
+  const { user, ownerId } = useAuthStore();
   const qc = useQueryClient();
   const key = useReadersKey();
 
   const { data: readers = [], isLoading, error, refetch } = useQuery({
     queryKey: key ?? ['readers', null],
-    queryFn: () => fetchReaders(user!.id),
-    enabled: !!user,
+    queryFn: () => fetchReaders(ownerId!),
+    enabled: !!ownerId,
   });
 
   const createMutation = useMutation({
     mutationFn: async ({ name, avatarSeed }: { name: string; avatarSeed?: string | null }) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user || !ownerId) throw new Error('Not authenticated');
       const { data, error } = await supabase
         .from('readers')
-        .insert({ user_id: user.id, name, avatar_seed: avatarSeed ?? null })
+        .insert({ user_id: ownerId, name, avatar_seed: avatarSeed ?? null })
         .select()
         .single();
       if (error) throw error;

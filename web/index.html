@@ -345,6 +345,10 @@
     }
 
     .feature-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       background: var(--card);
       border-radius: var(--radius);
       padding: 2rem 1.75rem;
@@ -359,7 +363,14 @@
     }
 
     .feature-icon {
-      font-size: 2.8rem;
+      font-size: 5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .feature-img {
+      width: 6rem;
+      height: 6rem;
       margin-bottom: 1rem;
       display: block;
     }
@@ -483,6 +494,11 @@
 
     footer strong {
       color: var(--purple);
+    }
+
+    .attribution-link {
+      color: var(--muted);
+      text-decoration: none;
     }
 
     /* ───── ANIMATIONS ───── */
@@ -611,33 +627,56 @@
       <h2 class="section-title" data-i18n="features.title">Why kids love Livrux</h2>
       <div class="features-grid">
         <div class="feature-card">
-          <span class="feature-icon">📖</span>
+          <img src="./assets/stack-of-books.png" class="feature-img" />
           <h3 data-i18n="features.track.title">Log every book</h3>
           <p data-i18n="features.track.desc">Scan the barcode or search by title. Each book logged earns Livrux coins
             automatically.</p>
         </div>
         <div class="feature-card">
-          <span class="feature-icon">🪙</span>
+          <img src="./assets/coin.png" class="feature-img" />
           <h3 data-i18n="features.earn.title">Earn real coins</h3>
           <p data-i18n="features.earn.desc">The more pages, the more coins. Bonus rewards for books in a foreign
             language.</p>
         </div>
         <div class="feature-card">
-          <span class="feature-icon">🎁</span>
+          <img src="./assets/popsicle.png" class="feature-img" />
           <h3 data-i18n="features.spend.title">Spend on real treats</h3>
           <p data-i18n="features.spend.desc">Ice cream, toys, outings — parents log how coins are redeemed for real-life
             rewards.</p>
         </div>
         <div class="feature-card">
-          <span class="feature-icon">👨‍👩‍👧</span>
+          <img src="./assets/family.png" class="feature-img" />
           <h3 data-i18n="features.family.title">Built for families</h3>
           <p data-i18n="features.family.desc">Multiple reader profiles, parental PIN, and a custom reward formula —
             you're in full control.</p>
         </div>
         <div class="feature-card">
-          <span class="feature-icon">📜</span>
+          <img src="./assets/ancient-scroll.png" class="feature-img" />
           <h3 data-i18n="features.history.title">A lifetime reading record</h3>
-          <p data-i18n="features.history.desc">Every book ever read stays saved in the app — a growing history that shows how far each reader has come.</p>
+          <p data-i18n="features.history.desc">Every book ever read stays saved in the app — a growing history that
+            shows how far each reader has come.</p>
+        </div>
+        <div class="feature-card">
+          <img src="./assets/friends.png" class="feature-img" />
+          <h3 data-i18n="features.friends.title">Connect with friends</h3>
+          <p data-i18n="features.friends.desc">Add friends by code and follow each other's reading journey. See what
+            they're reading and cheer them on.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔥</span>
+          <h3 data-i18n="features.streak.title">Reading streaks</h3>
+          <p data-i18n="features.streak.desc">Log reading sessions and keep the streak alive. Longer sessions earn bonus XP — a great way to build a daily reading habit.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🎖️</span>
+          <h3 data-i18n="features.badges.title">Badges & milestones</h3>
+          <p data-i18n="features.badges.desc">Every milestone — first book, tenth book, reading streak — unlocks a badge and rewards XP. Always something new to chase.</p>
+        </div>
+        <div class="feature-card">
+          <img src="./assets/ranking.png" class="feature-img" />
+          <h3 data-i18n="features.ranking.title">Climb the ranking</h3>
+          <p data-i18n="features.ranking.desc">See how your readers stack up against friends. A little friendly
+            competition goes a long way toward the next book.</p>
         </div>
       </div>
     </section>
@@ -684,12 +723,30 @@
   <footer>
     <p>Made with ❤️ for young readers &nbsp;·&nbsp; <strong>Livrux</strong> &nbsp;·&nbsp; <span id="year"></span></p>
     <p style="margin-top:.5rem;">
-      <a href="privacy.html" style="color:var(--muted);text-decoration:none;" onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
+      <a href="privacy.html" style="color:var(--muted);text-decoration:none;"
+        onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
       &nbsp;·&nbsp;
-      <a href="terms.html" style="color:var(--muted);text-decoration:none;" onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--muted)'">Terms of Use</a>
+      <a href="terms.html" style="color:var(--muted);text-decoration:none;"
+        onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--muted)'">Terms of Use</a>
+    </p>
+    <p style="margin-top:.5rem;">
+      <a class="attribution-link" href="https://www.flaticon.com/free-icons/coin" title="coin icons">Coin icons created
+        by kliwir art - Flaticon</a> |
+      <a class="attribution-link" href="https://www.flaticon.com/free-icons/library" title="library icons">Library icons
+        created by popo2021 - Flaticon</a> |
+      <a class="attribution-link" href="https://www.flaticon.com/free-icons/family-law" title="family law icons">Family
+        law icons created by Freepik - Flaticon</a>
     </p>
     <p>
-      <a href="https://www.flaticon.com/free-icons/friends" title="friends icons">Friends icons created by Freepik - Flaticon</a>
+      <a class="attribution-link" href="https://www.flaticon.com/free-icons/champion" title="champion icons">Champion
+        icons created by Freepik - Flaticon</a> |  
+      <a class="attribution-link" href="https://www.flaticon.com/free-icons/summer" title="summer icons">Summer icons
+        created by Freepik - Flaticon</a> | 
+      <a class="attribution-link" href="https://www.flaticon.com/free-icons/friends" title="friends icons">Friends icons
+        created by Freepik - Flaticon</a> | 
+      <a class="attribution-link" href="https://www.flaticon.com/free-icons/scroll" title="scroll icons">Scroll icons
+        created by Freepik - Flaticon</a>
+
     </p>
   </footer>
 
@@ -718,14 +775,22 @@
           'features.spend.title': 'Spend on real treats',
           'features.spend.desc': 'Ice cream, toys, outings — parents log how coins are redeemed for real-life rewards.',
           'features.family.title': 'Built for families',
-          'features.family.desc': 'Multiple reader profiles, parental PIN, and a custom reward formula — you\'re in full control.',
+          'features.family.desc': 'Multiple reader profiles, parental PIN, and a custom reward formula. Both parents can manage readers from their own account — always in sync.',
           'features.history.title': 'A lifetime reading record',
           'features.history.desc': 'Every book ever read stays saved in the app — a growing history that shows how far each reader has come.',
+          'features.streak.title': 'Reading streaks',
+          'features.streak.desc': 'Log reading sessions and keep the streak alive. Longer sessions earn bonus XP — a great way to build a daily reading habit.',
+          'features.badges.title': 'Badges & milestones',
+          'features.badges.desc': 'Every milestone — first book, tenth book, reading streak — unlocks a badge and rewards XP. Always something new to chase.',
+          'features.friends.title': 'Connect with friends',
+          'features.friends.desc': 'Add friends by code and follow each other\'s reading journey. See what they\'re reading — and whether they loved it and recommend it.',
+          'features.ranking.title': 'Climb the ranking',
+          'features.ranking.desc': 'See how your readers stack up against friends. A little friendly competition goes a long way toward the next book.',
           'how.title': 'How it works',
           'how.step1.title': 'Sign up',
           'how.step1.desc': 'Create a free account and add reader profiles for your children.',
           'how.step2.title': 'Read & log',
-          'how.step2.desc': 'After finishing a book, log it in the app. Coins land in the wallet instantly.',
+          'how.step2.desc': 'Add a book anytime — even mid-read. Coins land in the wallet once the book is marked as finished.',
           'how.step3.title': 'Spend & celebrate',
           'how.step3.desc': 'Choose a real reward together and log the spend. Reading has never felt this good.',
           'cta.title': 'Ready to start reading?',
@@ -751,14 +816,22 @@
           'features.spend.title': 'Gaste em mimos reais',
           'features.spend.desc': 'Sorvete, brinquedos, passeios — os pais registram como as moedas são trocadas por recompensas do mundo real.',
           'features.family.title': 'Feito para famílias',
-          'features.family.desc': 'Vários perfis de leitores, PIN parental e fórmula de recompensa personalizada — você tem controle total.',
+          'features.family.desc': 'Vários perfis de leitores, PIN parental e fórmula de recompensa personalizada. Os dois responsáveis podem gerenciar os leitores, cada um com o seu próprio acesso — sempre sincronizados.',
           'features.history.title': 'Um histórico valioso de leituras',
           'features.history.desc': 'Todos os livros lidos ficam salvos no app — um acervo que cresce com o leitor e mostra o quanto ele já evoluiu.',
+          'features.streak.title': 'Sequências de leitura',
+          'features.streak.desc': 'Registre sessões de leitura e mantenha a sequência viva. Sessões mais longas rendem XP bônus — ótimo para criar o hábito diário de ler.',
+          'features.badges.title': 'Badges e conquistas',
+          'features.badges.desc': 'Cada marco — primeiro livro, décimo livro, sequência de leitura — desbloqueia um badge e recompensa com XP. Sempre tem algo novo para conquistar.',
+          'features.friends.title': 'Conecte-se com amigos',
+          'features.friends.desc': 'Adicione amigos por código e acompanhe a jornada de leitura um do outro. Veja o que estão lendo — e se gostaram e recomendam.',
+          'features.ranking.title': 'Suba no ranking',
+          'features.ranking.desc': 'Veja como seus leitores se comparam com os amigos. Uma pitada de competição saudável leva a mais um livro.',
           'how.title': 'Como funciona',
           'how.step1.title': 'Cadastre-se',
           'how.step1.desc': 'Crie uma conta gratuita e adicione perfis de leitores para seus filhos.',
           'how.step2.title': 'Leia e registre',
-          'how.step2.desc': 'Ao terminar um livro, registre-o no app. As moedas chegam na carteira na hora.',
+          'how.step2.desc': 'Adicione um livro a qualquer momento — mesmo no meio da leitura. As moedas chegam na carteira quando o livro for marcado como concluído.',
           'how.step3.title': 'Gaste e comemore',
           'how.step3.desc': 'Escolham juntos uma recompensa e registrem o gasto. Ler nunca foi tão gostoso.',
           'cta.title': 'Pronto para começar a ler?',
@@ -784,14 +857,22 @@
           'features.spend.title': 'Echte Belohnungen einlösen',
           'features.spend.desc': 'Eis, Spielzeug, Ausflüge — Eltern erfassen, wie Münzen gegen echte Belohnungen eingelöst werden.',
           'features.family.title': 'Für Familien gemacht',
-          'features.family.desc': 'Mehrere Leserprofile, Eltern-PIN und eine eigene Belohnungsformel — du behältst die volle Kontrolle.',
+          'features.family.desc': 'Mehrere Leserprofile, Eltern-PIN und eine eigene Belohnungsformel. Beide Elternteile können die Leser über ihr eigenes Konto verwalten — immer synchronisiert.',
           'features.history.title': 'Eine wertvolle Lesegeschichte',
           'features.history.desc': 'Alle jemals gelesenen Bücher bleiben in der App gespeichert — ein wachsendes Archiv, das zeigt, wie weit jeder Leser gekommen ist.',
+          'features.streak.title': 'Lese-Serien',
+          'features.streak.desc': 'Erfasse Lesesitzungen und halte die Serie am Laufen. Längere Sitzungen bringen Bonus-XP — ideal, um eine tägliche Leseroutine aufzubauen.',
+          'features.badges.title': 'Abzeichen & Meilensteine',
+          'features.badges.desc': 'Jeder Meilenstein — erstes Buch, zehntes Buch, Lese-Serie — schaltet ein Abzeichen frei und belohnt mit XP. Immer etwas Neues zu erreichen.',
+          'features.friends.title': 'Mit Freunden verbinden',
+          'features.friends.desc': 'Füge Freunde per Code hinzu und verfolgt gegenseitig eure Lesereisen. Seht, was sie lesen — und ob sie das Buch mochten und empfehlen.',
+          'features.ranking.title': 'Im Ranking aufsteigen',
+          'features.ranking.desc': 'Sieh, wie deine Leser im Vergleich zu Freunden abschneiden. Ein bisschen freundlicher Wettbewerb motiviert zum nächsten Buch.',
           'how.title': 'So funktioniert es',
           'how.step1.title': 'Registrieren',
           'how.step1.desc': 'Erstelle ein kostenloses Konto und füge Leserprofile für deine Kinder hinzu.',
           'how.step2.title': 'Lesen & erfassen',
-          'how.step2.desc': 'Nach dem Lesen eines Buches erfasse es in der App. Die Münzen landen sofort im Guthaben.',
+          'how.step2.desc': 'Füge ein Buch jederzeit hinzu — auch mitten beim Lesen. Die Münzen landen im Guthaben, sobald das Buch als abgeschlossen markiert wird.',
           'how.step3.title': 'Ausgeben & feiern',
           'how.step3.desc': 'Wählt gemeinsam eine echte Belohnung aus und erfasst die Ausgabe. Lesen hat noch nie so viel Spaß gemacht.',
           'cta.title': 'Bereit zum Lesen?',

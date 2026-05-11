@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { secureStoreAdapter } from './secureStoreAdapter';
 
 // These env vars are injected by Expo at build time.
 // Never commit real credentials — use a .env file (git-ignored).
@@ -14,10 +14,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Single Supabase client instance shared across the entire app.
-// AsyncStorage is used so the session persists across app restarts.
+// SecureStore (iOS Keychain / Android Keystore) keeps the session encrypted at rest.
+// A chunking adapter is used because SecureStore has a ~2 KB per-key limit.
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage,
+    storage: secureStoreAdapter,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,

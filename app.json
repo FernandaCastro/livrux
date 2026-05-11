@@ -24,8 +24,7 @@
       "targetSdkVersion": 35,
       "kotlinVersion": "2.0.21",
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.CAMERA"
       ]
     },
     "web": {
@@ -47,8 +46,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Livrux to use your camera to scan book barcodes.",
-          "microphonePermission": "Allow Livrux to access your microphone."
+          "cameraPermission": "Allow Livrux to use your camera to scan book barcodes."
         }
       ],
       "expo-localization",

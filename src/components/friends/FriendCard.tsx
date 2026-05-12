@@ -8,14 +8,16 @@ interface FriendCardProps {
   avatarSeed: string | null;
   bookCount: number;
   xp?: number;
+  pendingSent?: boolean;
   onPress?: () => void;
   onAccept?: () => void;
   onReject?: () => void;
 }
 
-export function FriendCard({ name, avatarSeed, bookCount, xp, onPress, onAccept, onReject }: FriendCardProps) {
+export function FriendCard({ name, avatarSeed, bookCount, xp, pendingSent, onPress, onAccept, onReject }: FriendCardProps) {
   const { t } = useTranslation();
   const isPending = !!onAccept && !!onReject;
+  const canUnfriend = !isPending && !!onReject;
 
   return (
     <TouchableOpacity
@@ -43,18 +45,23 @@ export function FriendCard({ name, avatarSeed, bookCount, xp, onPress, onAccept,
             <Text style={styles.newBadgeText}>✨ {t('friends.newRequest')}</Text>
           </View>
         )}
+        {pendingSent && (
+          <View style={styles.sentBadge}>
+            <Text style={styles.sentBadgeText}>⏳ {t('friends.awaitingResponse')}</Text>
+          </View>
+        )}
         <Text style={styles.name} numberOfLines={1}>{name}</Text>
         <View style={styles.statsRow}>
-          <View style={styles.bookBadge}>
-            <Image source={require('../../../assets/livrux-clean.png')} style={styles.bookIcon} />
-            <Text style={styles.bookCount}>{bookCount} {t('friends.booksRead')}</Text>
-          </View>
           {xp !== undefined && xp > 0 && (
             <View style={styles.xpBadge}>
               <Text style={styles.xpIcon}>⭐</Text>
               <Text style={styles.xpCount}>{xp} XP</Text>
             </View>
           )}
+          <View style={styles.bookBadge}>
+            <Image source={require('../../../assets/livrux-clean.png')} style={styles.bookIcon} />
+            <Text style={styles.bookCount}>{bookCount} {t('friends.booksRead')}</Text>
+          </View>
         </View>
       </View>
 
@@ -68,11 +75,20 @@ export function FriendCard({ name, avatarSeed, bookCount, xp, onPress, onAccept,
             <Text style={styles.rejectText}>✕</Text>
           </TouchableOpacity>
         </View>
-      ) : onPress ? (
-        <View style={styles.chevronWrapper}>
-          <Text style={styles.chevron}>›</Text>
+      ) : (
+        <View style={styles.actions}>
+          {onPress && (
+            <View style={styles.chevronWrapper}>
+              <Text style={styles.chevron}>›</Text>
+            </View>
+          )}
+          {canUnfriend && (
+            <TouchableOpacity style={styles.rejectBtn} onPress={onReject} activeOpacity={0.75}>
+              <Text style={styles.rejectText}>✕</Text>
+            </TouchableOpacity>
+          )}
         </View>
-      ) : null}
+      )}
     </TouchableOpacity>
   );
 }
@@ -117,6 +133,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.xs,
     color: Colors.accent,
+  },
+  sentBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FEF3C7',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    marginBottom: Spacing.xs,
+  },
+  sentBadgeText: {
+    fontFamily: Fonts.bodyBold,
+    fontSize: FontSizes.xs,
+    color: '#92400E',
   },
   name: {
     fontFamily: Fonts.heading,

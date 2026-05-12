@@ -243,6 +243,8 @@ const de = {
     unfriendConfirm: '{{name}} aus der Freundesliste entfernen?',
     parentApprovalNeeded: 'Elternteil muss entsperrt sein, um Anfragen anzunehmen.',
     newRequest: 'Neue Anfrage!',
+    sentRequests: 'Warten auf Antwort',
+    awaitingResponse: 'Warten auf Antwort',
     noBooksSub: 'hat noch kein Buch gelesen. Bald gibt es Neuigkeiten! 🌟',
     friendsAutonomy: 'Freunde-Autonomie',
     friendsAutonomyHint: 'Erlaubt dem Leser, Freundschaftsanfragen selbst anzunehmen',

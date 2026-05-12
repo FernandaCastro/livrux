@@ -317,6 +317,8 @@ const pt = {
     unfriendConfirm: 'Desfazer amizade com {{name}}?',
     parentApprovalNeeded: 'O pai precisa estar desbloqueado para aceitar pedidos.',
     newRequest: 'Novo pedido!',
+    sentRequests: 'Aguardando resposta',
+    awaitingResponse: 'Aguardando resposta',
     noBooksSub: 'ainda não leu nenhum livro. Em breve vai ter novidades! 🌟',
     friendsAutonomy: 'Autonomia para amigos',
     friendsAutonomyHint: 'Permite que o leitor aceite pedidos de amizade sozinho',

@@ -38,6 +38,7 @@ export default function FriendsScreen() {
   const {
     friends,
     pendingRequests,
+    sentRequests,
     friendCode,
     friendsAutonomy,
     isLoading,
@@ -199,6 +200,22 @@ export default function FriendsScreen() {
                   {!canManageFriends && (
                     <Text style={styles.autonomyHint}>{t('friends.parentApprovalNeeded')}</Text>
                   )}
+                </View>
+              )}
+
+              {sentRequests.length > 0 && (
+                <View style={styles.section}>
+                  <Text style={styles.sectionLabel}>{t('friends.sentRequests')}</Text>
+                  {sentRequests.map((req) => (
+                    <FriendCard
+                      key={req.friendshipId}
+                      name={req.reader.name}
+                      avatarSeed={req.reader.avatar_seed}
+                      bookCount={req.reader.book_count}
+                      xp={req.reader.xp}
+                      pendingSent
+                    />
+                  ))}
                 </View>
               )}
 

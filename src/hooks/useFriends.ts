@@ -5,6 +5,7 @@ import type { FriendData, FriendRequest, FriendSearchResult } from '../types';
 interface UseFriendsResult {
   friends: FriendData[];
   pendingRequests: FriendRequest[];
+  sentRequests: FriendRequest[];
   friendCode: string | null;
   friendsAutonomy: boolean;
   isLoading: boolean;
@@ -19,6 +20,7 @@ interface UseFriendsResult {
 interface FriendsData {
   friends: FriendData[];
   pendingRequests: FriendRequest[];
+  sentRequests: FriendRequest[];
   friendCode: string | null;
   friendsAutonomy: boolean;
 }
@@ -26,7 +28,7 @@ interface FriendsData {
 export const FRIENDS_KEY = (readerId: string) => ['friends', readerId] as const;
 
 async function fetchFriendsData(readerId: string): Promise<FriendsData> {
-  const [readerResult, acceptedResult, pendingResult] = await Promise.all([
+  const [readerResult, acceptedResult, pendingResult, sentResult] = await Promise.all([
     supabase
       .from('readers')
       .select('friend_code, friends_autonomy')
@@ -48,6 +50,14 @@ async function fetchFriendsData(readerId: string): Promise<FriendsData> {
         requester:requester_id(id, name, avatar_seed, xp, book_count)
       `)
       .eq('addressee_id', readerId)
+      .eq('status', 'pending'),
+    supabase
+      .from('reader_friendships')
+      .select(`
+        id, addressee_id,
+        addressee:addressee_id(id, name, avatar_seed, xp, book_count)
+      `)
+      .eq('requester_id', readerId)
       .eq('status', 'pending'),
   ]);
 
@@ -84,9 +94,23 @@ async function fetchFriendsData(readerId: string): Promise<FriendsData> {
       },
     } satisfies FriendRequest));
 
+  const sentRequests: FriendRequest[] = (sentResult.data ?? [] as any[])
+    .filter((rf) => rf.addressee != null)
+    .map((rf) => ({
+      friendshipId: rf.id,
+      reader: {
+        id: rf.addressee.id,
+        name: rf.addressee.name,
+        avatar_seed: rf.addressee.avatar_seed ?? null,
+        book_count: (rf.addressee.book_count ?? 0) as number,
+        xp: (rf.addressee.xp ?? 0) as number,
+      },
+    } satisfies FriendRequest));
+
   return {
     friends,
     pendingRequests,
+    sentRequests,
     friendCode: readerResult.data?.friend_code ?? null,
     friendsAutonomy: readerResult.data?.friends_autonomy ?? false,
   };
@@ -111,6 +135,7 @@ export function useFriends(readerId: string | null): UseFriendsResult {
         .insert({ requester_id: readerId!, addressee_id: addresseeId });
       if (error) throw error;
     },
+    onSuccess: invalidate,
   });
 
   const acceptMutation = useMutation({
@@ -180,6 +205,7 @@ export function useFriends(readerId: string | null): UseFriendsResult {
   return {
     friends: data?.friends ?? [],
     pendingRequests: data?.pendingRequests ?? [],
+    sentRequests: data?.sentRequests ?? [],
     friendCode: data?.friendCode ?? null,
     friendsAutonomy: data?.friendsAutonomy ?? false,
     isLoading,

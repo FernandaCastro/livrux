@@ -285,6 +285,8 @@ const en = {
     unfriendConfirm: 'Remove {{name}} from friends?',
     parentApprovalNeeded: 'Parent must be unlocked to accept requests.',
     newRequest: 'New request!',
+    sentRequests: 'Waiting for reply',
+    awaitingResponse: 'Awaiting response',
     noBooksSub: "hasn't read any books yet. Stay tuned! 🌟",
     friendsAutonomy: 'Friends autonomy',
     friendsAutonomyHint: 'Allows the reader to accept friend requests on their own',

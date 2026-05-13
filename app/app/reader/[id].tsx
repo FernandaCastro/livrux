@@ -25,6 +25,8 @@ import { useParentalStore } from '../../../src/stores/parentalStore';
 import { useStreak } from '../../../src/hooks/useStreak';
 import { useBadges } from '../../../src/hooks/useBadges';
 import { useTheme } from '../../../src/hooks/useTheme';
+import { GestureDetector } from 'react-native-gesture-handler';
+import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
@@ -278,6 +280,7 @@ export default function ReaderDashboardScreen() {
   const { earnedBadges, refresh: refreshBadges } = useBadges(id ?? null);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const swipeGesture = useTabSwipe('reader');
 
   const completedBooks = books;
   const { canEditReader, isParentUnlocked } = useParentalStore();
@@ -338,18 +341,20 @@ export default function ReaderDashboardScreen() {
 
   if (!reader) {
     return (
-      <View style={styles.root}>
-        <LinearGradient
-          colors={theme.backgroundGradient}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.15, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-        <SafeAreaView style={styles.safe}>
-          <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
-        </SafeAreaView>
-      </View>
+      <GestureDetector gesture={swipeGesture}>
+        <View style={styles.root}>
+          <LinearGradient
+            colors={theme.backgroundGradient}
+            locations={[0, 0.6, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+          <SafeAreaView style={styles.safe}>
+            <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
+          </SafeAreaView>
+        </View>
+      </GestureDetector>
     );
   }
 
@@ -367,7 +372,8 @@ export default function ReaderDashboardScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <GestureDetector gesture={swipeGesture}>
+      <View style={styles.root}>
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
         colors={theme.backgroundGradient}
@@ -543,5 +549,6 @@ export default function ReaderDashboardScreen() {
         <BottomMenu />
       </SafeAreaView>
     </View>
+    </GestureDetector>
   );
 }

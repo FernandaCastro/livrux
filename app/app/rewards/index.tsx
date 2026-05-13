@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+import { GestureDetector } from 'react-native-gesture-handler';
+import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
 import {
   View,
   Text,
@@ -204,6 +206,7 @@ export default function RewardsScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const appStateRef = useRef(AppState.currentState);
+  const swipeGesture = useTabSwipe('rewards');
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
@@ -216,7 +219,8 @@ export default function RewardsScreen() {
   const totalBalance = selectedReader?.livrux_balance ?? 0;
 
   return (
-    <View style={styles.root}>
+    <GestureDetector gesture={swipeGesture}>
+      <View style={styles.root}>
       <Stack.Screen options={{ animation: 'none' }} />
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
@@ -298,5 +302,6 @@ export default function RewardsScreen() {
         <BottomMenu />
       </SafeAreaView>
     </View>
+    </GestureDetector>
   );
 }

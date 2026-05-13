@@ -270,6 +270,7 @@ const de = {
     earned: 'Verdient',
     pending: 'Zu verdienen',
     bonusEarned: '+{{amount}} Livrux',
+    bonusXp: '+{{amount}} XP',
     unlocked: 'Du hast einen Erfolg erhalten!',
     empty: 'Erfolge erscheinen hier, nachdem du deine ersten Bücher eingetragen hast!',
     friendEmpty: 'Dieser Leser hat noch keine Erfolge freigeschaltet.',

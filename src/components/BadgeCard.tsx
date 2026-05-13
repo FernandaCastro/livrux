@@ -6,11 +6,25 @@ import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPa
 import { useTheme } from '../hooks/useTheme';
 import type { BadgeTier } from '../types';
 
+const BADGE_XP: Record<string, number> = {
+  first_book:         5,
+  bookworm_5:        10,
+  bookworm_25:       25,
+  centurion:        100,
+  page_hunter_500:    5,
+  page_hunter_5000:  50,
+  polyglot:          15,
+  streak_7:          10,
+  streak_30:         50,
+  book_club:         10,
+};
+
 interface BadgeData {
   slug: string;
   icon: string;
   tier: BadgeTier;
   earned: boolean;
+  bonus_xp?: number;
   bonus_livrux?: number;
 }
 
@@ -132,6 +146,8 @@ export function BadgeCard({ badge, locked = false }: BadgeCardProps) {
 
   const cardColors = theme.cardGradient;
 
+  const xpAmount = badge.bonus_xp ?? BADGE_XP[badge.slug];
+
   if (locked) {
     return (
       <View style={[styles.card, styles.cardLocked]}>
@@ -147,6 +163,13 @@ export function BadgeCard({ badge, locked = false }: BadgeCardProps) {
         <Text style={styles.desc} numberOfLines={2}>
           {t(`badges.${badge.slug}.description`)}
         </Text>
+        {!!xpAmount && (
+          <View style={[styles.bonusPill, { backgroundColor: 'rgba(120,120,120,0.12)' }]}>
+            <Text style={[styles.bonusText, { color: theme.textSecondary }]}>
+              ⭐ {t('badges.bonusXp', { amount: xpAmount })}
+            </Text>
+          </View>
+        )}
       </View>
     );
   }
@@ -171,6 +194,13 @@ export function BadgeCard({ badge, locked = false }: BadgeCardProps) {
       <Text style={styles.desc} numberOfLines={2}>
         {t(`badges.${badge.slug}.description`)}
       </Text>
+      {!!xpAmount && (
+        <View style={[styles.bonusPill, { backgroundColor: tierColor + '22' }]}>
+          <Text style={[styles.bonusText, { color: tierColor }]}>
+            ⭐ {t('badges.bonusXp', { amount: xpAmount })}
+          </Text>
+        </View>
+      )}
       {!!badge.bonus_livrux && badge.bonus_livrux > 0 && (
         <View style={[styles.bonusPill, { backgroundColor: tierColor + '22' }]}>
           <Text style={[styles.bonusText, { color: tierColor }]}>

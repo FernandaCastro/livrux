@@ -89,9 +89,8 @@ function createStyles(theme: ColorPalette) {
     section: { marginBottom: Spacing.lg },
     sectionLabel: {
       fontFamily: Fonts.heading,
-      fontSize: FontSizes.sm,
+      fontSize: FontSizes.lg,
       color: theme.friendEmerald,
-      textTransform: 'uppercase',
       letterSpacing: 0.8,
       marginBottom: Spacing.sm,
       marginTop: Spacing.xs,

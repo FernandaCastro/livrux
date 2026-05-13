@@ -238,6 +238,7 @@ function createStyles(theme: ColorPalette) {
     sectionTitle: {
       fontFamily: Fonts.heading,
       fontSize: FontSizes.lg,
+      letterSpacing: 0.8,
       color: theme.secondary,
     },
     emptyContainer: {

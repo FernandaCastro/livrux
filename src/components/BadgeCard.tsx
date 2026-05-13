@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
 import type { BadgeTier } from '../types';
 
@@ -32,6 +32,7 @@ const TIER_LABEL: Record<BadgeTier, string> = {
 };
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     card: {
       width: '47%',
@@ -40,7 +41,7 @@ function createStyles(theme: ColorPalette) {
       paddingTop: Spacing.lg,
       alignItems: 'center',
       overflow: 'hidden',
-      ...Shadows.sm,
+      ...S.sm,
     },
     cardLocked: {
       backgroundColor: theme.statusBarStyle === 'light'

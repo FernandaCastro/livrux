@@ -32,10 +32,11 @@ import { FriendCard } from '../../../src/components/friends/FriendCard';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
 import type { FriendSearchResult } from '../../../src/types';
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     root: { flex: 1 },
     safe: { flex: 1, backgroundColor: 'transparent' },
@@ -47,7 +48,7 @@ function createStyles(theme: ColorPalette) {
       paddingHorizontal: Spacing.xl,
       paddingVertical: Spacing.xl,
       alignItems: 'center',
-      ...Shadows.lg,
+      ...S.lg,
     },
     bannerAvatar: {
       position: 'absolute',
@@ -209,7 +210,7 @@ function createStyles(theme: ColorPalette) {
       padding: Spacing.md,
       gap: Spacing.md,
       marginBottom: Spacing.lg,
-      ...Shadows.sm,
+      ...S.sm,
     },
     searchResultInfo: { flex: 1 },
     searchResultName: {

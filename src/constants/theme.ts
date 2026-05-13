@@ -1,7 +1,7 @@
 // Design system: colors, typography, spacing, and border radii for the Livrux app.
 // Target audience: families with kids — warm, playful, and legible.
 
-export type ThemeId = 'classic' | 'noite' | 'indigo';
+export type ThemeId = 'classic' | 'noite' | 'indigo' | 'rubi';
 
 export const Colors = {
   // Brand — orange is the coin/reward accent; purple is the dominant brand color
@@ -47,6 +47,8 @@ export const Colors = {
   border: '#E8E4F0',
   divider: '#EDE9FE',
 
+  shadowColor: '#7C3AED',  // used by createShadows(theme.shadowColor) in themed screens
+
   // Coin / Livrux brand
   coin: '#F5A623',
   coinShadow: '#C4800B',
@@ -85,6 +87,7 @@ export type ColorPalette = {
   textPrimary: string; textSecondary: string; textDisabled: string; textOnPrimary: string;
   success: string; error: string; warning: string; info: string;
   border: string; divider: string;
+  shadowColor: string;
   coin: string; coinShadow: string;
   chipCoin: string; chipXp: string; chipBadge: string; chipBook: string; chipFriend: string;
   navBackground: string;
@@ -121,6 +124,7 @@ export const noiteColors: ColorPalette = {
   info: '#38BDF8',
   border: '#334155',
   divider: '#1E293B',
+  shadowColor: '#6366F1',
   coin: '#F5A623',
   coinShadow: '#C4800B',
   chipCoin: '#F5A623',
@@ -163,6 +167,7 @@ export const indigoColors: ColorPalette = {
   info: '#1E88E5',
   border: '#E2E8F0',
   divider: '#EEF2FF',
+  shadowColor: '#4F46E5',
   coin: '#F5A623',
   coinShadow: '#C4800B',
   chipCoin: '#F5A623',
@@ -177,10 +182,25 @@ export const indigoColors: ColorPalette = {
   flashFrameBackground: '#BFDBFE',
 };
 
+export const rubiColors: ColorPalette = {
+  ...noiteColors,
+  // Reader banner gradient: vivid crimson → deep ruby wine
+  secondary: '#E11D48',        // rose-600 — banner gradient start
+  secondary2: '#881337',       // rose-900 — banner gradient end (deep ruby)
+  secondaryLight: '#4C0519',   // very dark rose for chip tints
+  secondaryDark: '#BE123C',    // rose-700
+  readerBlue: '#E11D48',       // reader accent (chips, pull-to-refresh, indicators)
+  readerBlueLight: '#4C0519',  // dark ruby for chip backgrounds
+  chipBook: '#E11D48',
+  shadowColor: '#DC2626',      // red shadows throughout the theme
+  flashFrameBackground: '#0F172A',
+};
+
 export const themes: Record<ThemeId, ColorPalette> = {
   classic: { ...Colors, backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'], cardGradient: ['#FEFBFF', '#FFFAF4'], navBackground: 'rgba(250,250,247,0.92)', statusBarStyle: 'dark', flashFrameBackground: '#FFF7ED' },
   noite: noiteColors,
   indigo: indigoColors,
+  rubi: rubiColors,
 };
 
 export const Fonts = {
@@ -221,26 +241,14 @@ export const Radius = {
   full: 9999,
 } as const;
 
-export const Shadows = {
-  sm: {
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.10,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  md: {
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  lg: {
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 24,
-    elevation: 10,
-  },
-} as const;
+export function createShadows(shadowColor: string) {
+  return {
+    sm: { shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 6,  elevation: 3  },
+    md: { shadowColor, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.16, shadowRadius: 12, elevation: 5  },
+    lg: { shadowColor, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.22, shadowRadius: 24, elevation: 10 },
+  };
+}
+
+// Classic shadows — kept as named export so non-themed files need no changes.
+export const Shadows = createShadows('#7C3AED');
+

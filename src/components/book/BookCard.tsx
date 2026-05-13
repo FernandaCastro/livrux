@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Book } from '../../types';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../constants/theme';
 import { useTheme } from '../../hooks/useTheme';
 
 interface BookCardProps {
@@ -23,11 +23,12 @@ const COVER_WIDTH = 64;
 const COVER_HEIGHT = 92;
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     shell: {
       borderRadius: Radius.xl,
       marginBottom: Spacing.sm,
-      ...Shadows.md,
+      ...S.md,
     },
     card: {
       flexDirection: 'row',
@@ -69,7 +70,7 @@ function createStyles(theme: ColorPalette) {
       height: 26,
       alignItems: 'center',
       justifyContent: 'center',
-      ...Shadows.sm,
+      ...S.sm,
     },
     ratingEmoji: { fontSize: 15 },
     info: {

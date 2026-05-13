@@ -33,12 +33,13 @@ import { BookCard } from '../../../src/components/book/BookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
 
 const AVATAR_SIZE = 80;
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     root: { flex: 1 },
     safe: { flex: 1, backgroundColor: 'transparent' },
@@ -52,7 +53,7 @@ function createStyles(theme: ColorPalette) {
       paddingHorizontal: Spacing.lg,
       paddingBottom: Spacing.lg,
       overflow: 'hidden',
-      ...Shadows.lg,
+      ...S.lg,
     },
     bannerHeader: {
       flexDirection: 'row',
@@ -99,7 +100,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.full,
       padding: 4,
       backgroundColor: 'rgba(255,255,255,0.15)',
-      ...Shadows.md,
+      ...S.md,
       marginTop: -20,
     },
     readerName: {
@@ -120,7 +121,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.full,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
-      ...Shadows.sm,
+      ...S.sm,
     },
     badgeCoin: { fontSize: 20 },
     balanceAmount: {
@@ -146,7 +147,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.full,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
-      ...Shadows.sm,
+      ...S.sm,
     },
     badgesBadge: {
       flexDirection: 'row',
@@ -156,7 +157,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.full,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
-      ...Shadows.sm,
+      ...S.sm,
     },
     badgeIcon: { fontSize: 18 },
     booksCount: {

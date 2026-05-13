@@ -13,7 +13,7 @@ import { useReaderStore } from '../../../src/stores/readerStore';
 import { useFriends } from '../../../src/hooks/useFriends';
 import { useTheme } from '../../../src/hooks/useTheme';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { FloatingEmojis } from '@/components/FloatingEmojis';
 
@@ -36,6 +36,7 @@ function positionEmoji(pos: number): string {
 }
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     root: { flex: 1 },
     safe: { flex: 1, backgroundColor: 'transparent' },
@@ -49,7 +50,7 @@ function createStyles(theme: ColorPalette) {
       paddingBottom: Spacing['2xl'],
       alignItems: 'center',
       gap: Spacing.sm,
-      ...Shadows.lg,
+      ...S.lg,
     },
     heroTitle: {
       fontFamily: Fonts.heading,
@@ -85,7 +86,7 @@ function createStyles(theme: ColorPalette) {
       padding: Spacing.md,
       gap: Spacing.md,
       overflow: 'hidden',
-      ...Shadows.sm,
+      ...S.sm,
     },
     myRow: {
       backgroundColor: theme.statusBarStyle === 'light'

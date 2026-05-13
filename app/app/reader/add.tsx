@@ -30,6 +30,7 @@ const THEME_OPTIONS: { id: ThemeId; label: string; colors: [string, string] }[] 
   { id: 'classic', label: 'Clássico', colors: ['#7C3AED', '#A855F7'] },
   { id: 'noite',   label: 'Noite',    colors: ['#0F172A', '#818CF8'] },
   { id: 'indigo',  label: 'Índigo',   colors: ['#4F46E5', '#06B6D4'] },
+  { id: 'rubi',    label: 'Rubi',     colors: ['#0F172A', '#EF4444'] },
 ];
 
 function useReaderSchema() {

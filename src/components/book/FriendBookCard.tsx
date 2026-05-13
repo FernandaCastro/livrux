@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Book } from '../../types';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../constants/theme';
 import { useTheme } from '../../hooks/useTheme';
 
 interface FriendBookCardProps {
@@ -32,6 +32,7 @@ const COVER_WIDTH = 68;
 const COVER_HEIGHT = 98;
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     card: {
       flexDirection: 'row',
@@ -40,7 +41,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.lg,
       marginBottom: Spacing.sm,
       overflow: 'hidden',
-      ...Shadows.md,
+      ...S.md,
     },
     accentStrip: {
       width: 5,

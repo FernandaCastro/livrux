@@ -23,7 +23,7 @@ import { MultiavatarView } from '../../../src/components/reader/MultiavatarView'
 import { FriendBookCard } from '../../../src/components/book/FriendBookCard';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
 
 interface FriendReader {
   id: string;
@@ -35,6 +35,7 @@ interface FriendReader {
 const AVATAR_SIZE = 80;
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     root: { flex: 1 },
     safe: { flex: 1, backgroundColor: 'transparent' },
@@ -45,7 +46,7 @@ function createStyles(theme: ColorPalette) {
       marginBottom: Spacing.md,
       paddingHorizontal: Spacing.xl,
       paddingBottom: Spacing.xl,
-      ...Shadows.lg,
+      ...S.lg,
     },
     heroContent: {
       flexDirection: 'row',
@@ -59,7 +60,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.full,
       padding: 4,
       backgroundColor: 'rgba(255,255,255,0.15)',
-      ...Shadows.md,
+      ...S.md,
       marginTop: -10,
     },
     heroRight: {
@@ -86,7 +87,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.full,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
-      ...Shadows.sm,
+      ...S.sm,
     },
     statChipText: {
       fontFamily: Fonts.heading,
@@ -101,7 +102,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.full,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
-      ...Shadows.sm,
+      ...S.sm,
     },
     badgesBadge: {
       flexDirection: 'row',
@@ -111,7 +112,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.full,
       paddingHorizontal: Spacing.lg,
       paddingVertical: Spacing.sm,
-      ...Shadows.sm,
+      ...S.sm,
     },
     badgeIcon: { fontSize: 18 },
     badgeCount: {

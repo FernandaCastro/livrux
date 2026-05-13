@@ -13,9 +13,10 @@ import { useTheme } from '../../../src/hooks/useTheme';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BadgeCard } from '../../../src/components/BadgeCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     root: { flex: 1 },
     safe: { flex: 1, backgroundColor: 'transparent' },
@@ -26,7 +27,7 @@ function createStyles(theme: ColorPalette) {
       marginBottom: Spacing.md,
       paddingHorizontal: Spacing.xl,
       paddingBottom: Spacing.xl,
-      ...Shadows.lg,
+      ...S.lg,
     },
     heroContent: {
       flexDirection: 'row',

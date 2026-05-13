@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MultiavatarView } from '../reader/MultiavatarView';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../constants/theme';
 import { useTheme } from '../../hooks/useTheme';
 
 interface FriendCardProps {
@@ -19,6 +19,7 @@ interface FriendCardProps {
 const AVATAR_SIZE = 60;
 
 function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     card: {
       flexDirection: 'row',
@@ -27,7 +28,7 @@ function createStyles(theme: ColorPalette) {
       borderRadius: Radius.lg,
       marginBottom: Spacing.sm,
       overflow: 'hidden',
-      ...Shadows.md,
+      ...S.md,
     },
     accentStrip: {
       width: 5,
@@ -127,7 +128,7 @@ function createStyles(theme: ColorPalette) {
       height: 40,
       alignItems: 'center',
       justifyContent: 'center',
-      ...Shadows.sm,
+      ...S.sm,
     },
     acceptText: {
       fontFamily: Fonts.bodyBold,

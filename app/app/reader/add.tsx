@@ -61,6 +61,7 @@ export default function AddReaderScreen() {
 
   const [avatarHistory, setAvatarHistory] = useState<string[]>(() => [generateAvatarSeed()]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [pendingThemeId, setPendingThemeId] = useState<ThemeId>('classic');
   const avatarSeed = avatarHistory[historyIndex];
 
   const schema = useReaderSchema();
@@ -76,6 +77,7 @@ export default function AddReaderScreen() {
         const seed = generateAvatarSeed();
         setAvatarHistory([seed]);
         setHistoryIndex(0);
+        setPendingThemeId('classic');
       } else if (editId) {
         loadThemeForReader(editId);
       }
@@ -114,7 +116,8 @@ export default function AddReaderScreen() {
           avatar_seed: avatarSeed,
         });
       } else {
-        await createReader(data.name, avatarSeed);
+        const newReader = await createReader(data.name, avatarSeed);
+        await saveThemeForReader(newReader.id, pendingThemeId);
       }
       router.back();
     } catch {
@@ -177,40 +180,44 @@ export default function AddReaderScreen() {
             <Text style={styles.avatarHint}>{t('reader.avatarHint', { defaultValue: '‹ › para trocar avatar' })}</Text>
           </View>
 
-          {/* Theme picker — only shown when editing an existing reader */}
-          {isEditing && editId && (
-            <View style={styles.themeSection}>
-              <Text style={styles.themeLabel}>Tema</Text>
-              <View style={styles.themeRow}>
-                {THEME_OPTIONS.map((opt) => {
-                  const selected = currentThemeId === opt.id;
-                  return (
-                    <TouchableOpacity
-                      key={opt.id}
-                      style={styles.themeOption}
-                      onPress={() => saveThemeForReader(editId, opt.id)}
-                      activeOpacity={0.8}
+          {/* Theme picker */}
+          <View style={styles.themeSection}>
+            <Text style={styles.themeLabel}>Tema</Text>
+            <View style={styles.themeRow}>
+              {THEME_OPTIONS.map((opt) => {
+                const selected = isEditing
+                  ? currentThemeId === opt.id
+                  : pendingThemeId === opt.id;
+                return (
+                  <TouchableOpacity
+                    key={opt.id}
+                    style={styles.themeOption}
+                    onPress={() =>
+                      isEditing && editId
+                        ? saveThemeForReader(editId, opt.id)
+                        : setPendingThemeId(opt.id)
+                    }
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={opt.colors}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={[
+                        styles.themeSwatch,
+                        selected && styles.themeSwatchSelected,
+                      ]}
                     >
-                      <LinearGradient
-                        colors={opt.colors}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={[
-                          styles.themeSwatch,
-                          selected && styles.themeSwatchSelected,
-                        ]}
-                      >
-                        {selected && <Text style={styles.themeCheck}>✓</Text>}
-                      </LinearGradient>
-                      <Text style={[styles.themeOptionLabel, selected && styles.themeOptionLabelSelected]}>
-                        {opt.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                      {selected && <Text style={styles.themeCheck}>✓</Text>}
+                    </LinearGradient>
+                    <Text style={[styles.themeOptionLabel, selected && styles.themeOptionLabelSelected]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-          )}
+          </View>
 
           {/* Name input */}
           <Controller

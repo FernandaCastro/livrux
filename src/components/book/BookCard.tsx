@@ -147,9 +147,7 @@ export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const cardColors: [string, string] = theme.statusBarStyle === 'light'
-    ? [theme.surface, theme.surfaceVariant]
-    : ['#FEFBFF', '#FFFAF4'];
+  const cardColors = theme.cardGradient;
 
   return (
     <TouchableOpacity onPress={onPress} onLongPress={onLongPress} activeOpacity={0.82} style={styles.shell}>

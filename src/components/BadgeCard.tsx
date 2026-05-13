@@ -129,9 +129,7 @@ export function BadgeCard({ badge, locked = false }: BadgeCardProps) {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const tierColor = TIER_COLOR[badge.tier];
 
-  const cardColors: [string, string] = theme.statusBarStyle === 'light'
-    ? [theme.surface, theme.surfaceVariant]
-    : ['#FEFBFF', '#FFFAF4'];
+  const cardColors = theme.cardGradient;
 
   if (locked) {
     return (

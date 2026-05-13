@@ -36,7 +36,7 @@ function createStyles(theme: ColorPalette) {
     card: {
       flexDirection: 'row',
       alignItems: 'stretch',
-      backgroundColor: theme.surface,
+      backgroundColor: theme.cardGradient[0],
       borderRadius: Radius.lg,
       marginBottom: Spacing.sm,
       overflow: 'hidden',

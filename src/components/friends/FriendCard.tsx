@@ -23,7 +23,7 @@ function createStyles(theme: ColorPalette) {
     card: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: theme.surface,
+      backgroundColor: theme.cardGradient[0],
       borderRadius: Radius.lg,
       marginBottom: Spacing.sm,
       overflow: 'hidden',

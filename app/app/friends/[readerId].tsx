@@ -352,9 +352,6 @@ export default function FriendsScreen() {
     });
   };
 
-  const cardColors: [string, string] = theme.statusBarStyle === 'light'
-    ? [theme.surface, theme.surfaceVariant]
-    : ['#FEFBFF', '#FFFAF4'];
 
   return (
     <View style={styles.root}>
@@ -521,7 +518,7 @@ export default function FriendsScreen() {
 
               {searchResult && !requestSent && (
                 <LinearGradient
-                  colors={cardColors}
+                  colors={theme.cardGradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.searchResultCard}

@@ -171,13 +171,9 @@ function TransactionRow({ tx }: { tx: LivruxTransaction }) {
         : tx.reason === 'book_updated' ? 'rewards.reasonBookUpdated'
           : 'rewards.reasonManualSpend';
 
-  const cardColors: [string, string] = theme.statusBarStyle === 'light'
-    ? [theme.surface, theme.surfaceVariant]
-    : ['#FEFBFF', '#FFFAF4'];
-
   return (
     <LinearGradient
-      colors={cardColors}
+      colors={theme.cardGradient}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.txRow}

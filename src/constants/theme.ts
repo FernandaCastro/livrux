@@ -65,6 +65,9 @@ export const Colors = {
   // Background gradient — three stops for the page background
   backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'] as [string, string, string],
 
+  // Card gradient — two stops used by BookCard, BadgeCard, TransactionRow, etc.
+  cardGradient: ['#FEFBFF', '#FFFAF4'] as [string, string],
+
   // Status bar style
   statusBarStyle: 'dark' as 'dark' | 'light',
 } as const;
@@ -74,6 +77,7 @@ export type ColorPalette = {
   secondary: string; secondary2: string; secondaryLight: string; secondaryDark: string;
   accent: string; accentLight: string;
   readerBlue: string; readerBlueLight: string;
+  cardGradient: [string, string];
   friendEmerald: string; friendEmeraldLight: string;
   background: string; backgroundTinted: string; surface: string; surfaceVariant: string;
   textPrimary: string; textSecondary: string; textDisabled: string; textOnPrimary: string;
@@ -123,6 +127,7 @@ export const noiteColors: ColorPalette = {
   chipFriend: '#34D399',
   navBackground: 'rgba(15,23,42,0.95)',
   backgroundGradient: ['#0F172A', '#131f35', '#0F172A'],
+  cardGradient: ['#1E293B', '#334155'],
   statusBarStyle: 'light',
 };
 
@@ -163,11 +168,12 @@ export const indigoColors: ColorPalette = {
   chipFriend: '#10B981',
   navBackground: 'rgba(199,210,254,0.92)', // indigo-200 translúcido
   backgroundGradient: ['#818CF8', '#BFDBFE', '#F8FAFC'], // índigo → sky → branco
+  cardGradient: ['#EFF6FF', '#DBEAFE'],    // sky-50 → blue-100
   statusBarStyle: 'dark',
 };
 
 export const themes: Record<ThemeId, ColorPalette> = {
-  classic: { ...Colors, backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'], navBackground: 'rgba(255,255,255,0.92)', statusBarStyle: 'dark' },
+  classic: { ...Colors, backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'], cardGradient: ['#FEFBFF', '#FFFAF4'], navBackground: 'rgba(255,255,255,0.92)', statusBarStyle: 'dark' },
   noite: noiteColors,
   indigo: indigoColors,
 };

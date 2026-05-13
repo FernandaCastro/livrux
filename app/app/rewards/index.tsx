@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,27 +14,170 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
 
 import { useLivrux } from '../../../src/hooks/useLivrux';
 import { useReaderStore } from '../../../src/stores/readerStore';
+import { useTheme } from '../../../src/hooks/useTheme';
 import type { LivruxTransaction } from '../../../src/types';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+
+function createStyles(theme: ColorPalette) {
+  return StyleSheet.create({
+    root: { flex: 1 },
+    safe: { flex: 1, backgroundColor: 'transparent' },
+    heroBanner: {
+      borderRadius: Radius.xl,
+      marginHorizontal: Spacing.md,
+      marginTop: Spacing.xs,
+      marginBottom: Spacing.md,
+      paddingHorizontal: Spacing.xl,
+      paddingVertical: Spacing.xl,
+      alignItems: 'center',
+      ...Shadows.lg,
+    },
+    bannerAvatar: {
+      position: 'absolute',
+      top: Spacing.md,
+      left: Spacing.md,
+    },
+    balanceLabel: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.sm,
+      color: 'rgba(255,255,255,0.85)',
+      marginBottom: 4,
+    },
+    balanceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+    },
+    balanceCoin: { fontSize: 36 },
+    balanceAmount: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes['4xl'],
+      color: theme.textOnPrimary,
+    },
+    balanceCurrency: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: 'rgba(255,255,255,0.85)',
+      marginTop: 2,
+    },
+    spendButton: {
+      alignSelf: 'stretch',
+      marginTop: Spacing.lg,
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      borderRadius: Radius.xl,
+      paddingVertical: Spacing.sm,
+      alignItems: 'center',
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.6)',
+    },
+    spendButtonText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textOnPrimary,
+    },
+    noReaderText: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.md,
+      color: theme.textSecondary,
+    },
+    list: {
+      paddingHorizontal: Spacing.xl,
+      paddingTop: Spacing.lg,
+      paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
+    },
+    sectionTitle: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.lg,
+      color: theme.primary,
+      marginBottom: Spacing.md,
+    },
+    title: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes['2xl'],
+      color: theme.textOnPrimary,
+      marginBottom: Spacing.sm,
+    },
+    txRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: Radius.md,
+      padding: Spacing.md,
+      paddingLeft: Spacing.md + 4,
+      marginBottom: Spacing.sm,
+      overflow: 'hidden',
+      ...Shadows.sm,
+    },
+    txAccent: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 4,
+    },
+    txAccentEarned: { backgroundColor: theme.success },
+    txAccentSpent: { backgroundColor: theme.error },
+    txIcon: { fontSize: 24, marginRight: Spacing.md },
+    txInfo: { flex: 1 },
+    txDescription: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.sm,
+      color: theme.textPrimary,
+    },
+    txReason: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textSecondary,
+      marginTop: 1,
+      textTransform: 'capitalize',
+    },
+    txDate: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textDisabled,
+      marginTop: 2,
+    },
+    txAmount: {
+      fontFamily: Fonts.bodyExtraBold,
+      fontSize: FontSizes.md,
+    },
+    earned: { color: theme.success },
+    spent: { color: theme.error },
+    empty: { alignItems: 'center', paddingTop: Spacing['2xl'] },
+    emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
+    emptyText: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.md,
+      color: theme.textSecondary,
+    },
+  });
+}
 
 function TransactionRow({ tx }: { tx: LivruxTransaction }) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const isEarned = tx.amount > 0;
   const reasonKey =
     tx.reason === 'book_completed' ? 'rewards.reasonBookCompleted'
       : tx.reason === 'book_deleted' ? 'rewards.reasonBookDeleted'
         : tx.reason === 'book_updated' ? 'rewards.reasonBookUpdated'
           : 'rewards.reasonManualSpend';
+
+  const cardColors: [string, string] = theme.statusBarStyle === 'light'
+    ? [theme.surface, theme.surfaceVariant]
+    : ['#FEFBFF', '#FFFAF4'];
+
   return (
     <LinearGradient
-      colors={['#FEFBFF', '#FFFAF4']}
+      colors={cardColors}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.txRow}
@@ -61,6 +205,8 @@ export default function RewardsScreen() {
   const router = useRouter();
   const { selectedReader } = useReaderStore();
   const { transactions, isLoading, refresh, fetchNextPage, hasNextPage, isFetchingNextPage } = useLivrux(selectedReader?.id ?? null);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const appStateRef = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -75,8 +221,9 @@ export default function RewardsScreen() {
 
   return (
     <View style={styles.root}>
+      <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
-        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
         start={{ x: 0.15, y: 0 }}
         end={{ x: 0.85, y: 1 }}
@@ -84,7 +231,7 @@ export default function RewardsScreen() {
       />
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
-        {/* Gold banner */}
+        {/* Gold banner — fixed brand color, intentionally not themed */}
         <LinearGradient
           colors={['#F5A623', '#FF7F3E']}
           start={{ x: 0, y: 0 }}
@@ -116,9 +263,8 @@ export default function RewardsScreen() {
           )}
         </LinearGradient>
 
-        {/* Transaction history */}
         {isLoading ? (
-          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+          <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
         ) : (
           <FlashList
             data={transactions}
@@ -130,7 +276,7 @@ export default function RewardsScreen() {
               <RefreshControl
                 refreshing={isLoading}
                 onRefresh={refresh}
-                tintColor={Colors.secondary}
+                tintColor={theme.secondary}
               />
             }
             onEndReached={() => { if (hasNextPage) fetchNextPage(); }}
@@ -146,7 +292,7 @@ export default function RewardsScreen() {
             }
             ListFooterComponent={
               isFetchingNextPage ? (
-                <ActivityIndicator color={Colors.secondary} style={{ paddingVertical: 16 }} />
+                <ActivityIndicator color={theme.secondary} style={{ paddingVertical: 16 }} />
               ) : null
             }
             renderItem={({ item }) => <TransactionRow tx={item} />}
@@ -157,135 +303,3 @@ export default function RewardsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  safe: { flex: 1, backgroundColor: 'transparent' },
-  heroBanner: {
-    borderRadius: Radius.xl,
-    marginHorizontal: Spacing.md,
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.xl,
-    alignItems: 'center',
-    ...Shadows.lg,
-  },
-  bannerAvatar: {
-    position: 'absolute',
-    top: Spacing.md,
-    left: Spacing.md,
-  },
-  balanceLabel: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.85)',
-    marginBottom: 4,
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
-  balanceCoin: { fontSize: 36 },
-  balanceAmount: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['4xl'],
-    color: Colors.textOnPrimary,
-  },
-  balanceCurrency: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: 'rgba(255,255,255,0.85)',
-    marginTop: 2,
-  },
-  spendButton: {
-    alignSelf: 'stretch',
-    marginTop: Spacing.lg,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderRadius: Radius.xl,
-    paddingVertical: Spacing.sm,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.6)',
-  },
-  spendButtonText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
-  },
-  noReaderText: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
-  },
-  list: {
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.lg,
-    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
-  },
-  sectionTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.lg,
-    color: Colors.primary,
-    marginBottom: Spacing.md,
-  },
-  title: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['2xl'],
-    color: Colors.textOnPrimary,
-    marginBottom: Spacing.sm,
-  },
-  txRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    paddingLeft: Spacing.md + 4,
-    marginBottom: Spacing.sm,
-    overflow: 'hidden',
-    ...Shadows.sm,
-  },
-  txAccent: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 4,
-  },
-  txAccentEarned: { backgroundColor: Colors.success },
-  txAccentSpent: { backgroundColor: Colors.error },
-  txIcon: { fontSize: 24, marginRight: Spacing.md },
-  txInfo: { flex: 1 },
-  txDescription: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: Colors.textPrimary,
-  },
-  txReason: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
-    marginTop: 1,
-    textTransform: 'capitalize',
-  },
-  txDate: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textDisabled,
-    marginTop: 2,
-  },
-  txAmount: {
-    fontFamily: Fonts.bodyExtraBold,
-    fontSize: FontSizes.md,
-  },
-  earned: { color: Colors.success },
-  spent: { color: Colors.error },
-  empty: { alignItems: 'center', paddingTop: Spacing['2xl'] },
-  emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
-  emptyText: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
-  },
-});

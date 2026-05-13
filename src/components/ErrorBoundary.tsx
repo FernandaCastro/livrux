@@ -1,11 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Colors, Fonts, FontSizes, Spacing } from '../constants/theme';
 
-// ---------------------------------------------------------------------------
-// Fallback UI — functional so it can use hooks if needed later
-// ---------------------------------------------------------------------------
 function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () => void }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.root}>
       <Image
@@ -13,17 +12,15 @@ function ErrorFallback({ error, onReset }: { error: Error | null; onReset: () =>
         style={styles.icon}
         resizeMode="contain"
       />
-      <Text style={styles.title}>Algo deu errado 😔</Text>
-      <Text style={styles.subtitle}>
-        O app encontrou um erro inesperado. Tente novamente.
-      </Text>
+      <Text style={styles.title}>{t('common.errorBoundaryTitle')} 😔</Text>
+      <Text style={styles.subtitle}>{t('common.errorBoundarySubtitle')}</Text>
       {__DEV__ && error && (
         <Text style={styles.devError} numberOfLines={6}>
           {error.message}
         </Text>
       )}
       <TouchableOpacity style={styles.button} onPress={onReset} activeOpacity={0.8}>
-        <Text style={styles.buttonLabel}>Tentar novamente</Text>
+        <Text style={styles.buttonLabel}>{t('common.retry')}</Text>
       </TouchableOpacity>
     </View>
   );

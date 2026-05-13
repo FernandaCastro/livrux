@@ -52,23 +52,18 @@ Deno.serve(async (req: Request) => {
       });
 
     if (logError) {
-      // Log the error but don't block deletion — user's right to erasure
-      // takes precedence over our internal audit logging.
-      console.error('[delete-account] Failed to write consent log:', logError.message);
+      // Don't block deletion — user's right to erasure takes precedence over audit logging.
     }
 
     // ── 3. Delete the auth user (cascades to all public tables) ─────────────
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id);
     if (deleteError) {
-      console.error('[delete-account] Failed to delete user:', deleteError.message);
       return json({ error: deleteError.message }, 500);
     }
 
-    console.log('[delete-account] Deleted user:', user.id);
     return json({ success: true }, 200);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[delete-account] Unexpected error:', message);
     return json({ error: message }, 500);
   }
 });

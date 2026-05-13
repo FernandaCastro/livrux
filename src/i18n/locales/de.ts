@@ -14,6 +14,8 @@ const de = {
     done: 'Fertig',
     or: 'oder',
     ok: 'OK',
+    errorBoundaryTitle: 'Etwas ist schiefgelaufen',
+    errorBoundarySubtitle: 'Die App ist auf einen unerwarteten Fehler gestoßen. Bitte versuche es erneut.',
   },
   auth: {
     signIn: 'Anmelden',

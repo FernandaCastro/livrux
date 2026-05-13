@@ -1,10 +1,18 @@
 import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Reader } from '../types';
+import { type ThemeId } from '../constants/theme';
+
+const THEME_KEY = (readerId: string) => `livrux_reader_theme_${readerId}`;
 
 // Holds the currently selected reader so all nested screens share the context.
 interface ReaderState {
   selectedReader: Reader | null;
   setSelectedReader: (reader: Reader | null) => void;
+  currentThemeId: ThemeId;
+  setThemeId: (themeId: ThemeId) => void;
+  loadThemeForReader: (readerId: string) => Promise<void>;
+  saveThemeForReader: (readerId: string, themeId: ThemeId) => Promise<void>;
   updateBalance: (newBalance: number) => void;
   // Set by the Add Book screen on success so the app layout can display the
   // confetti celebration while the navigation transition back is playing.
@@ -27,8 +35,34 @@ export const useReaderStore = create<ReaderState>((set) => ({
   confettiTrigger: null,
   bookPersistedCount: 0,
   readerSelectorVisible: false,
+  currentThemeId: 'classic',
 
-  setSelectedReader: (reader) => set({ selectedReader: reader }),
+  setSelectedReader: (reader) => set({
+    selectedReader: reader,
+    // Reset to classic when reader is deselected (parent view)
+    ...(reader === null ? { currentThemeId: 'classic' } : {}),
+  }),
+
+  setThemeId: (themeId) => set({ currentThemeId: themeId }),
+
+  loadThemeForReader: async (readerId) => {
+    try {
+      const stored = await AsyncStorage.getItem(THEME_KEY(readerId));
+      const themeId: ThemeId = (stored as ThemeId) ?? 'classic';
+      set({ currentThemeId: themeId });
+    } catch {
+      set({ currentThemeId: 'classic' });
+    }
+  },
+
+  saveThemeForReader: async (readerId, themeId) => {
+    set({ currentThemeId: themeId });
+    try {
+      await AsyncStorage.setItem(THEME_KEY(readerId), themeId);
+    } catch {
+      // Non-fatal — preference simply won't persist
+    }
+  },
 
   // Optimistic balance update after logging a book.
   updateBalance: (newBalance) =>

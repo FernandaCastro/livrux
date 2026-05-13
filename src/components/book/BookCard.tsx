@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Book } from '../../types';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 
 interface BookCardProps {
   book: Book;
@@ -18,12 +19,142 @@ const RATING_EMOJI: Record<string, string> = {
   loved: '😍',
 };
 
+const COVER_WIDTH = 64;
+const COVER_HEIGHT = 92;
+
+function createStyles(theme: ColorPalette) {
+  return StyleSheet.create({
+    shell: {
+      borderRadius: Radius.xl,
+      marginBottom: Spacing.sm,
+      ...Shadows.md,
+    },
+    card: {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      borderRadius: Radius.xl,
+      overflow: 'hidden',
+    },
+    accentStrip: {
+      width: 5,
+      backgroundColor: theme.secondary,
+    },
+    coverWrapper: {
+      margin: Spacing.md,
+      marginRight: Spacing.sm,
+      position: 'relative',
+      alignSelf: 'center',
+    },
+    cover: {
+      width: COVER_WIDTH,
+      height: COVER_HEIGHT,
+      borderRadius: Radius.sm,
+    },
+    coverPlaceholder: {
+      width: COVER_WIDTH,
+      height: COVER_HEIGHT,
+      borderRadius: Radius.sm,
+      backgroundColor: theme.secondaryLight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    coverIcon: { fontSize: 30 },
+    ratingBadge: {
+      position: 'absolute',
+      bottom: -6,
+      right: -6,
+      backgroundColor: theme.surface,
+      borderRadius: Radius.full,
+      width: 26,
+      height: 26,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...Shadows.sm,
+    },
+    ratingEmoji: { fontSize: 15 },
+    info: {
+      flex: 1,
+      paddingVertical: Spacing.md,
+      paddingRight: Spacing.md,
+      justifyContent: 'space-between',
+    },
+    title: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.md,
+      color: theme.textPrimary,
+      lineHeight: 20,
+      marginBottom: 2,
+    },
+    author: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textSecondary,
+      marginBottom: Spacing.xs,
+    },
+    chips: {
+      flexDirection: 'row',
+      gap: Spacing.xs,
+      marginBottom: Spacing.sm,
+      flexWrap: 'wrap',
+    },
+    pageChip: {
+      backgroundColor: theme.secondaryLight,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 2,
+    },
+    foreignChip: {
+      backgroundColor: theme.secondaryLight,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 2,
+    },
+    pageChipText: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.xs,
+      color: theme.secondaryDark,
+    },
+    footer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    coinBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 3,
+      backgroundColor: theme.chipCoin,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 3,
+    },
+    coinEmoji: { fontSize: 13 },
+    coinAmount: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.xs,
+      color: theme.textOnPrimary,
+    },
+    date: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textDisabled,
+    },
+  });
+}
+
 export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const cardColors: [string, string] = theme.statusBarStyle === 'light'
+    ? [theme.surface, theme.surfaceVariant]
+    : ['#FEFBFF', '#FFFAF4'];
+
   return (
     <TouchableOpacity onPress={onPress} onLongPress={onLongPress} activeOpacity={0.82} style={styles.shell}>
       <LinearGradient
-        colors={['#FEFBFF', '#FFFAF4']}
+        colors={cardColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.card}
@@ -80,124 +211,3 @@ export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
     </TouchableOpacity>
   );
 }
-
-const COVER_WIDTH = 64;
-const COVER_HEIGHT = 92;
-
-const styles = StyleSheet.create({
-  shell: {
-    borderRadius: Radius.xl,
-    marginBottom: Spacing.sm,
-    ...Shadows.md,
-  },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    borderRadius: Radius.xl,
-    overflow: 'hidden',
-  },
-  accentStrip: {
-    width: 5,
-    backgroundColor: Colors.secondary,
-  },
-  coverWrapper: {
-    margin: Spacing.md,
-    marginRight: Spacing.sm,
-    position: 'relative',
-    alignSelf: 'center',
-  },
-  cover: {
-    width: COVER_WIDTH,
-    height: COVER_HEIGHT,
-    borderRadius: Radius.sm,
-  },
-  coverPlaceholder: {
-    width: COVER_WIDTH,
-    height: COVER_HEIGHT,
-    borderRadius: Radius.sm,
-    backgroundColor: Colors.secondaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  coverIcon: { fontSize: 30 },
-  ratingBadge: {
-    position: 'absolute',
-    bottom: -6,
-    right: -6,
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.full,
-    width: 26,
-    height: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.sm,
-  },
-  ratingEmoji: { fontSize: 15 },
-  info: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    paddingRight: Spacing.md,
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.md,
-    color: Colors.textPrimary,
-    lineHeight: 20,
-    marginBottom: 2,
-  },
-  author: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  chips: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    marginBottom: Spacing.sm,
-    flexWrap: 'wrap',
-  },
-  pageChip: {
-    backgroundColor: Colors.secondaryLight,
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-  },
-  foreignChip: {
-    backgroundColor: Colors.secondaryLight,
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-  },
-  pageChipText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.xs,
-    color: Colors.secondaryDark,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  coinBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: Colors.chipCoin,
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 3,
-  },
-  coinEmoji: { fontSize: 13 },
-  coinAmount: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xs,
-    color: Colors.textOnPrimary,
-  },
-  date: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textDisabled,
-  },
-});

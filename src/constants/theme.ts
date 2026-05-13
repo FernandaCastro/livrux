@@ -131,11 +131,11 @@ export const indigoColors: ColorPalette = {
   primaryLight: '#FFD580',
   primaryDark: '#C4800B',
   secondary: '#4F46E5',
-  secondary2: '#818CF8',
-  secondaryLight: '#EEF2FF',
+  secondary2: '#0EA5E9',       // sky blue — makes hero gradient go indigo → cyan
+  secondaryLight: '#C7D2FE',   // indigo-200 — chips e placeholders com tint visível
   secondaryDark: '#3730A3',
-  accent: '#06B6D4',
-  accentLight: '#67E8F9',
+  accent: '#0EA5E9',           // sky blue vivo
+  accentLight: '#BAE6FD',
   readerBlue: '#6366F1',
   readerBlueLight: '#E0E7FF',
   friendEmerald: '#10B981',
@@ -143,7 +143,7 @@ export const indigoColors: ColorPalette = {
   background: '#F8FAFC',
   backgroundTinted: '#EEF2FF',
   surface: '#FFFFFF',
-  surfaceVariant: '#EEF2FF',
+  surfaceVariant: '#DBEAFE',   // blue-100 — superfícies com tint azul
   textPrimary: '#0F172A',
   textSecondary: '#64748B',
   textDisabled: '#CBD5E1',
@@ -161,8 +161,8 @@ export const indigoColors: ColorPalette = {
   chipBadge: '#2D6A4F',
   chipBook: '#4F46E5',
   chipFriend: '#10B981',
-  navBackground: 'rgba(255,255,255,0.92)',
-  backgroundGradient: ['#EEF2FF', '#F0F9FF', '#F8FAFC'],
+  navBackground: 'rgba(199,210,254,0.92)', // indigo-200 translúcido
+  backgroundGradient: ['#818CF8', '#BFDBFE', '#F8FAFC'], // índigo → sky → branco
   statusBarStyle: 'dark',
 };
 

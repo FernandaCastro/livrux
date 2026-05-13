@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -264,7 +265,7 @@ export default function FriendsScreen() {
   const { selectedReader } = useReaderStore();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const swipeGesture = useTabSwipe('friends');
+  const { gesture: swipeGesture, animatedStyle: swipeStyle } = useTabSwipe('friends');
 
   const {
     friends,
@@ -358,7 +359,7 @@ export default function FriendsScreen() {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <View style={styles.root}>
+      <Animated.View style={[styles.root, swipeStyle]}>
       <Stack.Screen options={{ animation: 'none' }} />
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
@@ -558,7 +559,7 @@ export default function FriendsScreen() {
 
         <BottomMenu />
       </SafeAreaView>
-    </View>
+      </Animated.View>
     </GestureDetector>
   );
 }

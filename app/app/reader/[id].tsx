@@ -26,6 +26,7 @@ import { useStreak } from '../../../src/hooks/useStreak';
 import { useBadges } from '../../../src/hooks/useBadges';
 import { useTheme } from '../../../src/hooks/useTheme';
 import { GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
@@ -280,7 +281,7 @@ export default function ReaderDashboardScreen() {
   const { earnedBadges, refresh: refreshBadges } = useBadges(id ?? null);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const swipeGesture = useTabSwipe('reader');
+  const { gesture: swipeGesture, animatedStyle: swipeStyle } = useTabSwipe('reader');
 
   const completedBooks = books;
   const { canEditReader, isParentUnlocked } = useParentalStore();
@@ -342,7 +343,7 @@ export default function ReaderDashboardScreen() {
   if (!reader) {
     return (
       <GestureDetector gesture={swipeGesture}>
-        <View style={styles.root}>
+        <Animated.View style={[styles.root, swipeStyle]}>
           <LinearGradient
             colors={theme.backgroundGradient}
             locations={[0, 0.6, 1]}
@@ -353,7 +354,7 @@ export default function ReaderDashboardScreen() {
           <SafeAreaView style={styles.safe}>
             <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
           </SafeAreaView>
-        </View>
+        </Animated.View>
       </GestureDetector>
     );
   }
@@ -373,7 +374,7 @@ export default function ReaderDashboardScreen() {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <View style={styles.root}>
+      <Animated.View style={[styles.root, swipeStyle]}>
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
         colors={theme.backgroundGradient}
@@ -548,7 +549,7 @@ export default function ReaderDashboardScreen() {
 
         <BottomMenu />
       </SafeAreaView>
-    </View>
+      </Animated.View>
     </GestureDetector>
   );
 }

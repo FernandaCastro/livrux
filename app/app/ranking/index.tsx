@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image } from 'react-native';
 import { Stack } from 'expo-router';
@@ -253,7 +254,7 @@ export default function RankingScreen() {
   const { friends, isLoading } = useFriends(selectedReader?.id ?? null);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const swipeGesture = useTabSwipe('ranking');
+  const { gesture: swipeGesture, animatedStyle: swipeStyle } = useTabSwipe('ranking');
 
   const entries = useMemo<RankingEntry[]>(() => {
     if (!selectedReader) return [];
@@ -283,7 +284,7 @@ export default function RankingScreen() {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <View style={styles.root}>
+      <Animated.View style={[styles.root, swipeStyle]}>
       <Stack.Screen options={{ animation: 'none' }} />
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
@@ -336,7 +337,7 @@ export default function RankingScreen() {
         />
         <BottomMenu />
       </SafeAreaView>
-    </View>
+      </Animated.View>
     </GestureDetector>
   );
 }

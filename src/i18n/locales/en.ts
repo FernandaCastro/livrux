@@ -235,6 +235,7 @@ const en = {
     earned: 'Earned',
     pending: 'To earn',
     bonusEarned: '+{{amount}} Livrux',
+    bonusXp: '+{{amount}} XP',
     unlocked: 'You earned an achievement!',
     empty: 'Achievements will appear here after you log your first books!',
     friendEmpty: 'This reader has not unlocked any achievements yet.',

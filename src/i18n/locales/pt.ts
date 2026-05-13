@@ -235,6 +235,7 @@ const pt = {
     earned: 'Conquistadas',
     pending: 'Para conquistar',
     bonusEarned: '+{{amount}} Livrux',
+    bonusXp: '+{{amount}} XP',
     unlocked: 'Você ganhou uma conquista!',
     empty: 'As conquistas aparecem aqui depois de registrar seus primeiros livros!',
     friendEmpty: 'Este leitor ainda não desbloqueou nenhuma conquista.',

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,15 +13,17 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { supabase } from '../../../src/lib/supabase';
 import { useBooks } from '../../../src/hooks/useBooks';
+import { useTheme } from '../../../src/hooks/useTheme';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FriendBookCard } from '../../../src/components/book/FriendBookCard';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
 
 interface FriendReader {
   id: string;
@@ -29,10 +32,150 @@ interface FriendReader {
   xp: number;
 }
 
+const AVATAR_SIZE = 80;
+
+function createStyles(theme: ColorPalette) {
+  return StyleSheet.create({
+    root: { flex: 1 },
+    safe: { flex: 1, backgroundColor: 'transparent' },
+    heroBanner: {
+      borderRadius: Radius.xl,
+      marginHorizontal: Spacing.md,
+      marginTop: Spacing.xs,
+      marginBottom: Spacing.md,
+      paddingHorizontal: Spacing.xl,
+      paddingBottom: Spacing.xl,
+      ...Shadows.lg,
+    },
+    heroContent: {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      alignSelf: 'stretch',
+      gap: Spacing.md,
+      marginTop: Spacing['2xl'],
+      marginBottom: Spacing.md,
+    },
+    avatarRing: {
+      borderRadius: Radius.full,
+      padding: 4,
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      ...Shadows.md,
+      marginTop: -10,
+    },
+    heroRight: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      paddingBottom: 20,
+    },
+    readerName: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes['2xl'],
+      color: theme.textOnPrimary,
+    },
+    heroBadgesRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: Spacing.md,
+      marginBottom: Spacing.sm,
+    },
+    statChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: '#38BDF8',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      ...Shadows.sm,
+    },
+    statChipText: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.xl,
+      color: theme.textOnPrimary,
+    },
+    xpBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: '#FCD34D',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      ...Shadows.sm,
+    },
+    badgesBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: '#22C55E',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      ...Shadows.sm,
+    },
+    badgeIcon: { fontSize: 18 },
+    badgeCount: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.xl,
+      color: theme.textOnPrimary,
+    },
+    badgeCountAmber: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.xl,
+      color: '#78350F',
+    },
+    badgeCurrencyAmber: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.sm,
+      color: '#92400E',
+    },
+    list: {
+      paddingHorizontal: Spacing.xl,
+      paddingTop: Spacing.lg,
+      paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      marginBottom: Spacing.md,
+    },
+    sectionHeaderSpaced: { marginTop: Spacing.xl },
+    sectionIcon: { fontSize: 20 },
+    sectionTitle: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.lg,
+      color: theme.textPrimary,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      paddingTop: Spacing['2xl'],
+    },
+    emptyIcon: { fontSize: 56, marginBottom: Spacing.md },
+    emptyTitle: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.xl,
+      color: theme.textPrimary,
+      marginBottom: Spacing.xs,
+      textAlign: 'center',
+    },
+    emptySubtext: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: theme.textSecondary,
+      textAlign: 'center',
+      paddingHorizontal: Spacing.xl,
+      lineHeight: 20,
+    },
+  });
+}
+
 export default function FriendProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { readerId, fromReaderId } = useLocalSearchParams<{ readerId: string; fromReaderId: string }>();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [friendReader, setFriendReader] = useState<FriendReader | null>(null);
   const [badgeCount, setBadgeCount] = useState(0);
@@ -47,15 +190,8 @@ export default function FriendProfileScreen() {
     if (!readerId) return;
     setReaderLoading(true);
     const [{ data: readerData }, { count }] = await Promise.all([
-      supabase
-        .from('readers')
-        .select('id, name, avatar_seed, xp')
-        .eq('id', readerId)
-        .single(),
-      supabase
-        .from('reader_badges')
-        .select('*', { count: 'exact', head: true })
-        .eq('reader_id', readerId),
+      supabase.from('readers').select('id, name, avatar_seed, xp').eq('id', readerId).single(),
+      supabase.from('reader_badges').select('*', { count: 'exact', head: true }).eq('reader_id', readerId),
     ]);
     setFriendReader(readerData ?? null);
     setBadgeCount(count ?? 0);
@@ -78,18 +214,23 @@ export default function FriendProfileScreen() {
 
   const isLoading = readerLoading || booksLoading;
 
+  const bgGradient = (
+    <LinearGradient
+      colors={theme.backgroundGradient}
+      locations={[0, 0.6, 1]}
+      start={{ x: 0.15, y: 0 }}
+      end={{ x: 0.85, y: 1 }}
+      style={StyleSheet.absoluteFill}
+    />
+  );
+
   if (readerLoading) {
     return (
       <View style={styles.root}>
-        <LinearGradient
-          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.15, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
+        <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
+        {bgGradient}
         <SafeAreaView style={styles.safe}>
-          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+          <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
         </SafeAreaView>
       </View>
     );
@@ -97,16 +238,11 @@ export default function FriendProfileScreen() {
 
   return (
     <View style={styles.root}>
-      <LinearGradient
-        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
-        locations={[0, 0.6, 1]}
-        start={{ x: 0.15, y: 0 }}
-        end={{ x: 0.85, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+      <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
+      {bgGradient}
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
-        {/* ── Hero banner ── */}
+        {/* Jade hero — fixed friends accent */}
         <LinearGradient
           colors={['#3ECA8C', '#0A6E48']}
           start={{ x: 0, y: 0 }}
@@ -120,7 +256,7 @@ export default function FriendProfileScreen() {
                   <MultiavatarView
                     seed={friendReader.avatar_seed}
                     size={AVATAR_SIZE}
-                    borderColor={Colors.friendEmeraldLight}
+                    borderColor={theme.friendEmeraldLight}
                     borderWidth={4}
                   />
                 </View>
@@ -137,7 +273,6 @@ export default function FriendProfileScreen() {
                   <Text style={styles.badgeCountAmber}>{friendReader.xp}</Text>
                   <Text style={styles.badgeCurrencyAmber}>XP</Text>
                 </View>
-
                 <TouchableOpacity
                   style={styles.badgesBadge}
                   onPress={() => router.push(`/app/friend/badges/${readerId}?fromReaderId=${fromReaderId}`)}
@@ -146,11 +281,9 @@ export default function FriendProfileScreen() {
                   <Text style={styles.badgeIcon}>🏅</Text>
                   <Text style={styles.badgeCount}>{badgeCount}</Text>
                 </TouchableOpacity>
-
                 <View style={styles.statChip}>
                   <Text style={styles.statChipText}>📚 {completedBooks.length}</Text>
                 </View>
-
                 {readingNow.length > 0 && (
                   <View style={styles.statChip}>
                     <Text style={styles.statChipText}>📖 {readingNow.length}</Text>
@@ -161,7 +294,6 @@ export default function FriendProfileScreen() {
           )}
         </LinearGradient>
 
-        {/* ── Books list ── */}
         <FlatList
           data={completedBooks}
           keyExtractor={(item) => item.id}
@@ -171,7 +303,7 @@ export default function FriendProfileScreen() {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={async () => { await fetchReader(); await refreshBooks(); }}
-              tintColor={Colors.secondary}
+              tintColor={theme.secondary}
             />
           }
           ListHeaderComponent={
@@ -212,150 +344,3 @@ export default function FriendProfileScreen() {
     </View>
   );
 }
-
-const AVATAR_SIZE = 80;
-
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  safe: { flex: 1, backgroundColor: 'transparent' },
-
-  heroBanner: {
-    borderRadius: Radius.xl,
-    marginHorizontal: Spacing.md,
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xl,
-    ...Shadows.lg,
-  },
-  heroContent: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    alignSelf: 'stretch',
-    gap: Spacing.md,
-    marginTop: Spacing['2xl'],
-    marginBottom: Spacing.md,
-  },
-  avatarRing: {
-    borderRadius: Radius.full,
-    padding: 4,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    ...Shadows.md,
-    marginTop: -10,
-  },
-  heroRight: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: 20,
-  },
-  readerName: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['2xl'],
-    color: Colors.textOnPrimary,
-  },
-
-  heroBadgesRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: Spacing.md,
-    marginBottom: Spacing.sm,
-  },
-  statChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    backgroundColor: '#38BDF8',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    ...Shadows.sm,
-  },
-  statChipText: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
-    color: Colors.textOnPrimary,
-  },
-  xpBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    backgroundColor: '#FCD34D',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    ...Shadows.sm,
-  },
-  badgesBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    backgroundColor: '#22C55E',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    ...Shadows.sm,
-  },
-  badgeIcon: { fontSize: 18 },
-  badgeCount: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
-    color: Colors.textOnPrimary,
-  },
-  badgeCountAmber: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
-    color: '#78350F',
-  },
-  badgeCurrency: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.85)',
-  },
-  badgeCurrencyAmber: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: '#92400E',
-  },
-
-  list: {
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.lg,
-    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    marginBottom: Spacing.md,
-  },
-  sectionHeaderSpaced: {
-    marginTop: Spacing.xl,
-  },
-  sectionIcon: { fontSize: 20 },
-  sectionTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.lg,
-    color: Colors.textPrimary,
-  },
-
-  emptyContainer: {
-    alignItems: 'center',
-    paddingTop: Spacing['2xl'],
-  },
-  emptyIcon: { fontSize: 56, marginBottom: Spacing.md },
-  emptyTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.xl,
-    lineHeight: 20,
-  },
-});

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Book } from '../../types';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 
 interface FriendBookCardProps {
   book: Book;
@@ -27,14 +28,133 @@ const RATING_TEXT_COLOR: Record<string, string> = {
   loved: '#2E7D32',
 };
 
+const COVER_WIDTH = 68;
+const COVER_HEIGHT = 98;
+
+function createStyles(theme: ColorPalette) {
+  return StyleSheet.create({
+    card: {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      backgroundColor: theme.surface,
+      borderRadius: Radius.lg,
+      marginBottom: Spacing.sm,
+      overflow: 'hidden',
+      ...Shadows.md,
+    },
+    accentStrip: {
+      width: 5,
+      backgroundColor: theme.friendEmerald,
+    },
+    coverWrapper: {
+      margin: Spacing.md,
+      marginRight: Spacing.sm,
+      alignSelf: 'center',
+    },
+    cover: {
+      width: COVER_WIDTH,
+      height: COVER_HEIGHT,
+      borderRadius: Radius.sm,
+    },
+    coverPlaceholder: {
+      width: COVER_WIDTH,
+      height: COVER_HEIGHT,
+      borderRadius: Radius.sm,
+      backgroundColor: theme.surfaceVariant,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    coverIcon: { fontSize: 32 },
+    info: {
+      flex: 1,
+      paddingVertical: Spacing.md,
+      paddingRight: Spacing.md,
+    },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: Spacing.xs,
+      marginBottom: 2,
+    },
+    title: {
+      flex: 1,
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.md,
+      color: theme.textPrimary,
+      lineHeight: 20,
+    },
+    metaCol: {
+      alignItems: 'flex-end',
+      gap: 2,
+      paddingTop: 2,
+    },
+    date: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textDisabled,
+    },
+    pages: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textDisabled,
+    },
+    author: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textSecondary,
+      marginBottom: Spacing.xs,
+    },
+    chips: {
+      flexDirection: 'row',
+      gap: Spacing.xs,
+      flexWrap: 'wrap',
+      marginBottom: Spacing.sm,
+    },
+    chip: {
+      backgroundColor: theme.surfaceVariant,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 2,
+    },
+    chipText: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textSecondary,
+    },
+    ratingPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      alignSelf: 'flex-start',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 3,
+      marginBottom: Spacing.xs,
+    },
+    ratingEmoji: { fontSize: 14 },
+    ratingText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.xs,
+    },
+    review: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: theme.textSecondary,
+      fontStyle: 'italic',
+      lineHeight: 17,
+    },
+  });
+}
+
 export function FriendBookCard({ book }: FriendBookCardProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <View style={styles.card}>
-      {/* Coral accent strip */}
       <View style={styles.accentStrip} />
 
-      {/* Cover */}
       <View style={styles.coverWrapper}>
         {book.cover_url ? (
           <Image source={{ uri: book.cover_url }} style={styles.cover} resizeMode="cover" />
@@ -45,9 +165,7 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
         )}
       </View>
 
-      {/* Info */}
       <View style={styles.info}>
-        {/* Title + right meta column */}
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={2}>{book.title}</Text>
           <View style={styles.metaCol}>
@@ -60,7 +178,6 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
           <Text style={styles.author} numberOfLines={1}>{book.author}</Text>
         )}
 
-        {/* Chips */}
         {book.is_foreign_language && (
           <View style={styles.chips}>
             <View style={styles.chip}>
@@ -69,7 +186,6 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
           </View>
         )}
 
-        {/* Rating pill */}
         {book.rating && (
           <View style={[styles.ratingPill, { backgroundColor: RATING_COLOR[book.rating] }]}>
             <Text style={styles.ratingEmoji}>{RATING_EMOJI[book.rating]}</Text>
@@ -83,7 +199,6 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
           </View>
         )}
 
-        {/* Review snippet */}
         {book.review && (
           <Text style={styles.review} numberOfLines={2}>💬 {book.review}</Text>
         )}
@@ -91,119 +206,3 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
     </View>
   );
 }
-
-const COVER_WIDTH = 68;
-const COVER_HEIGHT = 98;
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    marginBottom: Spacing.sm,
-    overflow: 'hidden',
-    ...Shadows.md,
-  },
-  accentStrip: {
-    width: 5,
-    backgroundColor: Colors.friendEmerald,
-  },
-  coverWrapper: {
-    margin: Spacing.md,
-    marginRight: Spacing.sm,
-    alignSelf: 'center',
-  },
-  cover: {
-    width: COVER_WIDTH,
-    height: COVER_HEIGHT,
-    borderRadius: Radius.sm,
-  },
-  coverPlaceholder: {
-    width: COVER_WIDTH,
-    height: COVER_HEIGHT,
-    borderRadius: Radius.sm,
-    backgroundColor: Colors.surfaceVariant,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  coverIcon: { fontSize: 32 },
-  info: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-    paddingRight: Spacing.md,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.xs,
-    marginBottom: 2,
-  },
-  title: {
-    flex: 1,
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.md,
-    color: Colors.textPrimary,
-    lineHeight: 20,
-  },
-  metaCol: {
-    alignItems: 'flex-end',
-    gap: 2,
-    paddingTop: 2,
-  },
-  date: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textDisabled,
-  },
-  pages: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textDisabled,
-  },
-  author: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
-  },
-  chips: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    flexWrap: 'wrap',
-    marginBottom: Spacing.sm,
-  },
-  chip: {
-    backgroundColor: Colors.surfaceVariant,
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-  },
-  chipText: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
-  },
-  ratingPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    alignSelf: 'flex-start',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 3,
-    marginBottom: Spacing.xs,
-  },
-  ratingEmoji: { fontSize: 14 },
-  ratingText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xs,
-  },
-  review: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
-    fontStyle: 'italic',
-    lineHeight: 17,
-  },
-});

@@ -5,6 +5,10 @@ import { type ThemeId } from '../constants/theme';
 
 const THEME_KEY = (readerId: string) => `livrux_reader_theme_${readerId}`;
 
+// In-memory cache so repeated reader switches apply the theme synchronously
+// without waiting for AsyncStorage.
+const themeCache = new Map<string, ThemeId>();
+
 // Holds the currently selected reader so all nested screens share the context.
 interface ReaderState {
   selectedReader: Reader | null;
@@ -39,16 +43,24 @@ export const useReaderStore = create<ReaderState>((set) => ({
 
   setSelectedReader: (reader) => set({
     selectedReader: reader,
-    // Reset to classic when reader is deselected (parent view)
-    ...(reader === null ? { currentThemeId: 'classic' } : {}),
+    // Apply cached theme synchronously; fall back to classic for null/unknown.
+    currentThemeId: reader === null
+      ? 'classic'
+      : (themeCache.get(reader.id) ?? 'classic'),
   }),
 
   setThemeId: (themeId) => set({ currentThemeId: themeId }),
 
   loadThemeForReader: async (readerId) => {
+    // Serve from cache synchronously first so callers that await this
+    // get an immediate state update before the AsyncStorage round-trip.
+    if (themeCache.has(readerId)) {
+      set({ currentThemeId: themeCache.get(readerId)! });
+    }
     try {
       const stored = await AsyncStorage.getItem(THEME_KEY(readerId));
       const themeId: ThemeId = (stored as ThemeId) ?? 'classic';
+      themeCache.set(readerId, themeId);
       set({ currentThemeId: themeId });
     } catch {
       set({ currentThemeId: 'classic' });
@@ -56,6 +68,7 @@ export const useReaderStore = create<ReaderState>((set) => ({
   },
 
   saveThemeForReader: async (readerId, themeId) => {
+    themeCache.set(readerId, themeId);
     set({ currentThemeId: themeId });
     try {
       await AsyncStorage.setItem(THEME_KEY(readerId), themeId);

@@ -184,14 +184,14 @@ export const indigoColors: ColorPalette = {
 
 export const rubiColors: ColorPalette = {
   ...noiteColors,
-  // Reader banner gradient: vivid crimson → deep ruby wine
-  secondary: '#E11D48',        // rose-600 — banner gradient start
-  secondary2: '#881337',       // rose-900 — banner gradient end (deep ruby)
-  secondaryLight: '#4C0519',   // very dark rose for chip tints
-  secondaryDark: '#BE123C',    // rose-700
-  readerBlue: '#E11D48',       // reader accent (chips, pull-to-refresh, indicators)
-  readerBlueLight: '#4C0519',  // dark ruby for chip backgrounds
-  chipBook: '#E11D48',
+  // Reader banner gradient: vivid red → deep dark red
+  secondary: '#EF4444',        // red-500 — banner gradient start
+  secondary2: '#7F1D1D',       // red-950 — banner gradient end
+  secondaryLight: '#3B0A0A',   // very dark red for chip tints
+  secondaryDark: '#B91C1C',    // red-700
+  readerBlue: '#EF4444',       // reader accent (chips, pull-to-refresh, indicators)
+  readerBlueLight: '#3B0A0A',  // dark red for chip backgrounds
+  chipBook: '#EF4444',
   shadowColor: '#DC2626',      // red shadows throughout the theme
   flashFrameBackground: '#0F172A',
 };
@@ -245,7 +245,8 @@ export function createShadows(shadowColor: string) {
   return {
     sm: { shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 6,  elevation: 3  },
     md: { shadowColor, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.16, shadowRadius: 12, elevation: 5  },
-    lg: { shadowColor, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.22, shadowRadius: 24, elevation: 10 },
+    lg: { shadowColor, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.55, shadowRadius: 40, elevation: 22 },
+    xl: { shadowColor, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.28, shadowRadius: 48, elevation: 15 },
   };
 }
 

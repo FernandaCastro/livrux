@@ -52,7 +52,6 @@ function createStyles(theme: ColorPalette) {
       marginBottom: Spacing.md,
       paddingHorizontal: Spacing.lg,
       paddingBottom: Spacing.lg,
-      overflow: 'hidden',
       ...S.lg,
     },
     bannerHeader: {

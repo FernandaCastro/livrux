@@ -20,8 +20,8 @@ export function useTabSwipe(currentTab: TabId) {
     if (!selectedReader) return;
 
     const idx = TAB_ORDER.indexOf(currentTab);
-    const toNext = (dx > SWIPE_THRESHOLD || vx > VELOCITY_THRESHOLD) && idx < TAB_ORDER.length - 1;
-    const toPrev = (dx < -SWIPE_THRESHOLD || vx < -VELOCITY_THRESHOLD) && idx > 0;
+    const toNext = (dx < -SWIPE_THRESHOLD || vx < -VELOCITY_THRESHOLD) && idx < TAB_ORDER.length - 1;
+    const toPrev = (dx > SWIPE_THRESHOLD || vx > VELOCITY_THRESHOLD) && idx > 0;
     if (!toNext && !toPrev) return;
 
     const target = TAB_ORDER[idx + (toNext ? 1 : -1)];

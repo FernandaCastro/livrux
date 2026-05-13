@@ -1357,3 +1357,46 @@ AS $$
   AND    token::text ILIKE p_code || '%'
   LIMIT  1;
 $$;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- GRANTS
+-- Required so the authenticated/anon roles pass the PostgreSQL permission check
+-- before RLS policies are evaluated. consent_logs is intentionally excluded —
+-- it has no RLS policies, so only the service role (Edge Function) can access it.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+GRANT SELECT ON public.badges TO authenticated;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON
+  public.user_profiles,
+  public.reward_formulas,
+  public.readers,
+  public.books,
+  public.livrux_transactions,
+  public.reader_friendships,
+  public.reading_sessions,
+  public.reader_badges,
+  public.co_guardians,
+  public.guardian_invitations
+TO authenticated;
+
+GRANT EXECUTE ON FUNCTION
+  public.family_owner_id(),
+  public.my_reader_ids(),
+  public.calculate_streak(UUID),
+  public.get_streak_info(UUID),
+  public.search_reader_by_code(TEXT),
+  public.check_and_award_badges(UUID),
+  public.check_book_club_badge(UUID),
+  public.revoke_unqualified_badges(UUID),
+  public.log_reading_session(UUID, UUID, INTEGER, DATE),
+  public.log_book(UUID, TEXT, TEXT, INTEGER, TEXT, NUMERIC, TEXT, DATE, DATE, TEXT, BOOLEAN, TEXT, TEXT),
+  public.complete_book(UUID, DATE, NUMERIC, TEXT, TEXT),
+  public.delete_book(UUID),
+  public.update_book(UUID, TEXT, TEXT, INTEGER, TEXT, DATE, BOOLEAN, NUMERIC, TEXT, TEXT),
+  public.spend_livrux(UUID, NUMERIC, TEXT),
+  public.find_invitation_by_short_code(TEXT)
+TO authenticated;

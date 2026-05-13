@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,6 +14,7 @@ import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useBooks, useReadingBooks } from '../../../src/hooks/useBooks';
@@ -22,25 +24,265 @@ import { useDialogStore } from '../../../src/stores/dialogStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { useStreak } from '../../../src/hooks/useStreak';
 import { useBadges } from '../../../src/hooks/useBadges';
+import { useTheme } from '../../../src/hooks/useTheme';
+import { GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
+import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
 import { supabase } from '../../../src/lib/supabase';
 import { BookCard } from '../../../src/components/book/BookCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
 import type { Reader } from '../../../src/types';
+
+const AVATAR_SIZE = 80;
+
+function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
+  return StyleSheet.create({
+    root: { flex: 1 },
+    safe: { flex: 1, backgroundColor: 'transparent' },
+
+    heroBanner: {
+      alignItems: 'center',
+      borderRadius: Radius.xl,
+      marginHorizontal: Spacing.md,
+      marginTop: Spacing.xs,
+      marginBottom: Spacing.md,
+      paddingHorizontal: Spacing.lg,
+      paddingBottom: Spacing.lg,
+      ...S.lg,
+    },
+    bannerHeader: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignSelf: 'stretch',
+      paddingTop: Spacing.md,
+    },
+    bannerActions: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+    },
+    actionBtn: {
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.xs,
+    },
+    actionBtnDelete: {
+      backgroundColor: 'rgba(255,100,100,0.25)',
+    },
+    actionBtnText: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.sm,
+      color: theme.textOnPrimary,
+    },
+    actionBtnDeleteText: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.sm,
+      color: '#FFB3B3',
+    },
+    heroContent: {
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      alignSelf: 'stretch',
+      gap: Spacing.sm,
+      marginBottom: Spacing.md,
+    },
+    heroRight: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      paddingBottom: 20,
+    },
+    avatarRing: {
+      borderRadius: Radius.full,
+      padding: 4,
+      backgroundColor: 'rgba(255,255,255,0.15)',
+      ...S.md,
+      marginTop: -20,
+    },
+    readerName: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes['2xl'],
+      color: theme.textOnPrimary,
+    },
+    heroBadgesRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: Spacing.md,
+    },
+    balanceBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: theme.chipCoin,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      ...S.sm,
+    },
+    badgeCoin: { fontSize: 20 },
+    balanceAmount: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.lg,
+      color: theme.textOnPrimary,
+    },
+    xpAmount: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.lg,
+      color: '#78350F',
+    },
+    xpCurrency: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.sm,
+      color: '#92400E',
+    },
+    xpBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: '#FCD34D',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      ...S.sm,
+    },
+    badgesBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      backgroundColor: '#22C55E',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      ...S.sm,
+    },
+    badgeIcon: { fontSize: 18 },
+    booksCount: {
+      marginTop: 3,
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.lg,
+      color: theme.textOnPrimary,
+    },
+    streakRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      gap: Spacing.sm,
+      marginTop: Spacing.sm,
+    },
+    streakChip: {
+      flex: 1,
+      backgroundColor: 'rgba(255,255,255,0.18)',
+      borderRadius: Radius.lg,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.md,
+      alignItems: 'center',
+    },
+    streakText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textOnPrimary,
+    },
+    streakBest: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.xs,
+      color: 'rgba(255,255,255,0.75)',
+      marginTop: 2,
+    },
+    booksChip: {
+      flex: 1,
+      backgroundColor: 'rgba(255,255,255,0.18)',
+      borderRadius: Radius.lg,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.xs,
+      alignItems: 'center',
+    },
+    bookRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      gap: Spacing.xs,
+      marginTop: Spacing.sm,
+    },
+    booksChipText: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.xs,
+      color: theme.textOnPrimary,
+    },
+    addBookBtn: {
+      alignSelf: 'stretch',
+      marginTop: Spacing.lg,
+      backgroundColor: 'rgba(255,255,255,0.22)',
+      borderRadius: Radius.xl,
+      paddingVertical: Spacing.sm,
+      alignItems: 'center',
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.55)',
+    },
+    addBookBtnText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textOnPrimary,
+    },
+    list: {
+      paddingHorizontal: Spacing.xl,
+      paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      marginBottom: Spacing.md,
+    },
+    sectionIcon: { fontSize: 20 },
+    sectionTitle: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.lg,
+      letterSpacing: 0.8,
+      color: theme.secondary,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      paddingTop: Spacing['2xl'],
+    },
+    emptyIcon: { width: 56, height: 56, marginBottom: Spacing.md },
+    emptyTitle: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.xl,
+      color: theme.textPrimary,
+      marginBottom: Spacing.xs,
+      textAlign: 'center',
+    },
+    emptySubtext: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: theme.textSecondary,
+      textAlign: 'center',
+      paddingHorizontal: Spacing.xl,
+      lineHeight: 20,
+    },
+    bookIcon: {
+      width: 25,
+      height: 25,
+      resizeMode: 'contain',
+    },
+  });
+}
 
 export default function ReaderDashboardScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { selectedReader, setSelectedReader, bookPersistedCount } = useReaderStore();
+  const { selectedReader, setSelectedReader, bookPersistedCount, loadThemeForReader } = useReaderStore();
   const { deleteReader } = useReaders();
   const showDialog = useDialogStore((s) => s.show);
   const { books, isLoading, refresh, fetchNextPage, hasNextPage, isFetchingNextPage } = useBooks(id ?? null);
   const { readingBooks, refresh: refreshReading } = useReadingBooks(id ?? null);
   const { streak } = useStreak(id ?? null);
   const { earnedBadges, refresh: refreshBadges } = useBadges(id ?? null);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const { gesture: swipeGesture, animatedStyle: swipeStyle } = useTabSwipe('reader');
 
   const completedBooks = books;
   const { canEditReader, isParentUnlocked } = useParentalStore();
@@ -86,6 +328,7 @@ export default function ReaderDashboardScreen() {
       refreshReading();
       refreshBadges();
       if (id) {
+        loadThemeForReader(id);
         supabase
           .from('readers')
           .select('*')
@@ -100,18 +343,20 @@ export default function ReaderDashboardScreen() {
 
   if (!reader) {
     return (
-      <View style={styles.root}>
-        <LinearGradient
-          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.15, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-        <SafeAreaView style={styles.safe}>
-          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
-        </SafeAreaView>
-      </View>
+      <GestureDetector gesture={swipeGesture}>
+        <Animated.View style={[styles.root, swipeStyle]}>
+          <LinearGradient
+            colors={theme.backgroundGradient}
+            locations={[0, 0.6, 1]}
+            start={{ x: 0.15, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+          <SafeAreaView style={styles.safe}>
+            <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
+          </SafeAreaView>
+        </Animated.View>
+      </GestureDetector>
     );
   }
 
@@ -129,9 +374,11 @@ export default function ReaderDashboardScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <GestureDetector gesture={swipeGesture}>
+      <Animated.View style={[styles.root, swipeStyle]}>
+      <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
-        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
         start={{ x: 0.15, y: 0 }}
         end={{ x: 0.85, y: 1 }}
@@ -142,7 +389,7 @@ export default function ReaderDashboardScreen() {
       <SafeAreaView style={styles.safe}>
         {/* ── Hero banner ── */}
         <LinearGradient
-          colors={[Colors.secondary, Colors.secondary2]}
+          colors={[theme.secondary, theme.secondary2]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.heroBanner}
@@ -248,7 +495,7 @@ export default function ReaderDashboardScreen() {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={() => { refresh(); refreshReading(); }}
-              tintColor={Colors.secondary}
+              tintColor={theme.secondary}
             />
           }
           onEndReached={() => { if (hasNextPage) fetchNextPage(); }}
@@ -289,7 +536,7 @@ export default function ReaderDashboardScreen() {
           }
           ListFooterComponent={
             isFetchingNextPage ? (
-              <ActivityIndicator color={Colors.secondary} style={{ paddingVertical: 16 }} />
+              <ActivityIndicator color={theme.secondary} style={{ paddingVertical: 16 }} />
             ) : null
           }
           renderItem={({ item }) => (
@@ -303,250 +550,7 @@ export default function ReaderDashboardScreen() {
 
         <BottomMenu />
       </SafeAreaView>
-    </View>
+      </Animated.View>
+    </GestureDetector>
   );
 }
-
-const AVATAR_SIZE = 80;
-
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  safe: { flex: 1, backgroundColor: 'transparent' },
-
-  /* ── Hero ── */
-  heroBanner: {
-    alignItems: 'center',
-    borderRadius: Radius.xl,
-    marginHorizontal: Spacing.md,
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
-    overflow: 'hidden',
-    ...Shadows.lg,
-  },
-  bannerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignSelf: 'stretch',
-    paddingTop: Spacing.md,
-  },
-  bannerActions: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  actionBtn: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-  },
-  actionBtnDelete: {
-    backgroundColor: 'rgba(255,100,100,0.25)',
-  },
-  actionBtnText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: Colors.textOnPrimary,
-  },
-  actionBtnDeleteText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: '#FFB3B3',
-  },
-  heroContent: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    alignSelf: 'stretch',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  heroRight: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: 20,
-  },
-  avatarRing: {
-    borderRadius: Radius.full,
-    padding: 4,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    ...Shadows.md,
-    marginTop: -20,
-  },
-  readerName: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['2xl'],
-    color: Colors.textOnPrimary,
-  },
-  heroBadgesRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: Spacing.md,
-  },
-  balanceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    backgroundColor: Colors.chipCoin,
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    ...Shadows.sm,
-  },
-  badgeCoin: { fontSize: 20 },
-  balanceAmount: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.lg,
-    color: Colors.textOnPrimary,
-  },
-  balanceCurrency: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.85)',
-  },
-  xpAmount: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.lg,
-    color: '#78350F',
-  },
-  xpCurrency: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: '#92400E',
-  },
-  xpBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    backgroundColor: '#FCD34D',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    ...Shadows.sm,
-  },
-  badgesBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    backgroundColor: '#22C55E',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
-    ...Shadows.sm,
-  },
-  badgeIcon: { fontSize: 18 },
-  booksCount: {
-    marginTop:3,
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.lg,
-    color: Colors.textOnPrimary,
-  },
-
-  /* ── Streak ── */
-  streakRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: Spacing.sm,
-    marginTop: Spacing.sm,
-  },
-  streakChip: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: Radius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    alignItems: 'center',
-  },
-  streakText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
-  },
-  streakBest: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.xs,
-    color: 'rgba(255,255,255,0.75)',
-    marginTop: 2,
-  },
-  booksChip: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: Radius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    alignItems: 'center',
-  },
-  bookRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: Spacing.xs,
-    marginTop: Spacing.sm,
-  },
-  booksChipText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.xs,
-    color: Colors.textOnPrimary,
-  },
-
-  /* ── Add book ── */
-  addBookBtn: {
-    alignSelf: 'stretch',
-    marginTop: Spacing.lg,
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    borderRadius: Radius.xl,
-    paddingVertical: Spacing.sm,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.55)',
-  },
-  addBookBtnText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
-  },
-
-  /* ── List ── */
-  list: {
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing.xl,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    marginBottom: Spacing.md,
-  },
-  sectionIcon: { fontSize: 20 },
-  sectionTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.lg,
-    color: Colors.secondary,
-  },
-
-  /* ── Empty ── */
-  emptyContainer: {
-    alignItems: 'center',
-    paddingTop: Spacing['2xl'],
-  },
-  emptyIcon: { width: 56, height: 56, marginBottom: Spacing.md },
-  emptyTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.xl,
-    lineHeight: 20,
-  },
-  bookIcon: {
-    width: 25,
-    height: 25,
-    resizeMode: 'contain',
-  },
-});

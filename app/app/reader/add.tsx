@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -22,9 +22,16 @@ import { TextInput } from '../../../src/components/ui/TextInput';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows, themes, type ThemeId } from '../../../src/constants/theme';
 
 const AVATAR_DISPLAY_SIZE = 100;
+
+const THEME_OPTIONS: { id: ThemeId; label: string; colors: [string, string] }[] = [
+  { id: 'classic', label: 'Clássico', colors: ['#7C3AED', '#A855F7'] },
+  { id: 'noite',   label: 'Noite',    colors: ['#0F172A', '#818CF8'] },
+  { id: 'indigo',  label: 'Índigo',   colors: ['#4F46E5', '#06B6D4'] },
+  { id: 'rubi',    label: 'Rubi',     colors: ['#0F172A', '#EF4444'] },
+];
 
 function useReaderSchema() {
   const { t } = useTranslation();
@@ -49,7 +56,7 @@ export default function AddReaderScreen() {
   const isEditing = !!editId;
 
   const { createReader, updateReader } = useReaders();
-  const { selectedReader } = useReaderStore();
+  const { selectedReader, loadThemeForReader, saveThemeForReader, currentThemeId } = useReaderStore();
   const showToast = useToastStore((s) => s.show);
 
   const [avatarHistory, setAvatarHistory] = useState<string[]>(() => [generateAvatarSeed()]);
@@ -69,8 +76,10 @@ export default function AddReaderScreen() {
         const seed = generateAvatarSeed();
         setAvatarHistory([seed]);
         setHistoryIndex(0);
+      } else if (editId) {
+        loadThemeForReader(editId);
       }
-    }, [isEditing])
+    }, [isEditing, editId])
   );
 
   useEffect(() => {
@@ -168,6 +177,41 @@ export default function AddReaderScreen() {
             <Text style={styles.avatarHint}>{t('reader.avatarHint', { defaultValue: '‹ › para trocar avatar' })}</Text>
           </View>
 
+          {/* Theme picker — only shown when editing an existing reader */}
+          {isEditing && editId && (
+            <View style={styles.themeSection}>
+              <Text style={styles.themeLabel}>Tema</Text>
+              <View style={styles.themeRow}>
+                {THEME_OPTIONS.map((opt) => {
+                  const selected = currentThemeId === opt.id;
+                  return (
+                    <TouchableOpacity
+                      key={opt.id}
+                      style={styles.themeOption}
+                      onPress={() => saveThemeForReader(editId, opt.id)}
+                      activeOpacity={0.8}
+                    >
+                      <LinearGradient
+                        colors={opt.colors}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={[
+                          styles.themeSwatch,
+                          selected && styles.themeSwatchSelected,
+                        ]}
+                      >
+                        {selected && <Text style={styles.themeCheck}>✓</Text>}
+                      </LinearGradient>
+                      <Text style={[styles.themeOptionLabel, selected && styles.themeOptionLabelSelected]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          )}
+
           {/* Name input */}
           <Controller
             control={control}
@@ -226,7 +270,7 @@ const styles = StyleSheet.create({
   },
   avatarSection: {
     alignItems: 'center',
-    marginBottom: Spacing['2xl'],
+    marginBottom: Spacing.xl,
     marginTop: Spacing.md,
     gap: Spacing.sm,
   },
@@ -265,5 +309,54 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xs,
     color: Colors.textSecondary,
   },
+
+  /* Theme picker */
+  themeSection: {
+    marginBottom: Spacing.xl,
+  },
+  themeLabel: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.md,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  themeRow: {
+    flexDirection: 'row',
+    gap: Spacing.lg,
+    justifyContent: 'center',
+  },
+  themeOption: {
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  themeSwatch: {
+    width: 64,
+    height: 64,
+    borderRadius: Radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.md,
+  },
+  themeSwatchSelected: {
+    borderWidth: 3,
+    borderColor: Colors.textPrimary,
+  },
+  themeCheck: {
+    fontSize: 24,
+    color: '#FFFFFF',
+    fontFamily: Fonts.bodyBold,
+  },
+  themeOptionLabel: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+  },
+  themeOptionLabelSelected: {
+    fontFamily: Fonts.bodyBold,
+    color: Colors.textPrimary,
+  },
+
   saveButton: { marginTop: Spacing.md },
 });

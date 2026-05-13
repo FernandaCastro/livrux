@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,10 +12,14 @@ import {
   RefreshControl,
   AppState,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import { GestureDetector } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
+import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect, useRef } from 'react';
 import * as Clipboard from 'expo-clipboard';
 
@@ -22,18 +27,245 @@ import { useFriends } from '../../../src/hooks/useFriends';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useParentalStore } from '../../../src/stores/parentalStore';
 import { useDialogStore } from '../../../src/stores/dialogStore';
+import { useTheme } from '../../../src/hooks/useTheme';
 import { FriendCard } from '../../../src/components/friends/FriendCard';
 import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
 import type { FriendSearchResult } from '../../../src/types';
+
+function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
+  return StyleSheet.create({
+    root: { flex: 1 },
+    safe: { flex: 1, backgroundColor: 'transparent' },
+    heroBanner: {
+      borderRadius: Radius.xl,
+      marginHorizontal: Spacing.md,
+      marginTop: Spacing.xs,
+      marginBottom: Spacing.md,
+      paddingHorizontal: Spacing.xl,
+      paddingVertical: Spacing.xl,
+      alignItems: 'center',
+      ...S.lg,
+    },
+    bannerAvatar: {
+      position: 'absolute',
+      top: Spacing.md,
+      left: Spacing.md,
+    },
+    title: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes['2xl'],
+      color: theme.textOnPrimary,
+      marginBottom: Spacing.sm,
+    },
+    codeBlock: { alignItems: 'center' },
+    codeLabel: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.sm,
+      color: 'white',
+      marginBottom: 4,
+    },
+    codeValue: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes['4xl'],
+      color: theme.textOnPrimary,
+      letterSpacing: 6,
+    },
+    codeHint: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.sm,
+      color: 'white',
+      textAlign: 'center',
+      marginTop: 4,
+      marginBottom: Spacing.sm,
+    },
+    list: {
+      paddingHorizontal: Spacing.xl,
+      paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'] + 72,
+    },
+    section: { marginBottom: Spacing.lg },
+    sectionLabel: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.lg,
+      color: theme.friendEmerald,
+      letterSpacing: 0.8,
+      marginBottom: Spacing.sm,
+      marginTop: Spacing.xs,
+    },
+    autonomyHint: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: theme.textDisabled,
+      textAlign: 'center',
+      paddingVertical: Spacing.sm,
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      paddingTop: Spacing['2xl'],
+      paddingBottom: Spacing['2xl'],
+    },
+    emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
+    emptyText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textPrimary,
+      marginBottom: Spacing.xs,
+    },
+    emptySubtext: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: theme.textSecondary,
+      textAlign: 'center',
+      paddingHorizontal: Spacing.xl,
+    },
+    addBtn: {
+      alignSelf: 'stretch',
+      marginTop: Spacing.lg,
+      backgroundColor: 'rgba(255,255,255,0.25)',
+      borderRadius: Radius.xl,
+      paddingVertical: Spacing.sm,
+      alignItems: 'center',
+      borderWidth: 1.5,
+      borderColor: 'rgba(255,255,255,0.6)',
+    },
+    addBtnText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textOnPrimary,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: theme.background,
+      borderTopLeftRadius: Radius.xl,
+      borderTopRightRadius: Radius.xl,
+      paddingTop: Spacing.xl,
+      paddingBottom: Spacing['3xl'],
+      paddingHorizontal: Spacing.xl,
+    },
+    sheetTitle: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes['2xl'],
+      color: theme.textPrimary,
+      textAlign: 'center',
+      marginBottom: Spacing.xs,
+    },
+    sheetSubtitle: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: theme.textSecondary,
+      textAlign: 'center',
+      marginBottom: Spacing.xl,
+    },
+    codeInputRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      marginBottom: Spacing.md,
+    },
+    codeInput: {
+      flex: 1,
+      backgroundColor: theme.surface,
+      borderRadius: Radius.md,
+      borderWidth: 1,
+      borderColor: theme.border,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.md,
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.xl,
+      color: theme.textPrimary,
+      textAlign: 'center',
+      letterSpacing: 4,
+    },
+    searchBtn: {
+      backgroundColor: theme.secondary,
+      borderRadius: Radius.md,
+      paddingHorizontal: Spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    searchBtnDisabled: { opacity: 0.5 },
+    searchBtnText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textOnPrimary,
+    },
+    errorText: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: theme.error,
+      textAlign: 'center',
+      marginBottom: Spacing.md,
+    },
+    searchResultCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: Radius.lg,
+      padding: Spacing.md,
+      gap: Spacing.md,
+      marginBottom: Spacing.lg,
+      ...S.sm,
+    },
+    searchResultInfo: { flex: 1 },
+    searchResultName: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textPrimary,
+      marginBottom: 2,
+    },
+    searchResultBooks: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: theme.textSecondary,
+    },
+    sendBtn: {
+      backgroundColor: theme.secondary,
+      borderRadius: Radius.md,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+    },
+    sendBtnText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.sm,
+      color: theme.textOnPrimary,
+    },
+    sentContainer: {
+      alignItems: 'center',
+      paddingVertical: Spacing.lg,
+      marginBottom: Spacing.md,
+    },
+    sentIcon: { fontSize: 36, marginBottom: Spacing.sm },
+    sentText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.success,
+      textAlign: 'center',
+    },
+    closeBtn: {
+      alignItems: 'center',
+      paddingVertical: Spacing.sm,
+    },
+    closeBtnText: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.md,
+      color: theme.textSecondary,
+    },
+  });
+}
 
 export default function FriendsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { readerId } = useLocalSearchParams<{ readerId: string }>();
   const { selectedReader } = useReaderStore();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const { gesture: swipeGesture, animatedStyle: swipeStyle } = useTabSwipe('friends');
 
   const {
     friends,
@@ -93,7 +325,6 @@ export default function FriendsScreen() {
     setSearchError(null);
     setSearchResult(null);
     setRequestSent(false);
-
     const result = await searchByCode(searchCode);
     if (!result) {
       setSearchError(t('friends.codeNotFound'));
@@ -125,10 +356,14 @@ export default function FriendsScreen() {
     });
   };
 
+
   return (
-    <View style={styles.root}>
+    <GestureDetector gesture={swipeGesture}>
+      <Animated.View style={[styles.root, swipeStyle]}>
+      <Stack.Screen options={{ animation: 'none' }} />
+      <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
-        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
         start={{ x: 0.15, y: 0 }}
         end={{ x: 0.85, y: 1 }}
@@ -136,7 +371,7 @@ export default function FriendsScreen() {
       />
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
-        {/* Hero banner */}
+        {/* Jade hero — fixed friends accent */}
         <LinearGradient
           colors={['#3ECA8C', '#0A6E48']}
           start={{ x: 0, y: 0 }}
@@ -169,7 +404,7 @@ export default function FriendsScreen() {
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor={Colors.secondary} />
+            <RefreshControl refreshing={isLoading} onRefresh={refresh} tintColor={theme.secondary} />
           }
           ListHeaderComponent={
             <>
@@ -202,7 +437,6 @@ export default function FriendsScreen() {
                   )}
                 </View>
               )}
-
               {sentRequests.length > 0 && (
                 <View style={styles.section}>
                   <Text style={styles.sectionLabel}>{t('friends.sentRequests')}</Text>
@@ -218,7 +452,6 @@ export default function FriendsScreen() {
                   ))}
                 </View>
               )}
-
               {friends.length > 0 && (
                 <Text style={styles.sectionLabel}>{t('friends.myFriends')}</Text>
               )}
@@ -267,7 +500,7 @@ export default function FriendsScreen() {
                     setRequestSent(false);
                   }}
                   placeholder={t('friends.codePlaceholder')}
-                  placeholderTextColor={Colors.textDisabled}
+                  placeholderTextColor={theme.textDisabled}
                   autoCapitalize="characters"
                   maxLength={6}
                   autoCorrect={false}
@@ -279,7 +512,7 @@ export default function FriendsScreen() {
                   activeOpacity={0.8}
                 >
                   {searchLoading
-                    ? <ActivityIndicator color={Colors.textOnPrimary} size="small" />
+                    ? <ActivityIndicator color={theme.textOnPrimary} size="small" />
                     : <Text style={styles.searchBtnText}>{t('friends.search')}</Text>
                   }
                 </TouchableOpacity>
@@ -291,12 +524,12 @@ export default function FriendsScreen() {
 
               {searchResult && !requestSent && (
                 <LinearGradient
-                  colors={['#FEFBFF', '#FFFAF4']}
+                  colors={theme.cardGradient}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.searchResultCard}
                 >
-                  <MultiavatarView seed={searchResult.avatar_seed} size={56} borderColor={Colors.secondaryLight} borderWidth={2} />
+                  <MultiavatarView seed={searchResult.avatar_seed} size={56} borderColor={theme.secondaryLight} borderWidth={2} />
                   <View style={styles.searchResultInfo}>
                     <Text style={styles.searchResultName}>{searchResult.name}</Text>
                     <Text style={styles.searchResultBooks}>📚 {searchResult.book_count} {t('friends.booksRead')}</Text>
@@ -326,231 +559,7 @@ export default function FriendsScreen() {
 
         <BottomMenu />
       </SafeAreaView>
-    </View>
+      </Animated.View>
+    </GestureDetector>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  safe: { flex: 1, backgroundColor: 'transparent' },
-  heroBanner: {
-    borderRadius: Radius.xl,
-    marginHorizontal: Spacing.md,
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.xl,
-    alignItems: 'center',
-    ...Shadows.lg,
-  },
-  bannerAvatar: {
-    position: 'absolute',
-    top: Spacing.md,
-    left: Spacing.md,
-  },
-  title: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['2xl'],
-    color: Colors.textOnPrimary,
-    marginBottom: Spacing.sm,
-  },
-  codeBlock: {
-    alignItems: 'center',
-  },
-  codeLabel: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: 'white',
-    marginBottom: 4,
-  },
-  codeValue: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['4xl'],
-    color: Colors.textOnPrimary,
-    letterSpacing: 6,
-  },
-  codeHint: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.sm,
-    color: 'white',
-    textAlign: 'center',
-    marginTop: 4,
-    marginBottom: Spacing.sm,
-  },
-  list: {
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'] + 72,
-  },
-  section: {
-    marginBottom: Spacing.lg,
-  },
-  sectionLabel: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.sm,
-    color: Colors.friendEmerald,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: Spacing.sm,
-    marginTop: Spacing.xs,
-  },
-  autonomyHint: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textDisabled,
-    textAlign: 'center',
-    paddingVertical: Spacing.sm,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingTop: Spacing['2xl'],
-    paddingBottom: Spacing['2xl'],
-  },
-  emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
-  emptyText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
-  },
-  emptySubtext: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.xl,
-  },
-  addBtn: {
-    alignSelf: 'stretch',
-    marginTop: Spacing.lg,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderRadius: Radius.xl,
-    paddingVertical: Spacing.sm,
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.6)',
-  },
-  addBtnText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: Colors.background,
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing['3xl'],
-    paddingHorizontal: Spacing.xl,
-  },
-  sheetTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['2xl'],
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
-  },
-  sheetSubtitle: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: Spacing.xl,
-  },
-  codeInputRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
-  },
-  codeInput: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.xl,
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    letterSpacing: 4,
-  },
-  searchBtn: {
-    backgroundColor: Colors.secondary,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  searchBtnDisabled: { opacity: 0.5 },
-  searchBtnText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
-  },
-  errorText: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.error,
-    textAlign: 'center',
-    marginBottom: Spacing.md,
-  },
-  searchResultCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    gap: Spacing.md,
-    marginBottom: Spacing.lg,
-    ...Shadows.sm,
-  },
-  searchResultInfo: { flex: 1 },
-  searchResultName: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textPrimary,
-    marginBottom: 2,
-  },
-  searchResultBooks: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-  },
-  sendBtn: {
-    backgroundColor: Colors.secondary,
-    borderRadius: Radius.md,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-  },
-  sendBtnText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.sm,
-    color: Colors.textOnPrimary,
-  },
-  sentContainer: {
-    alignItems: 'center',
-    paddingVertical: Spacing.lg,
-    marginBottom: Spacing.md,
-  },
-  sentIcon: { fontSize: 36, marginBottom: Spacing.sm },
-  sentText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.success,
-    textAlign: 'center',
-  },
-  closeBtn: {
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-  },
-  closeBtnText: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
-  },
-});

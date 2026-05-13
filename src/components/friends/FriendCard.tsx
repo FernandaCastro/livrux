@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MultiavatarView } from '../reader/MultiavatarView';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 
 interface FriendCardProps {
   name: string;
@@ -14,8 +16,152 @@ interface FriendCardProps {
   onReject?: () => void;
 }
 
+const AVATAR_SIZE = 60;
+
+function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
+  return StyleSheet.create({
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.cardGradient[0],
+      borderRadius: Radius.lg,
+      marginBottom: Spacing.sm,
+      overflow: 'hidden',
+      ...S.md,
+    },
+    accentStrip: {
+      width: 5,
+      alignSelf: 'stretch',
+      backgroundColor: theme.chipFriend,
+    },
+    accentStripPending: {
+      backgroundColor: theme.friendEmeraldLight,
+    },
+    avatarWrapper: {
+      marginVertical: Spacing.md,
+      marginHorizontal: Spacing.md,
+    },
+    info: {
+      flex: 1,
+      paddingVertical: Spacing.md,
+    },
+    newBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: theme.accentLight,
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 2,
+      marginBottom: Spacing.xs,
+    },
+    newBadgeText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.xs,
+      color: theme.accent,
+    },
+    sentBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: '#FEF3C7',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 2,
+      marginBottom: Spacing.xs,
+    },
+    sentBadgeText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.xs,
+      color: '#92400E',
+    },
+    name: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.lg,
+      color: theme.textPrimary,
+      marginBottom: Spacing.xs,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      gap: Spacing.xs,
+      flexWrap: 'wrap',
+    },
+    bookBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      alignSelf: 'flex-start',
+      backgroundColor: '#38BDF8',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 0,
+    },
+    bookIcon: { width: 25, height: 25, resizeMode: 'contain' },
+    bookCount: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.xs,
+      color: theme.textOnPrimary,
+    },
+    xpBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      alignSelf: 'flex-start',
+      backgroundColor: '#FCD34D',
+      borderRadius: Radius.full,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 3,
+    },
+    xpIcon: { fontSize: 13 },
+    xpCount: {
+      marginTop: 1,
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.xs,
+      color: '#78350F',
+    },
+    actions: {
+      flexDirection: 'row',
+      gap: Spacing.xs,
+      paddingRight: Spacing.md,
+    },
+    acceptBtn: {
+      backgroundColor: theme.success,
+      borderRadius: Radius.full,
+      width: 40,
+      height: 40,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...S.sm,
+    },
+    acceptText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.lg,
+      color: theme.textOnPrimary,
+    },
+    rejectBtn: {
+      backgroundColor: theme.surfaceVariant,
+      borderRadius: Radius.full,
+      width: 40,
+      height: 40,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rejectText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textSecondary,
+    },
+    chevronWrapper: {
+      paddingRight: Spacing.md,
+    },
+    chevron: {
+      fontSize: FontSizes['2xl'],
+      color: theme.secondary,
+    },
+  });
+}
+
 export function FriendCard({ name, avatarSeed, bookCount, xp, pendingSent, onPress, onAccept, onReject }: FriendCardProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const isPending = !!onAccept && !!onReject;
   const canUnfriend = !isPending && !!onReject;
 
@@ -25,20 +171,17 @@ export function FriendCard({ name, avatarSeed, bookCount, xp, pendingSent, onPre
       activeOpacity={onPress ? 0.8 : 1}
       style={styles.card}
     >
-      {/* Accent strip — gold for friends, coral for pending */}
       <View style={[styles.accentStrip, isPending && styles.accentStripPending]} />
 
-      {/* Avatar */}
       <View style={styles.avatarWrapper}>
         <MultiavatarView
           seed={avatarSeed}
           size={AVATAR_SIZE}
-          borderColor={Colors.friendEmeraldLight}
+          borderColor={theme.friendEmeraldLight}
           borderWidth={3}
         />
       </View>
 
-      {/* Info */}
       <View style={styles.info}>
         {isPending && (
           <View style={styles.newBadge}>
@@ -65,7 +208,6 @@ export function FriendCard({ name, avatarSeed, bookCount, xp, pendingSent, onPre
         </View>
       </View>
 
-      {/* Actions or chevron */}
       {isPending ? (
         <View style={styles.actions}>
           <TouchableOpacity style={styles.acceptBtn} onPress={onAccept} activeOpacity={0.75}>
@@ -92,146 +234,3 @@ export function FriendCard({ name, avatarSeed, bookCount, xp, pendingSent, onPre
     </TouchableOpacity>
   );
 }
-
-const AVATAR_SIZE = 60;
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.lg,
-    marginBottom: Spacing.sm,
-    overflow: 'hidden',
-    ...Shadows.md,
-  },
-  accentStrip: {
-    width: 5,
-    alignSelf: 'stretch',
-    backgroundColor: Colors.chipFriend,
-  },
-  accentStripPending: {
-    backgroundColor: Colors.friendEmeraldLight,
-  },
-  avatarWrapper: {
-    marginVertical: Spacing.md,
-    marginHorizontal: Spacing.md,
-  },
-  info: {
-    flex: 1,
-    paddingVertical: Spacing.md,
-  },
-  newBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: Colors.accentLight,
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    marginBottom: Spacing.xs,
-  },
-  newBadgeText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xs,
-    color: Colors.accent,
-  },
-  sentBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FEF3C7',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    marginBottom: Spacing.xs,
-  },
-  sentBadgeText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xs,
-    color: '#92400E',
-  },
-  name: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes.lg,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    flexWrap: 'wrap',
-  },
-  bookBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    alignSelf: 'flex-start',
-    backgroundColor: '#38BDF8',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 0,
-  },
-  bookIcon: {
-    width: 25,
-    height: 25,
-    resizeMode: 'contain',
-  },
-  bookCount: {
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.xs,
-    color: Colors.textOnPrimary,
-  },
-  xpBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    alignSelf: 'flex-start',
-    backgroundColor: '#FCD34D',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 3,
-  },
-  xpIcon: { fontSize: 13 },
-  xpCount: {
-    marginTop: 1,
-    fontFamily: Fonts.bodySemiBold,
-    fontSize: FontSizes.xs,
-    color: '#78350F',
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: Spacing.xs,
-    paddingRight: Spacing.md,
-  },
-  acceptBtn: {
-    backgroundColor: Colors.success,
-    borderRadius: Radius.full,
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Shadows.sm,
-  },
-  acceptText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.lg,
-    color: Colors.textOnPrimary,
-  },
-  rejectBtn: {
-    backgroundColor: Colors.surfaceVariant,
-    borderRadius: Radius.full,
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rejectText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
-  },
-  chevronWrapper: {
-    paddingRight: Spacing.md,
-  },
-  chevron: {
-    fontSize: FontSizes['2xl'],
-    color: Colors.secondary,
-  },
-});

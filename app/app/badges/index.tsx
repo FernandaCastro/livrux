@@ -1,20 +1,123 @@
+import { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, AppState } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
+import { Stack } from 'expo-router';
 
 import { useBadges } from '../../../src/hooks/useBadges';
 import { useReaderStore } from '../../../src/stores/readerStore';
+import { useTheme } from '../../../src/hooks/useTheme';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BadgeCard } from '../../../src/components/BadgeCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
+
+function createStyles(theme: ColorPalette) {
+  const S = createShadows(theme.shadowColor);
+  return StyleSheet.create({
+    root: { flex: 1 },
+    safe: { flex: 1, backgroundColor: 'transparent' },
+    heroBanner: {
+      borderRadius: Radius.xl,
+      marginHorizontal: Spacing.md,
+      marginTop: Spacing.xs,
+      marginBottom: Spacing.md,
+      paddingHorizontal: Spacing.xl,
+      paddingBottom: Spacing.xl,
+      ...S.lg,
+    },
+    heroContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.md,
+      marginTop: Spacing['2xl'],
+      marginBottom: Spacing.md,
+    },
+    heroBannerEmoji: { fontSize: 56 },
+    heroRight: { flex: 1, justifyContent: 'center' },
+    heroTitle: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes['2xl'],
+      color: theme.textOnPrimary,
+    },
+    heroSubtitle: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: 'rgba(255,255,255,0.8)',
+      marginTop: 2,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      alignSelf: 'stretch',
+    },
+    statChip: {
+      flex: 1,
+      backgroundColor: 'rgba(255,255,255,0.18)',
+      borderRadius: Radius.lg,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      alignItems: 'center',
+    },
+    statChipText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.sm,
+      color: theme.textOnPrimary,
+    },
+    container: {
+      flexGrow: 1,
+      paddingHorizontal: Spacing.xl,
+      paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
+      paddingTop: Spacing.sm,
+    },
+    sectionLabel: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.sm,
+      color: '#C2410C',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginBottom: Spacing.md,
+      marginTop: Spacing.sm,
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.md,
+      marginBottom: Spacing.xl,
+    },
+    emptyContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: Spacing.xl,
+      paddingVertical: Spacing['2xl'],
+    },
+    emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
+    emptyText: {
+      fontFamily: Fonts.bodyBold,
+      fontSize: FontSizes.md,
+      color: theme.textPrimary,
+      textAlign: 'center',
+      marginBottom: Spacing.sm,
+    },
+    emptySubtext: {
+      fontFamily: Fonts.body,
+      fontSize: FontSizes.sm,
+      color: theme.textSecondary,
+      textAlign: 'center',
+    },
+  });
+}
 
 export default function BadgesScreen() {
   const { t } = useTranslation();
   const { selectedReader } = useReaderStore();
   const { earnedBadges, pendingBadges, isLoading, error, refresh } = useBadges(selectedReader?.id ?? null);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const appStateRef = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -25,18 +128,23 @@ export default function BadgesScreen() {
     return () => subscription.remove();
   }, []);
 
+  const bgGradient = (
+    <LinearGradient
+      colors={theme.backgroundGradient}
+      locations={[0, 0.6, 1]}
+      start={{ x: 0.15, y: 0 }}
+      end={{ x: 0.85, y: 1 }}
+      style={StyleSheet.absoluteFill}
+    />
+  );
+
   if (isLoading) {
     return (
       <View style={styles.root}>
-        <LinearGradient
-          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.15, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
+        <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
+        {bgGradient}
         <SafeAreaView style={styles.safe}>
-          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+          <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
         </SafeAreaView>
       </View>
     );
@@ -45,13 +153,8 @@ export default function BadgesScreen() {
   if (error) {
     return (
       <View style={styles.root}>
-        <LinearGradient
-          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
-          locations={[0, 0.6, 1]}
-          start={{ x: 0.15, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
+        <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
+        {bgGradient}
         <SafeAreaView style={styles.safe}>
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>⚠️</Text>
@@ -66,17 +169,12 @@ export default function BadgesScreen() {
 
   return (
     <View style={styles.root}>
-      <LinearGradient
-        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
-        locations={[0, 0.6, 1]}
-        start={{ x: 0.15, y: 0 }}
-        end={{ x: 0.85, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+      <Stack.Screen options={{ animation: 'none' }} />
+      <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
+      {bgGradient}
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
-
-        {/* ── Hero banner ── */}
+        {/* Orange/bronze hero — fixed badge accent */}
         <LinearGradient
           colors={['#FF7F3E', '#C2410C']}
           start={{ x: 0, y: 0 }}
@@ -92,7 +190,6 @@ export default function BadgesScreen() {
               )}
             </View>
           </View>
-
           <View style={styles.statsRow}>
             <View style={styles.statChip}>
               <Text style={styles.statChipText}>🏆 {earnedBadges.length} {t('badges.earned')}</Text>
@@ -115,7 +212,6 @@ export default function BadgesScreen() {
               <Text style={styles.emptyText}>{t('badges.empty')}</Text>
             </View>
           )}
-
           {earnedBadges.length > 0 && (
             <>
               <Text style={styles.sectionLabel}>{t('badges.earned')}</Text>
@@ -126,7 +222,6 @@ export default function BadgesScreen() {
               </View>
             </>
           )}
-
           {pendingBadges.length > 0 && (
             <>
               <Text style={styles.sectionLabel}>{t('badges.pending')}</Text>
@@ -143,104 +238,3 @@ export default function BadgesScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  safe: { flex: 1, backgroundColor: 'transparent' },
-
-  heroBanner: {
-    borderRadius: Radius.xl,
-    marginHorizontal: Spacing.md,
-    marginTop: Spacing.xs,
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: Spacing.xl,
-    ...Shadows.lg,
-  },
-  heroContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    marginTop: Spacing['2xl'],
-    marginBottom: Spacing.md,
-  },
-  heroBannerEmoji: {
-    fontSize: 56,
-  },
-  heroRight: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  heroTitle: {
-    fontFamily: Fonts.heading,
-    fontSize: FontSizes['2xl'],
-    color: Colors.textOnPrimary,
-  },
-  heroSubtitle: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: 'rgba(255,255,255,0.8)',
-    marginTop: 2,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-    alignSelf: 'stretch',
-  },
-  statChip: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderRadius: Radius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    alignItems: 'center',
-  },
-  statChipText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.sm,
-    color: Colors.textOnPrimary,
-  },
-
-  container: {
-    flexGrow: 1,
-    paddingHorizontal: Spacing.xl,
-    paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
-    paddingTop: Spacing.sm,
-  },
-  sectionLabel: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.sm,
-    color: '#C2410C',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: Spacing.md,
-    marginTop: Spacing.sm,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.md,
-    marginBottom: Spacing.xl,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing['2xl'],
-  },
-  emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
-  emptyText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.md,
-    color: Colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: Spacing.sm,
-  },
-  emptySubtext: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-});

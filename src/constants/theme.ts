@@ -1,6 +1,8 @@
 // Design system: colors, typography, spacing, and border radii for the Livrux app.
 // Target audience: families with kids — warm, playful, and legible.
 
+export type ThemeId = 'classic' | 'noite' | 'indigo' | 'rubi';
+
 export const Colors = {
   // Brand — orange is the coin/reward accent; purple is the dominant brand color
   primary: '#F5A623',       // warm gold — the Livrux coin color
@@ -32,7 +34,7 @@ export const Colors = {
   // Text
   textPrimary: '#1E1B4B',   // deep purple-blue — matches web
   textSecondary: '#6B7280',
-  textDisabled: '#BDBDBD',
+  textDisabled: '#9CA3AF',
   textOnPrimary: '#FFFFFF',
 
   // Feedback
@@ -45,6 +47,8 @@ export const Colors = {
   border: '#E8E4F0',
   divider: '#EDE9FE',
 
+  shadowColor: '#7C3AED',  // used by createShadows(theme.shadowColor) in themed screens
+
   // Coin / Livrux brand
   coin: '#F5A623',
   coinShadow: '#C4800B',
@@ -56,7 +60,148 @@ export const Colors = {
   chipBadge: '#2D6A4F',   // 🏅 badges — forest green
   chipBook: '#7C3AED',    // 📚 books
   chipFriend: '#5FAF8A',  // 👦👧 friends
+
+  // Navigation bar background (translucent)
+  navBackground: 'rgba(255,255,255,0.92)',
+
+  // Background gradient — three stops for the page background
+  backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'] as [string, string, string],
+
+  flashFrameBackground: '#FFF7ED', // light peach for flash frame
+
+  // Card gradient — two stops used by BookCard, BadgeCard, TransactionRow, etc.
+  cardGradient: ['#FEFBFF', '#FFFAF4'] as [string, string],
+
+  // Status bar style
+  statusBarStyle: 'dark' as 'dark' | 'light',
 } as const;
+
+export type ColorPalette = {
+  primary: string; primaryLight: string; primaryDark: string;
+  secondary: string; secondary2: string; secondaryLight: string; secondaryDark: string;
+  accent: string; accentLight: string;
+  readerBlue: string; readerBlueLight: string;
+  cardGradient: [string, string];
+  friendEmerald: string; friendEmeraldLight: string;
+  background: string; backgroundTinted: string; surface: string; surfaceVariant: string;
+  textPrimary: string; textSecondary: string; textDisabled: string; textOnPrimary: string;
+  success: string; error: string; warning: string; info: string;
+  border: string; divider: string;
+  shadowColor: string;
+  coin: string; coinShadow: string;
+  chipCoin: string; chipXp: string; chipBadge: string; chipBook: string; chipFriend: string;
+  navBackground: string;
+  backgroundGradient: [string, string, string];
+  statusBarStyle: 'dark' | 'light';
+  flashFrameBackground: string;
+};
+
+export const noiteColors: ColorPalette = {
+  primary: '#F5A623',
+  primaryLight: '#FFD580',
+  primaryDark: '#C4800B',
+  secondary: '#818CF8',
+  secondary2: '#A5B4FC',
+  secondaryLight: '#1E2D5E',
+  secondaryDark: '#6366F1',
+  accent: '#38BDF8',
+  accentLight: '#7DD3FC',
+  readerBlue: '#38BDF8',
+  readerBlueLight: '#1E3A5F',
+  friendEmerald: '#34D399',
+  friendEmeraldLight: '#064E3B',
+  background: '#0F172A',
+  backgroundTinted: '#1E1B4B',
+  surface: '#1E293B',
+  surfaceVariant: '#334155',
+  textPrimary: '#F1F5F9',
+  textSecondary: '#94A3B8',
+  textDisabled: '#64748B',
+  textOnPrimary: '#FFFFFF',
+  success: '#22C55E',
+  error: '#F87171',
+  warning: '#FB8C00',
+  info: '#38BDF8',
+  border: '#334155',
+  divider: '#1E293B',
+  shadowColor: '#6366F1',
+  coin: '#F5A623',
+  coinShadow: '#C4800B',
+  chipCoin: '#F5A623',
+  chipXp: '#B45309',
+  chipBadge: '#2D6A4F',
+  chipBook: '#6366F1',
+  chipFriend: '#34D399',
+  navBackground: 'rgba(15,23,42,0.95)',
+  backgroundGradient: ['#0F172A', '#131f35', '#0F172A'],
+  cardGradient: ['#1E293B', '#334155'],
+  statusBarStyle: 'light',
+  flashFrameBackground: '#131F35',
+};
+
+export const indigoColors: ColorPalette = {
+  primary: '#F5A623',
+  primaryLight: '#FFD580',
+  primaryDark: '#C4800B',
+  secondary: '#4F46E5',
+  secondary2: '#0EA5E9',       // sky blue — makes hero gradient go indigo → cyan
+  secondaryLight: '#C7D2FE',   // indigo-200 — chips e placeholders com tint visível
+  secondaryDark: '#3730A3',
+  accent: '#0EA5E9',           // sky blue vivo
+  accentLight: '#BAE6FD',
+  readerBlue: '#6366F1',
+  readerBlueLight: '#E0E7FF',
+  friendEmerald: '#10B981',
+  friendEmeraldLight: '#D1FAE5',
+  background: '#F8FAFC',
+  backgroundTinted: '#EEF2FF',
+  surface: '#FFFFFF',
+  surfaceVariant: '#DBEAFE',   // blue-100 — superfícies com tint azul
+  textPrimary: '#0F172A',
+  textSecondary: '#64748B',
+  textDisabled: '#94A3B8',
+  textOnPrimary: '#FFFFFF',
+  success: '#22C55E',
+  error: '#E53935',
+  warning: '#FB8C00',
+  info: '#1E88E5',
+  border: '#E2E8F0',
+  divider: '#EEF2FF',
+  shadowColor: '#4F46E5',
+  coin: '#F5A623',
+  coinShadow: '#C4800B',
+  chipCoin: '#F5A623',
+  chipXp: '#B45309',
+  chipBadge: '#2D6A4F',
+  chipBook: '#4F46E5',
+  chipFriend: '#10B981',
+  navBackground: 'rgba(199,210,254,0.92)', // indigo-200 translúcido
+  backgroundGradient: ['#818CF8', '#BFDBFE', '#F8FAFC'], // índigo → sky → branco
+  cardGradient: ['#EFF6FF', '#DBEAFE'],    // sky-50 → blue-100
+  statusBarStyle: 'dark',
+  flashFrameBackground: '#BFDBFE',
+};
+
+export const rubiColors: ColorPalette = {
+  ...noiteColors,
+  // Reader banner gradient: vivid red → deep dark red
+  secondary: '#EF4444',        // red-500 — banner gradient start
+  secondary2: '#7F1D1D',       // red-950 — banner gradient end
+  secondaryLight: '#3B0A0A',   // very dark red for chip tints
+  secondaryDark: '#B91C1C',    // red-700
+  readerBlue: '#EF4444',       // reader accent (chips, pull-to-refresh, indicators)
+  readerBlueLight: '#3B0A0A',  // dark red for chip backgrounds
+  chipBook: '#EF4444',
+  shadowColor: '#DC2626',      // red shadows throughout the theme
+  flashFrameBackground: '#0F172A',
+};
+
+export const themes: Record<ThemeId, ColorPalette> = {
+  classic: { ...Colors, backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'], cardGradient: ['#FEFBFF', '#FFFAF4'], navBackground: 'rgba(250,250,247,0.92)', statusBarStyle: 'dark', flashFrameBackground: '#FFF7ED' },
+  noite: noiteColors,
+  indigo: indigoColors,
+  rubi: rubiColors,
+};
 
 export const Fonts = {
   heading: 'FredokaOne_400Regular',
@@ -96,26 +241,15 @@ export const Radius = {
   full: 9999,
 } as const;
 
-export const Shadows = {
-  sm: {
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.10,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  md: {
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.16,
-    shadowRadius: 12,
-    elevation: 5,
-  },
-  lg: {
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 24,
-    elevation: 10,
-  },
-} as const;
+export function createShadows(shadowColor: string) {
+  return {
+    sm: { shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.10, shadowRadius: 6,  elevation: 3  },
+    md: { shadowColor, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.16, shadowRadius: 12, elevation: 5  },
+    lg: { shadowColor, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.55, shadowRadius: 40, elevation: 22 },
+    xl: { shadowColor, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.28, shadowRadius: 48, elevation: 15 },
+  };
+}
+
+// Classic shadows — kept as named export so non-themed files need no changes.
+export const Shadows = createShadows('#7C3AED');
+

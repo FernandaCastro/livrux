@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
+import { Stack } from 'expo-router';
 
 import { useBadges } from '../../../src/hooks/useBadges';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -167,6 +168,7 @@ export default function BadgesScreen() {
 
   return (
     <View style={styles.root}>
+      <Stack.Screen options={{ animation: 'none' }} />
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       {bgGradient}
       <FloatingEmojis />

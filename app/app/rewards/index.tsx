@@ -11,7 +11,7 @@ import {
 import { FlashList } from '@shopify/flash-list';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
@@ -217,6 +217,7 @@ export default function RewardsScreen() {
 
   return (
     <View style={styles.root}>
+      <Stack.Screen options={{ animation: 'none' }} />
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
         colors={theme.backgroundGradient}

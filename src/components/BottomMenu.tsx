@@ -83,6 +83,12 @@ export function BottomMenu() {
   const isRanking    = pathname.startsWith('/app/ranking');
   const isReader     = !isSettings && !isWallet && !isFriends && !isRanking;
 
+  // Already on a tab → replace so the stack doesn't accumulate.
+  // Coming from the reader screen → push to keep the reader in the back stack.
+  const navigate = isReader
+    ? (path: string) => router.push(path as any)
+    : (path: string) => router.replace(path as any);
+
   if (!selectedReader) {
     return (
       <View style={styles.container}>
@@ -128,7 +134,7 @@ export function BottomMenu() {
         {/* Rewards — gold */}
         <TouchableOpacity
           style={styles.tab}
-          onPress={() => router.push(`/app/rewards?readerId=${selectedReader.id}`)}
+          onPress={() => navigate(`/app/rewards?readerId=${selectedReader.id}`)}
           activeOpacity={0.7}
         >
           {isWallet && <TabIndicator color={theme.primary} />}
@@ -140,7 +146,7 @@ export function BottomMenu() {
         {/* Friends — jade */}
         <TouchableOpacity
           style={styles.tab}
-          onPress={() => router.push(`/app/friends/${selectedReader.id}`)}
+          onPress={() => navigate(`/app/friends/${selectedReader.id}`)}
           activeOpacity={0.7}
         >
           {isFriends && <TabIndicator color={ACCENT_FRIENDS} />}
@@ -152,7 +158,7 @@ export function BottomMenu() {
         {/* Ranking — orange */}
         <TouchableOpacity
           style={styles.tab}
-          onPress={() => router.push('/app/ranking' as any)}
+          onPress={() => navigate('/app/ranking')}
           activeOpacity={0.7}
         >
           {isRanking && <TabIndicator color={ACCENT_RANKING} />}

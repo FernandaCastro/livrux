@@ -9,6 +9,8 @@ import {
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { useReaderStore } from '../stores/readerStore';
+import { Easing } from 'react-native';
+import { LinearEasing } from 'react-native-reanimated/lib/typescript/css/easing';
 
 export type TabId = 'reader' | 'rewards' | 'friends' | 'ranking';
 
@@ -16,7 +18,7 @@ const TAB_ORDER: TabId[] = ['reader', 'rewards', 'friends', 'ranking'];
 const SWIPE_THRESHOLD = 60;
 const VELOCITY_THRESHOLD = 400;
 const MAX_DRAG = 60;       // max visual offset while dragging
-const EXIT_MS = 140;       // exit animation duration
+const EXIT_MS = 100;       // exit animation duration
 
 export function useTabSwipe(currentTab: TabId) {
   const router = useRouter();
@@ -26,7 +28,7 @@ export function useTabSwipe(currentTab: TabId) {
 
   // Fade in on mount — masks the LinearGradient render delay on the incoming screen.
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: 120 });
+    opacity.value = withTiming(1, { duration: 150 });
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({

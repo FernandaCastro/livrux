@@ -65,6 +65,8 @@ export const Colors = {
   // Background gradient — three stops for the page background
   backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'] as [string, string, string],
 
+  flashFrameBackground: '#FFF7ED', // light peach for flash frame
+
   // Card gradient — two stops used by BookCard, BadgeCard, TransactionRow, etc.
   cardGradient: ['#FEFBFF', '#FFFAF4'] as [string, string],
 
@@ -88,6 +90,7 @@ export type ColorPalette = {
   navBackground: string;
   backgroundGradient: [string, string, string];
   statusBarStyle: 'dark' | 'light';
+  flashFrameBackground: string;
 };
 
 export const noiteColors: ColorPalette = {
@@ -129,6 +132,7 @@ export const noiteColors: ColorPalette = {
   backgroundGradient: ['#0F172A', '#131f35', '#0F172A'],
   cardGradient: ['#1E293B', '#334155'],
   statusBarStyle: 'light',
+  flashFrameBackground: '#131F35',
 };
 
 export const indigoColors: ColorPalette = {
@@ -170,10 +174,11 @@ export const indigoColors: ColorPalette = {
   backgroundGradient: ['#818CF8', '#BFDBFE', '#F8FAFC'], // índigo → sky → branco
   cardGradient: ['#EFF6FF', '#DBEAFE'],    // sky-50 → blue-100
   statusBarStyle: 'dark',
+  flashFrameBackground: '#BFDBFE',
 };
 
 export const themes: Record<ThemeId, ColorPalette> = {
-  classic: { ...Colors, backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'], cardGradient: ['#FEFBFF', '#FFFAF4'], navBackground: 'rgba(255,255,255,0.92)', statusBarStyle: 'dark' },
+  classic: { ...Colors, backgroundGradient: ['#f0e6ff', '#fff7ed', '#fafaf7'], cardGradient: ['#FEFBFF', '#FFFAF4'], navBackground: 'rgba(250,250,247,0.92)', statusBarStyle: 'dark', flashFrameBackground: '#FFF7ED' },
   noite: noiteColors,
   indigo: indigoColors,
 };

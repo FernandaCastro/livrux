@@ -2,7 +2,7 @@
 
 export const DEFAULT_FORMULA = {
   base_reward: 2,
-  per_page_rate: 0.1,
+  per_page_rate: 0.01,
   bonus_rules: [],
 } as const;
 

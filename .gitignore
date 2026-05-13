@@ -49,3 +49,6 @@ google-play-service-account.json
 
 #supabase
 /supabase/.temp
+
+#idea
+.idea

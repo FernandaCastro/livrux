@@ -1,10 +1,9 @@
 -- =============================================================================
--- Livrux — Complete schema (consolidated from migrations 0001–0029)
+-- Livrux — Complete schema (consolidated, release-ready)
 --
--- Apply this file to a fresh Supabase project to reach the full baseline state.
--- For an existing project that already has migrations 0001–0029 applied, run
+-- Apply to a fresh Supabase project to reach the full baseline.
+-- For an existing project that already has migrations applied, run:
 --   supabase migration repair --status applied <timestamp>_0001_schema
--- to mark it as applied without re-executing it.
 -- =============================================================================
 
 
@@ -12,30 +11,27 @@
 -- TABLES
 -- ─────────────────────────────────────────────────────────────────────────────
 
--- 1. user_profiles
---    Extends auth.users with app-specific data.
+-- 1. user_profiles — extends auth.users with app-specific data.
 CREATE TABLE public.user_profiles (
   id                       UUID    PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name             TEXT,
   avatar_url               TEXT,
   created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   parental_pin             TEXT    DEFAULT NULL,
-  parental_unlock_duration INTEGER NOT NULL DEFAULT 5
+  parental_unlock_duration INTEGER NOT NULL DEFAULT 5,
+  terms_accepted_at        TIMESTAMPTZ           -- nullable; pre-GDPR users have NULL
 );
 
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view their own profile"
-  ON public.user_profiles FOR SELECT
-  USING (auth.uid() = id);
 
 CREATE POLICY "Users can update their own profile"
   ON public.user_profiles FOR UPDATE
   USING (auth.uid() = id);
 
+-- "Users can view their own or family members profile" added after co_guardians below.
 
--- 2. reward_formulas
---    One formula per user. Controls how many Livrux a reader earns per book.
+
+-- 2. reward_formulas — one formula per family; controls Livrux earned per book.
 CREATE TABLE public.reward_formulas (
   id            UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -49,18 +45,10 @@ CREATE TABLE public.reward_formulas (
 
 ALTER TABLE public.reward_formulas ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can read their own formula"
-  ON public.reward_formulas FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own formula"
-  ON public.reward_formulas FOR UPDATE
-  USING (auth.uid() = user_id);
+-- Policies added after family_owner_id() below.
 
 
--- 3. readers
---    Each user can have multiple readers (their children).
---    avatar_url was replaced by avatar_seed (Multiavatar) in migration 0013.
+-- 3. readers — each user (family) can have multiple readers (their children).
 CREATE TABLE public.readers (
   id               UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id          UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -68,12 +56,13 @@ CREATE TABLE public.readers (
   livrux_balance   NUMERIC(12,2) NOT NULL DEFAULT 0,
   created_at       TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   updated_at       TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-  pin              TEXT          DEFAULT NULL,           -- per-reader PIN hash (SHA-256)
-  friend_code      TEXT          UNIQUE,                 -- 6-char discovery code
+  pin              TEXT          DEFAULT NULL,
+  friend_code      TEXT          UNIQUE,
   friends_autonomy BOOLEAN       NOT NULL DEFAULT FALSE,
-  avatar_seed      TEXT,                                 -- Multiavatar seed
-  old_avatar_seed  TEXT,                                 -- previous seed (undo reference)
+  avatar_seed      TEXT,
+  old_avatar_seed  TEXT,
   xp               INTEGER       NOT NULL DEFAULT 0,
+  book_count       INTEGER       NOT NULL DEFAULT 0,
   CONSTRAINT readers_xp_non_negative CHECK (xp >= 0)
 );
 
@@ -81,15 +70,10 @@ CREATE INDEX idx_readers_friend_code ON public.readers (friend_code);
 
 ALTER TABLE public.readers ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage their own readers"
-  ON public.readers FOR ALL
-  USING (auth.uid() = user_id);
-
--- "View accepted friend readers" is added after my_reader_ids() below.
+-- Policies added after family_owner_id() and my_reader_ids() below.
 
 
--- 4. badges
---    Static catalog; seeded below. Created before reader_badges (FK target).
+-- 4. badges — static catalog, seeded below.
 CREATE TABLE public.badges (
   slug            TEXT    PRIMARY KEY,
   name_key        TEXT    NOT NULL,
@@ -109,7 +93,6 @@ CREATE POLICY "Authenticated users can read badges catalog"
   TO authenticated
   USING (true);
 
--- Badge seed (ordered easiest → hardest)
 INSERT INTO public.badges (slug, name_key, description_key, icon, tier, sort_order) VALUES
   ('first_book',       'badges.first_book.name',       'badges.first_book.description',       '📖', 'bronze',  1),
   ('bookworm_5',       'badges.bookworm_5.name',       'badges.bookworm_5.description',       '🐛', 'bronze',  2),
@@ -119,22 +102,21 @@ INSERT INTO public.badges (slug, name_key, description_key, icon, tier, sort_ord
   ('polyglot',         'badges.polyglot.name',         'badges.polyglot.description',         '🌍', 'silver',  6),
   ('book_club',        'badges.book_club.name',        'badges.book_club.description',        '🤝', 'silver',  7),
   ('streak_30',        'badges.streak_30.name',        'badges.streak_30.description',        '⚡', 'gold',    8),
-  ('page_hunter_5000', 'badges.page_hunter_5000.name', 'badges.page_hunter_5000.description', '🗺️',  'gold',   9),
+  ('page_hunter_5000', 'badges.page_hunter_5000.name', 'badges.page_hunter_5000.description', '🗺️', 'gold',    9),
   ('centurion',        'badges.centurion.name',        'badges.centurion.description',        '🏆', 'gold',   10);
 
 
--- 5. books
---    Each book belongs to a reader. livrux_earned is 0 while status = 'reading'.
+-- 5. books — each book belongs to a reader.
 CREATE TABLE public.books (
   id                  UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   reader_id           UUID          NOT NULL REFERENCES public.readers(id) ON DELETE CASCADE,
-  user_id             UUID          NOT NULL REFERENCES auth.users(id),
+  user_id             UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title               TEXT          NOT NULL,
   author              TEXT,
   total_pages         INTEGER       NOT NULL CHECK (total_pages > 0),
   cover_url           TEXT,
   livrux_earned       NUMERIC(10,2) NOT NULL DEFAULT 0,
-  date_completed      TIMESTAMPTZ,                       -- NULL while status = 'reading'
+  date_completed      TIMESTAMPTZ,
   notes               TEXT,
   created_at          TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
   is_foreign_language BOOLEAN       NOT NULL DEFAULT FALSE,
@@ -142,38 +124,32 @@ CREATE TABLE public.books (
   review              TEXT,
   status              TEXT          NOT NULL DEFAULT 'completed'
                                         CHECK (status IN ('reading', 'completed')),
-  date_start          DATE          NOT NULL DEFAULT CURRENT_DATE
+  date_start          DATE          NOT NULL DEFAULT CURRENT_DATE,
+  xp_earned           INTEGER       NOT NULL DEFAULT 0
 );
 
 CREATE INDEX idx_books_reader_status ON public.books (reader_id, status);
 
 ALTER TABLE public.books ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage their own books"
-  ON public.books FOR ALL
-  USING (auth.uid() = user_id);
-
--- "View accepted friend books" is added after my_reader_ids() below.
+-- Policies added after family_owner_id() and my_reader_ids() below.
 
 
--- 6. livrux_transactions
---    Immutable audit log of every Livrux credit/debit event.
+-- 6. livrux_transactions — immutable audit log of every Livrux credit/debit.
 CREATE TABLE public.livrux_transactions (
   id          UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   reader_id   UUID          NOT NULL REFERENCES public.readers(id) ON DELETE CASCADE,
-  user_id     UUID          NOT NULL REFERENCES auth.users(id),
+  user_id     UUID          NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   book_id     UUID          REFERENCES public.books(id) ON DELETE SET NULL,
-  amount      NUMERIC(10,2) NOT NULL,   -- positive = earn, negative = spend/deduct
+  amount      NUMERIC(10,2) NOT NULL,
   reason      TEXT,
-  description TEXT,                     -- human-readable label (book title, etc.)
+  description TEXT,
   created_at  TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE public.livrux_transactions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage their own transactions"
-  ON public.livrux_transactions FOR ALL
-  USING (auth.uid() = user_id);
+-- Policy added after family_owner_id() below.
 
 
 -- 7. reader_friendships
@@ -194,16 +170,15 @@ CREATE INDEX idx_rf_addressee ON public.reader_friendships (addressee_id);
 
 ALTER TABLE public.reader_friendships ENABLE ROW LEVEL SECURITY;
 
--- Policies are added after my_reader_ids() below.
+-- Policies added after my_reader_ids() below.
 
 
--- 8. reading_sessions
---    Tracks daily reading progress (last page reached) for medium/long books.
+-- 8. reading_sessions — daily reading progress for medium/long books.
 CREATE TABLE public.reading_sessions (
   id           UUID    PRIMARY KEY DEFAULT gen_random_uuid(),
   reader_id    UUID    NOT NULL REFERENCES public.readers(id) ON DELETE CASCADE,
   book_id      UUID    NOT NULL REFERENCES public.books(id)   ON DELETE CASCADE,
-  user_id      UUID    NOT NULL REFERENCES auth.users(id),
+  user_id      UUID    NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   session_date DATE    NOT NULL DEFAULT CURRENT_DATE,
   last_page    INTEGER NOT NULL CHECK (last_page > 0),
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -215,33 +190,14 @@ CREATE INDEX idx_rs_book        ON public.reading_sessions (book_id);
 
 ALTER TABLE public.reading_sessions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage their own reading sessions"
-  ON public.reading_sessions FOR ALL
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "View accepted friend reading sessions"
-  ON public.reading_sessions FOR SELECT
-  USING (
-    auth.uid() = user_id
-    OR EXISTS (
-      SELECT 1 FROM public.reader_friendships rf
-      WHERE rf.status = 'accepted'
-        AND (rf.requester_id = reading_sessions.reader_id OR rf.addressee_id = reading_sessions.reader_id)
-        AND EXISTS (
-          SELECT 1 FROM public.readers my_r
-          WHERE my_r.user_id = auth.uid()
-            AND (my_r.id = rf.requester_id OR my_r.id = rf.addressee_id)
-        )
-    )
-  );
+-- Policies added after family_owner_id() and my_reader_ids() below.
 
 
--- 9. reader_badges
---    One row per (reader, badge) earned.
+-- 9. reader_badges — one row per (reader, badge) earned.
 CREATE TABLE public.reader_badges (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   reader_id  UUID        NOT NULL REFERENCES public.readers(id) ON DELETE CASCADE,
-  user_id    UUID        NOT NULL REFERENCES auth.users(id),
+  user_id    UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   badge_slug TEXT        NOT NULL REFERENCES public.badges(slug),
   earned_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   bonus_xp   INTEGER     NOT NULL DEFAULT 0,
@@ -252,69 +208,61 @@ CREATE INDEX idx_rb_reader ON public.reader_badges (reader_id);
 
 ALTER TABLE public.reader_badges ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can read their own reader badges"
-  ON public.reader_badges FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own reader badges"
-  ON public.reader_badges FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "View accepted friend badges"
-  ON public.reader_badges FOR SELECT
-  USING (
-    auth.uid() = user_id
-    OR EXISTS (
-      SELECT 1 FROM public.reader_friendships rf
-      WHERE rf.status = 'accepted'
-        AND (rf.requester_id = reader_badges.reader_id OR rf.addressee_id = reader_badges.reader_id)
-        AND EXISTS (
-          SELECT 1 FROM public.readers my_r
-          WHERE my_r.user_id = auth.uid()
-            AND (my_r.id = rf.requester_id OR my_r.id = rf.addressee_id)
-        )
-    )
-  );
+-- Policies added after family_owner_id() and my_reader_ids() below.
 
 
--- 10. xp_transactions
---     Audit log for XP credits and debits.
-CREATE TABLE public.xp_transactions (
-  id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  reader_id  UUID        NOT NULL REFERENCES public.readers(id) ON DELETE CASCADE,
-  user_id    UUID        NOT NULL REFERENCES auth.users(id),
-  amount     INTEGER     NOT NULL,
-  reason     TEXT        NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- 10. consent_logs — GDPR/DSGVO audit log; intentionally no FK to auth.users
+--     so the record survives account deletion (3-year retention, Art. 6 GDPR).
+CREATE TABLE public.consent_logs (
+  id                 UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id            UUID        NOT NULL,
+  email              TEXT        NOT NULL,
+  terms_accepted_at  TIMESTAMPTZ,           -- nullable: pre-GDPR accounts have NULL
+  account_deleted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  retain_until       TIMESTAMPTZ NOT NULL
 );
 
-CREATE INDEX idx_xp_tx_reader ON public.xp_transactions (reader_id, created_at DESC);
+ALTER TABLE public.consent_logs ENABLE ROW LEVEL SECURITY;
+-- No policies — only the service-role Edge Function can read/write this table.
 
-ALTER TABLE public.xp_transactions ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can read their own XP transactions"
-  ON public.xp_transactions FOR SELECT
-  USING (auth.uid() = user_id);
+-- 11. co_guardians — allows multiple auth users to share one family's data.
+CREATE TABLE public.co_guardians (
+  owner_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  guardian_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (owner_id, guardian_id),
+  CHECK (owner_id <> guardian_id)
+);
 
-CREATE POLICY "Users can insert their own XP transactions"
-  ON public.xp_transactions FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+CREATE UNIQUE INDEX co_guardians_unique_guardian ON public.co_guardians(guardian_id);
 
-CREATE POLICY "View accepted friend XP transactions"
-  ON public.xp_transactions FOR SELECT
-  USING (
-    auth.uid() = user_id
-    OR EXISTS (
-      SELECT 1 FROM public.reader_friendships rf
-      WHERE rf.status = 'accepted'
-        AND (rf.requester_id = xp_transactions.reader_id OR rf.addressee_id = xp_transactions.reader_id)
-        AND EXISTS (
-          SELECT 1 FROM public.readers my_r
-          WHERE my_r.user_id = auth.uid()
-            AND (my_r.id = rf.requester_id OR my_r.id = rf.addressee_id)
-        )
-    )
-  );
+ALTER TABLE public.co_guardians ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "family can view co-guardians" ON public.co_guardians
+  FOR SELECT
+  USING (owner_id = auth.uid() OR guardian_id = auth.uid());
+
+CREATE POLICY "family can remove co-guardians" ON public.co_guardians
+  FOR DELETE
+  USING (owner_id = auth.uid() OR guardian_id = auth.uid());
+
+
+-- 12. guardian_invitations
+CREATE TABLE public.guardian_invitations (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_id    UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  email       TEXT        NOT NULL,
+  token       UUID        NOT NULL DEFAULT gen_random_uuid() UNIQUE,
+  status      TEXT        NOT NULL DEFAULT 'pending'
+                CHECK (status IN ('pending', 'accepted', 'cancelled')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  accepted_at TIMESTAMPTZ
+);
+
+ALTER TABLE public.guardian_invitations ENABLE ROW LEVEL SECURITY;
+
+-- Policies added after family_owner_id() below.
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -322,19 +270,18 @@ CREATE POLICY "View accepted friend XP transactions"
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- ---------------------------------------------------------------------------
--- Sign-up trigger
--- Creates user_profiles and reward_formulas rows on new user registration.
--- (terms_accepted_at column and its capture are added in 0002_gdpr.sql)
+-- handle_new_user — creates user_profiles and reward_formulas on registration.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql SECURITY DEFINER
 AS $$
 BEGIN
-  INSERT INTO public.user_profiles (id, display_name)
+  INSERT INTO public.user_profiles (id, display_name, terms_accepted_at)
   VALUES (
     NEW.id,
-    NEW.raw_user_meta_data->>'display_name'
+    NEW.raw_user_meta_data->>'display_name',
+    (NEW.raw_user_meta_data->>'terms_accepted_at')::TIMESTAMPTZ
   )
   ON CONFLICT (id) DO NOTHING;
 
@@ -353,8 +300,7 @@ CREATE TRIGGER on_auth_user_created
 
 
 -- ---------------------------------------------------------------------------
--- generate_friend_code()
--- Returns a unique 6-char alphanumeric code (no ambiguous chars).
+-- generate_friend_code — unique 6-char alphanumeric code (no ambiguous chars).
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.generate_friend_code()
 RETURNS TEXT
@@ -380,7 +326,7 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- set_friend_code() trigger — auto-assigns friend_code on reader INSERT.
+-- set_friend_code trigger — auto-assigns friend_code on reader INSERT.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.set_friend_code()
 RETURNS TRIGGER
@@ -401,30 +347,67 @@ CREATE TRIGGER set_reader_friend_code
 
 
 -- ---------------------------------------------------------------------------
--- my_reader_ids()
--- SECURITY DEFINER helper that returns the calling user's reader IDs without
--- triggering RLS on readers — breaks the readers ↔ reader_friendships cycle.
+-- family_owner_id() — returns the root owner's user_id:
+--   co-guardian → the owner they belong to; everyone else → their own uid.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.my_reader_ids()
-RETURNS SETOF UUID
-LANGUAGE sql
-SECURITY DEFINER
-STABLE
+CREATE OR REPLACE FUNCTION public.family_owner_id()
+RETURNS UUID
+LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT id FROM public.readers WHERE user_id = auth.uid();
+  SELECT COALESCE(
+    (SELECT owner_id FROM public.co_guardians WHERE guardian_id = auth.uid() LIMIT 1),
+    auth.uid()
+  )
 $$;
 
 
 -- ---------------------------------------------------------------------------
--- RLS policies that depend on my_reader_ids()
+-- my_reader_ids() — returns all reader IDs for the calling user's family.
+-- SECURITY DEFINER breaks the readers ↔ reader_friendships RLS cycle.
 -- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.my_reader_ids()
+RETURNS SETOF UUID
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT id FROM public.readers WHERE user_id = public.family_owner_id();
+$$;
 
--- readers: friend visibility
-CREATE POLICY "View accepted friend readers"
-  ON public.readers FOR SELECT
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- RLS POLICIES (require family_owner_id / my_reader_ids)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- user_profiles
+CREATE POLICY "Users can view their own or family members profile"
+  ON public.user_profiles FOR SELECT
   USING (
-    auth.uid() = user_id
+    id = auth.uid()
+    OR EXISTS (
+      SELECT 1 FROM public.co_guardians
+      WHERE (owner_id = auth.uid() AND guardian_id = user_profiles.id)
+         OR (guardian_id = auth.uid() AND owner_id = user_profiles.id)
+    )
+  );
+
+-- reward_formulas
+CREATE POLICY "family can read formula" ON public.reward_formulas
+  FOR SELECT USING (public.family_owner_id() = user_id);
+
+CREATE POLICY "family can update formula" ON public.reward_formulas
+  FOR UPDATE USING (public.family_owner_id() = user_id);
+
+-- readers
+CREATE POLICY "family can manage readers" ON public.readers
+  FOR ALL
+  USING    (public.family_owner_id() = user_id)
+  WITH CHECK (public.family_owner_id() = user_id);
+
+CREATE POLICY "View accepted friend readers" ON public.readers
+  FOR SELECT
+  USING (
+    public.family_owner_id() = user_id
     OR EXISTS (
       SELECT 1 FROM public.reader_friendships rf
       WHERE rf.status = 'accepted'
@@ -436,11 +419,27 @@ CREATE POLICY "View accepted friend readers"
     )
   );
 
--- books: friend visibility
-CREATE POLICY "View accepted friend books"
-  ON public.books FOR SELECT
+CREATE POLICY "View pending friend request readers" ON public.readers
+  FOR SELECT
   USING (
-    auth.uid() = user_id
+    EXISTS (
+      SELECT 1 FROM public.reader_friendships rf
+      WHERE rf.status = 'pending'
+        AND rf.requester_id = readers.id
+        AND rf.addressee_id IN (SELECT public.my_reader_ids())
+    )
+  );
+
+-- books
+CREATE POLICY "family can manage books" ON public.books
+  FOR ALL
+  USING    (public.family_owner_id() = user_id)
+  WITH CHECK (public.family_owner_id() = user_id);
+
+CREATE POLICY "View accepted friend books" ON public.books
+  FOR SELECT
+  USING (
+    public.family_owner_id() = user_id
     OR EXISTS (
       SELECT 1 FROM public.reader_friendships rf
       WHERE rf.status = 'accepted'
@@ -452,39 +451,105 @@ CREATE POLICY "View accepted friend books"
     )
   );
 
--- reader_friendships policies
-CREATE POLICY "View own reader friendships"
-  ON public.reader_friendships FOR SELECT
+-- livrux_transactions
+CREATE POLICY "family can manage transactions" ON public.livrux_transactions
+  FOR ALL
+  USING    (public.family_owner_id() = user_id)
+  WITH CHECK (public.family_owner_id() = user_id);
+
+-- reader_friendships
+CREATE POLICY "View own reader friendships" ON public.reader_friendships
+  FOR SELECT
   USING (
     requester_id IN (SELECT public.my_reader_ids())
     OR addressee_id IN (SELECT public.my_reader_ids())
   );
 
-CREATE POLICY "Send friend requests"
-  ON public.reader_friendships FOR INSERT
+CREATE POLICY "Send friend requests" ON public.reader_friendships
+  FOR INSERT
   WITH CHECK (
     requester_id IN (SELECT public.my_reader_ids())
   );
 
-CREATE POLICY "Respond to friend requests"
-  ON public.reader_friendships FOR UPDATE
+CREATE POLICY "Respond to friend requests" ON public.reader_friendships
+  FOR UPDATE
   USING (
     addressee_id IN (SELECT public.my_reader_ids())
   );
 
-CREATE POLICY "Remove friendships"
-  ON public.reader_friendships FOR DELETE
+CREATE POLICY "Remove friendships" ON public.reader_friendships
+  FOR DELETE
   USING (
     requester_id IN (SELECT public.my_reader_ids())
     OR addressee_id IN (SELECT public.my_reader_ids())
   );
 
+-- reading_sessions
+CREATE POLICY "family can manage reading sessions" ON public.reading_sessions
+  FOR ALL
+  USING    (public.family_owner_id() = user_id)
+  WITH CHECK (public.family_owner_id() = user_id);
+
+CREATE POLICY "View accepted friend reading sessions" ON public.reading_sessions
+  FOR SELECT
+  USING (
+    public.family_owner_id() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.reader_friendships rf
+      WHERE rf.status = 'accepted'
+        AND (rf.requester_id = reading_sessions.reader_id OR rf.addressee_id = reading_sessions.reader_id)
+        AND (
+          rf.requester_id IN (SELECT public.my_reader_ids())
+          OR rf.addressee_id IN (SELECT public.my_reader_ids())
+        )
+    )
+  );
+
+-- reader_badges
+CREATE POLICY "family can read reader badges" ON public.reader_badges
+  FOR SELECT USING (public.family_owner_id() = user_id);
+
+CREATE POLICY "family can insert reader badges" ON public.reader_badges
+  FOR INSERT WITH CHECK (public.family_owner_id() = user_id);
+
+CREATE POLICY "View accepted friend badges" ON public.reader_badges
+  FOR SELECT
+  USING (
+    public.family_owner_id() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.reader_friendships rf
+      WHERE rf.status = 'accepted'
+        AND (rf.requester_id = reader_badges.reader_id OR rf.addressee_id = reader_badges.reader_id)
+        AND (
+          rf.requester_id IN (SELECT public.my_reader_ids())
+          OR rf.addressee_id IN (SELECT public.my_reader_ids())
+        )
+    )
+  );
+
+-- guardian_invitations
+CREATE POLICY "family can view invitations" ON public.guardian_invitations
+  FOR SELECT
+  USING (public.family_owner_id() = owner_id);
+
+CREATE POLICY "family can create invitations" ON public.guardian_invitations
+  FOR INSERT
+  WITH CHECK (public.family_owner_id() = owner_id);
+
+CREATE POLICY "family can cancel invitations" ON public.guardian_invitations
+  FOR UPDATE
+  USING (public.family_owner_id() = owner_id)
+  WITH CHECK (public.family_owner_id() = owner_id);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- BUSINESS LOGIC FUNCTIONS
+-- ─────────────────────────────────────────────────────────────────────────────
 
 -- ---------------------------------------------------------------------------
--- calculate_streak(p_reader_id)
--- Returns the reader's current active reading streak in days.
+-- calculate_streak — current active reading streak in days.
 -- A "reading day" = a short book completed (<100 pp) OR a reading session logged.
--- Allows yesterday as anchor so the streak isn't broken by not having logged yet.
+-- Allows yesterday as anchor so the streak isn't broken before today's log.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.calculate_streak(p_reader_id UUID)
 RETURNS INTEGER
@@ -538,8 +603,7 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- get_streak_info(p_reader_id)
--- Returns current streak and all-time best streak.
+-- get_streak_info — returns current streak and all-time best streak.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.get_streak_info(p_reader_id UUID)
 RETURNS TABLE (current_streak INTEGER, best_streak INTEGER)
@@ -591,9 +655,8 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- search_reader_by_code(p_code)
--- Finds a reader by friend code. SECURITY DEFINER so any authenticated user
--- can discover a reader without needing RLS access to the readers table.
+-- search_reader_by_code — finds a reader by friend code.
+-- SECURITY DEFINER allows any authenticated user to discover a reader.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.search_reader_by_code(p_code TEXT)
 RETURNS TABLE (id UUID, name TEXT, avatar_seed TEXT, book_count BIGINT, xp INTEGER)
@@ -605,19 +668,17 @@ AS $$
     r.id,
     r.name,
     r.avatar_seed,
-    COUNT(b.id)::BIGINT AS book_count,
+    r.book_count::BIGINT,
     r.xp
   FROM public.readers r
-  LEFT JOIN public.books b ON b.reader_id = r.id
-  WHERE r.friend_code = p_code
-  GROUP BY r.id, r.name, r.avatar_seed, r.xp;
+  WHERE r.friend_code = p_code;
 $$;
 
 
 -- ---------------------------------------------------------------------------
--- check_and_award_badges(p_reader_id)
--- Evaluates all badge criteria and inserts newly earned badges.
+-- check_and_award_badges — evaluates all badge criteria and awards new badges.
 -- Returns (awarded_slug, bonus_xp) for each badge just awarded.
+-- XP values are 10% of original to keep rewards balanced.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.check_and_award_badges(p_reader_id UUID)
 RETURNS TABLE (awarded_slug TEXT, bonus_xp INTEGER)
@@ -646,15 +707,15 @@ BEGIN
   v_current_streak := public.calculate_streak(p_reader_id);
 
   FOR v_slug, v_xp IN (VALUES
-    ('first_book',          50),
-    ('bookworm_5',         100),
-    ('bookworm_25',        250),
-    ('centurion',         1000),
-    ('page_hunter_500',     50),
-    ('page_hunter_5000',   500),
-    ('polyglot',           150),
-    ('streak_7',           100),
-    ('streak_30',          500)
+    ('first_book',           5),
+    ('bookworm_5',          10),
+    ('bookworm_25',         25),
+    ('centurion',          100),
+    ('page_hunter_500',      5),
+    ('page_hunter_5000',    50),
+    ('polyglot',            15),
+    ('streak_7',            10),
+    ('streak_30',           50)
   ) LOOP
     CONTINUE WHEN EXISTS (
       SELECT 1 FROM public.reader_badges
@@ -674,9 +735,6 @@ BEGIN
       INSERT INTO public.reader_badges (reader_id, user_id, badge_slug, bonus_xp)
       VALUES (p_reader_id, v_user_id, v_slug, v_xp);
 
-      INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
-      VALUES (p_reader_id, v_user_id, v_xp, 'badge_' || v_slug);
-
       UPDATE public.readers
       SET xp = xp + v_xp, updated_at = NOW()
       WHERE id = p_reader_id;
@@ -691,9 +749,8 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- check_book_club_badge(p_reader_id)
--- Awards the book_club badge when two accepted friends have logged the same
--- title (case-insensitive). Returns TRUE if the badge was just awarded.
+-- check_book_club_badge — awards book_club when two accepted friends have
+-- logged the same title (case-insensitive). Returns TRUE if just awarded.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.check_book_club_badge(p_reader_id UUID)
 RETURNS BOOLEAN
@@ -731,14 +788,11 @@ BEGIN
 
   IF v_earned THEN
     INSERT INTO public.reader_badges (reader_id, user_id, badge_slug, bonus_xp)
-    VALUES (p_reader_id, v_user_id, 'book_club', 100)
+    VALUES (p_reader_id, v_user_id, 'book_club', 10)
     ON CONFLICT DO NOTHING;
 
-    INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
-    VALUES (p_reader_id, v_user_id, 100, 'badge_book_club');
-
     UPDATE public.readers
-    SET xp = xp + 100, updated_at = NOW()
+    SET xp = xp + 10, updated_at = NOW()
     WHERE id = p_reader_id;
   END IF;
 
@@ -748,9 +802,9 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- revoke_unqualified_badges(p_reader_id)
--- Called after a book is deleted. Revokes any badges the reader no longer
--- qualifies for and deducts their XP bonus (floor: 0). Returns revoked rows.
+-- revoke_unqualified_badges — called after a book is deleted.
+-- Revokes any badges no longer earned and deducts their XP (floor: 0).
+-- Returns (revoked_slug, penalty_xp) for each revoked badge.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.revoke_unqualified_badges(p_reader_id UUID)
 RETURNS TABLE (revoked_slug TEXT, penalty_xp INTEGER)
@@ -817,9 +871,6 @@ BEGIN
       WHERE reader_id = p_reader_id AND badge_slug = v_rb.badge_slug;
 
       IF v_rb.bonus_xp > 0 THEN
-        INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
-        VALUES (p_reader_id, v_user_id, -v_rb.bonus_xp, 'badge_revoked_' || v_rb.badge_slug);
-
         UPDATE public.readers
         SET xp = GREATEST(0, xp - v_rb.bonus_xp), updated_at = NOW()
         WHERE id = p_reader_id;
@@ -835,8 +886,7 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- log_reading_session(p_reader_id, p_book_id, p_last_page, p_date)
--- Upserts a daily reading session (one row per reader/book/day).
+-- log_reading_session — upserts a daily reading session.
 -- Awards XP = pages advanced for long books (> 100 pages).
 -- Returns { xp_earned: <int> }.
 -- ---------------------------------------------------------------------------
@@ -859,7 +909,7 @@ DECLARE
 BEGIN
   SELECT user_id INTO v_user_id
   FROM public.readers
-  WHERE id = p_reader_id AND user_id = auth.uid();
+  WHERE id = p_reader_id AND user_id = public.family_owner_id();
 
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'Reader not found or access denied';
@@ -869,8 +919,6 @@ BEGIN
   FROM public.books
   WHERE id = p_book_id AND reader_id = p_reader_id;
 
-  -- Baseline: today's existing last_page (if updating same day),
-  -- or the most recent prior session, or 0 for the very first session.
   SELECT COALESCE(
     (SELECT last_page FROM public.reading_sessions
       WHERE reader_id = p_reader_id AND book_id = p_book_id
@@ -887,14 +935,14 @@ BEGIN
   ON CONFLICT (reader_id, book_id, session_date)
   DO UPDATE SET last_page = EXCLUDED.last_page;
 
-  -- XP = 1 per page advanced (long books only; short books earn XP on completion)
   IF v_total_pages > 100 THEN
     v_pages_delta := GREATEST(p_last_page - v_previous_last_page, 0);
     v_xp_earned   := v_pages_delta;
 
     IF v_xp_earned > 0 THEN
-      INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
-      VALUES (p_reader_id, v_user_id, v_xp_earned, 'reading_session');
+      UPDATE public.books
+      SET xp_earned = xp_earned + v_xp_earned
+      WHERE id = p_book_id;
 
       UPDATE public.readers
       SET xp = xp + v_xp_earned, updated_at = NOW()
@@ -908,9 +956,9 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- log_book(...)
--- Inserts a book, awards Livrux (if completed), awards XP (short books),
+-- log_book — inserts a book, awards Livrux (if completed), awards XP,
 -- checks badges. Returns { book_id, awarded_badges, xp_earned }.
+-- XP = total_pages for any book added directly as completed (no sessions).
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.log_book(
   p_reader_id           UUID,
@@ -940,16 +988,20 @@ DECLARE
 BEGIN
   SELECT user_id INTO v_user_id
   FROM public.readers
-  WHERE id = p_reader_id AND user_id = auth.uid();
+  WHERE id = p_reader_id AND user_id = public.family_owner_id();
 
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'Reader not found or access denied';
   END IF;
 
+  IF p_status = 'completed' THEN
+    v_xp_earned := p_total_pages;
+  END IF;
+
   INSERT INTO public.books (
     reader_id, user_id, title, author, total_pages,
     cover_url, livrux_earned, status, date_start, date_completed,
-    notes, is_foreign_language, rating, review
+    notes, is_foreign_language, rating, review, xp_earned
   ) VALUES (
     p_reader_id, v_user_id, p_title, p_author, p_total_pages,
     p_cover_url,
@@ -957,28 +1009,25 @@ BEGIN
     p_status, p_date_start, p_date_completed,
     p_notes, p_is_foreign_language,
     CASE WHEN p_status = 'completed' THEN p_rating ELSE NULL END,
-    CASE WHEN p_status = 'completed' THEN p_review ELSE NULL END
+    CASE WHEN p_status = 'completed' THEN p_review ELSE NULL END,
+    v_xp_earned
   ) RETURNING id INTO v_book_id;
 
-  IF p_status = 'completed' AND p_livrux_earned > 0 THEN
-    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason)
-    VALUES (p_reader_id, v_user_id, v_book_id, p_livrux_earned, 'book_completed');
-
+  IF p_status = 'completed' THEN
     UPDATE public.readers
-    SET livrux_balance = livrux_balance + p_livrux_earned,
+    SET book_count = book_count + 1,
+        xp         = xp + v_xp_earned,
         updated_at = NOW()
     WHERE id = p_reader_id;
   END IF;
 
-  -- XP for completing a short book (≤ 100 pages) = total page count
-  IF p_status = 'completed' AND p_total_pages <= 100 THEN
-    v_xp_earned := p_total_pages;
-
-    INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
-    VALUES (p_reader_id, v_user_id, v_xp_earned, 'book_completed_short');
+  IF p_status = 'completed' AND p_livrux_earned > 0 THEN
+    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason, description)
+    VALUES (p_reader_id, v_user_id, v_book_id, p_livrux_earned, 'book_completed', p_title);
 
     UPDATE public.readers
-    SET xp = xp + v_xp_earned, updated_at = NOW()
+    SET livrux_balance = livrux_balance + p_livrux_earned,
+        updated_at     = NOW()
     WHERE id = p_reader_id;
   END IF;
 
@@ -996,7 +1045,7 @@ BEGIN
     IF public.check_book_club_badge(p_reader_id) THEN
       v_badges := v_badges || jsonb_build_object(
         'slug',     'book_club',
-        'bonus_xp', 100
+        'bonus_xp', 10
       );
     END IF;
   END IF;
@@ -1011,9 +1060,10 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- complete_book(p_book_id, p_date_completed, p_livrux_earned, p_rating, p_review)
--- Transitions a 'reading' book to 'completed', awards Livrux and XP,
--- checks badges. Returns { awarded_badges, xp_earned }.
+-- complete_book — transitions a 'reading' book to 'completed', awards
+-- Livrux and XP, checks badges. Returns { awarded_badges, xp_earned }.
+-- Short books: XP = total_pages. Long books: XP = remaining pages after
+-- last session (tops up books.xp_earned to equal total_pages).
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.complete_book(
   p_book_id        UUID,
@@ -1027,18 +1077,20 @@ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_reader_id   UUID;
-  v_user_id     UUID;
-  v_status      TEXT;
-  v_total_pages INTEGER;
-  v_badges      JSONB   := '[]'::JSONB;
-  v_badge_row   RECORD;
-  v_xp_earned   INTEGER := 0;
+  v_reader_id    UUID;
+  v_user_id      UUID;
+  v_title        TEXT;
+  v_status       TEXT;
+  v_total_pages  INTEGER;
+  v_last_page    INTEGER := 0;
+  v_badges       JSONB   := '[]'::JSONB;
+  v_badge_row    RECORD;
+  v_xp_earned    INTEGER := 0;
 BEGIN
-  SELECT reader_id, user_id, status, total_pages
-  INTO v_reader_id, v_user_id, v_status, v_total_pages
+  SELECT reader_id, user_id, title, status, total_pages
+  INTO v_reader_id, v_user_id, v_title, v_status, v_total_pages
   FROM public.books
-  WHERE id = p_book_id AND user_id = auth.uid();
+  WHERE id = p_book_id AND user_id = public.family_owner_id();
 
   IF v_reader_id IS NULL THEN
     RAISE EXCEPTION 'Book not found or access denied';
@@ -1048,33 +1100,40 @@ BEGIN
     RAISE EXCEPTION 'Book is already completed';
   END IF;
 
+  IF v_total_pages <= 100 THEN
+    v_xp_earned := v_total_pages;
+  ELSE
+    SELECT COALESCE(last_page, 0) INTO v_last_page
+    FROM public.reading_sessions
+    WHERE book_id = p_book_id AND reader_id = v_reader_id
+    ORDER BY session_date DESC
+    LIMIT 1;
+
+    v_xp_earned := GREATEST(v_total_pages - v_last_page, 0);
+  END IF;
+
   UPDATE public.books
   SET status         = 'completed',
       date_completed = p_date_completed,
       livrux_earned  = p_livrux_earned,
       rating         = p_rating,
-      review         = p_review
+      review         = p_review,
+      xp_earned      = xp_earned + v_xp_earned
   WHERE id = p_book_id;
 
+  UPDATE public.readers
+  SET book_count = book_count + 1,
+      xp         = xp + v_xp_earned,
+      updated_at = NOW()
+  WHERE id = v_reader_id;
+
   IF p_livrux_earned > 0 THEN
-    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason)
-    VALUES (v_reader_id, v_user_id, p_book_id, p_livrux_earned, 'book_completed');
+    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason, description)
+    VALUES (v_reader_id, v_user_id, p_book_id, p_livrux_earned, 'book_completed', v_title);
 
     UPDATE public.readers
     SET livrux_balance = livrux_balance + p_livrux_earned,
-        updated_at = NOW()
-    WHERE id = v_reader_id;
-  END IF;
-
-  -- XP for short book (≤ 100 pages) = total page count
-  IF v_total_pages <= 100 THEN
-    v_xp_earned := v_total_pages;
-
-    INSERT INTO public.xp_transactions (reader_id, user_id, amount, reason)
-    VALUES (v_reader_id, v_user_id, v_xp_earned, 'book_completed_short');
-
-    UPDATE public.readers
-    SET xp = xp + v_xp_earned, updated_at = NOW()
+        updated_at     = NOW()
     WHERE id = v_reader_id;
   END IF;
 
@@ -1091,7 +1150,7 @@ BEGIN
   IF public.check_book_club_badge(v_reader_id) THEN
     v_badges := v_badges || jsonb_build_object(
       'slug',     'book_club',
-      'bonus_xp', 100
+      'bonus_xp', 10
     );
   END IF;
 
@@ -1104,8 +1163,7 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- delete_book(p_book_id)
--- Deletes a book, deducts its Livrux, revokes badges no longer earned.
+-- delete_book — deletes a book, deducts its Livrux and XP, revokes badges.
 -- Returns { revoked_badges: [{slug, penalty_xp}] }.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.delete_book(p_book_id UUID)
@@ -1116,26 +1174,41 @@ AS $$
 DECLARE
   v_reader_id     UUID;
   v_user_id       UUID;
+  v_title         TEXT;
+  v_status        TEXT;
   v_livrux_earned NUMERIC;
+  v_xp_earned     INTEGER;
   v_revoked       JSONB := '[]'::JSONB;
   v_row           RECORD;
 BEGIN
-  SELECT reader_id, user_id, livrux_earned
-  INTO v_reader_id, v_user_id, v_livrux_earned
+  SELECT reader_id, user_id, title, status, livrux_earned, xp_earned
+  INTO v_reader_id, v_user_id, v_title, v_status, v_livrux_earned, v_xp_earned
   FROM public.books
-  WHERE id = p_book_id AND user_id = auth.uid();
+  WHERE id = p_book_id AND user_id = public.family_owner_id();
 
   IF v_reader_id IS NULL THEN
     RAISE EXCEPTION 'Book not found or access denied';
   END IF;
 
-  -- Delete the book; reading_sessions cascade automatically.
   DELETE FROM public.books WHERE id = p_book_id;
 
-  -- Deduct Livrux earned (0 for 'reading' books, so always safe).
+  IF v_status = 'completed' THEN
+    UPDATE public.readers
+    SET book_count = book_count - 1,
+        updated_at = NOW()
+    WHERE id = v_reader_id;
+  END IF;
+
+  IF v_xp_earned > 0 THEN
+    UPDATE public.readers
+    SET xp         = GREATEST(0, xp - v_xp_earned),
+        updated_at = NOW()
+    WHERE id = v_reader_id;
+  END IF;
+
   IF v_livrux_earned > 0 THEN
-    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason)
-    VALUES (v_reader_id, v_user_id, NULL, -v_livrux_earned, 'book_deleted');
+    INSERT INTO public.livrux_transactions (reader_id, user_id, book_id, amount, reason, description)
+    VALUES (v_reader_id, v_user_id, NULL, -v_livrux_earned, 'book_deleted', v_title);
 
     UPDATE public.readers
     SET livrux_balance = livrux_balance - v_livrux_earned,
@@ -1143,7 +1216,6 @@ BEGIN
     WHERE id = v_reader_id;
   END IF;
 
-  -- Revoke any badges the reader no longer qualifies for.
   FOR v_row IN
     SELECT revoked_slug, penalty_xp
     FROM public.revoke_unqualified_badges(v_reader_id)
@@ -1160,9 +1232,8 @@ $$;
 
 
 -- ---------------------------------------------------------------------------
--- update_book(...)
--- Updates all editable book fields, records the Livrux delta as a transaction,
--- and adjusts the reader balance atomically.
+-- update_book — updates editable book fields and records the Livrux delta.
+-- Only inserts a transaction when the Livrux amount actually changed.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.update_book(
   p_book_id             UUID,
@@ -1178,6 +1249,7 @@ CREATE OR REPLACE FUNCTION public.update_book(
 )
 RETURNS VOID
 LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_reader_id  UUID;
@@ -1188,7 +1260,7 @@ BEGIN
   SELECT reader_id, user_id, livrux_earned
   INTO v_reader_id, v_user_id, v_old_livrux
   FROM public.books
-  WHERE id = p_book_id AND user_id = auth.uid();
+  WHERE id = p_book_id AND user_id = public.family_owner_id();
 
   IF v_reader_id IS NULL THEN
     RAISE EXCEPTION 'Book not found or access denied';
@@ -1209,22 +1281,23 @@ BEGIN
     review              = p_review
   WHERE id = p_book_id;
 
-  INSERT INTO public.livrux_transactions
-    (reader_id, user_id, book_id, amount, reason, description)
-  VALUES
-    (v_reader_id, v_user_id, p_book_id, v_delta, 'book_updated', p_title);
+  IF v_delta <> 0 THEN
+    INSERT INTO public.livrux_transactions
+      (reader_id, user_id, book_id, amount, reason, description)
+    VALUES
+      (v_reader_id, v_user_id, p_book_id, v_delta, 'book_updated', p_title);
 
-  UPDATE public.readers
-  SET livrux_balance = livrux_balance + v_delta,
-      updated_at     = NOW()
-  WHERE id = v_reader_id;
+    UPDATE public.readers
+    SET livrux_balance = livrux_balance + v_delta,
+        updated_at     = NOW()
+    WHERE id = v_reader_id;
+  END IF;
 END;
 $$;
 
 
 -- ---------------------------------------------------------------------------
--- spend_livrux(p_reader_id, p_amount, p_description)
--- Logs a real-life Livrux expense. p_amount is positive; stored as negative.
+-- spend_livrux — logs a real-life Livrux expense. p_amount is positive.
 -- ---------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.spend_livrux(
   p_reader_id   UUID,
@@ -1233,6 +1306,7 @@ CREATE OR REPLACE FUNCTION public.spend_livrux(
 )
 RETURNS VOID
 LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_user_id UUID;
@@ -1241,7 +1315,7 @@ BEGIN
   SELECT user_id, livrux_balance
   INTO v_user_id, v_balance
   FROM public.readers
-  WHERE id = p_reader_id AND user_id = auth.uid();
+  WHERE id = p_reader_id AND user_id = public.family_owner_id();
 
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'Reader not found or access denied';
@@ -1266,3 +1340,63 @@ BEGIN
   WHERE id = p_reader_id;
 END;
 $$;
+
+
+-- ---------------------------------------------------------------------------
+-- find_invitation_by_short_code — used by the accept-invitation Edge Function
+-- to find a pending invitation by the first 8 hex chars of its UUID token.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.find_invitation_by_short_code(p_code TEXT)
+RETURNS SETOF public.guardian_invitations
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT *
+  FROM   public.guardian_invitations
+  WHERE  status = 'pending'
+  AND    token::text ILIKE p_code || '%'
+  LIMIT  1;
+$$;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- GRANTS
+-- Required so the authenticated/anon roles pass the PostgreSQL permission check
+-- before RLS policies are evaluated. consent_logs is intentionally excluded —
+-- it has no RLS policies, so only the service role (Edge Function) can access it.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+GRANT SELECT ON public.badges TO authenticated;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON
+  public.user_profiles,
+  public.reward_formulas,
+  public.readers,
+  public.books,
+  public.livrux_transactions,
+  public.reader_friendships,
+  public.reading_sessions,
+  public.reader_badges,
+  public.co_guardians,
+  public.guardian_invitations
+TO authenticated;
+
+GRANT EXECUTE ON FUNCTION
+  public.family_owner_id(),
+  public.my_reader_ids(),
+  public.calculate_streak(UUID),
+  public.get_streak_info(UUID),
+  public.search_reader_by_code(TEXT),
+  public.check_and_award_badges(UUID),
+  public.check_book_club_badge(UUID),
+  public.revoke_unqualified_badges(UUID),
+  public.log_reading_session(UUID, UUID, INTEGER, DATE),
+  public.log_book(UUID, TEXT, TEXT, INTEGER, TEXT, NUMERIC, TEXT, DATE, DATE, TEXT, BOOLEAN, TEXT, TEXT),
+  public.complete_book(UUID, DATE, NUMERIC, TEXT, TEXT),
+  public.delete_book(UUID),
+  public.update_book(UUID, TEXT, TEXT, INTEGER, TEXT, DATE, BOOLEAN, NUMERIC, TEXT, TEXT),
+  public.spend_livrux(UUID, NUMERIC, TEXT),
+  public.find_invitation_by_short_code(TEXT)
+TO authenticated;

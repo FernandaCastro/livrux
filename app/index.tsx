@@ -34,7 +34,7 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { readers, isLoading, error: readersError, refresh } = useReaders();
-  const { setSelectedReader, loadThemeForReader, bookPersistedCount } = useReaderStore();
+  const { setSelectedReader, bookPersistedCount } = useReaderStore();
   const { profile } = useAuthStore();
   const { canAccessReader, lockReaders } = useParentalStore();
   const { pendingEmailConfirmation } = useAuthStore();
@@ -53,8 +53,7 @@ export default function HomeScreen() {
   }, [bookPersistedCount]);
 
   const handleSelectReader = (reader: Reader) => {
-    requireReaderPin(reader, async () => {
-      await loadThemeForReader(reader.id);
+    requireReaderPin(reader, () => {
       setSelectedReader(reader);
       router.push(`/app/reader/${reader.id}`);
     });

@@ -10,7 +10,6 @@ export default function AppLayout() {
   const { confettiTrigger, clearConfetti, readerSelectorVisible, closeReaderSelector, currentThemeId } = useReaderStore();
   const background = themes[currentThemeId].flashFrameBackground;
   return (
-    <>
       <View style={[
         styles.container,
         { backgroundColor: background },
@@ -25,7 +24,6 @@ export default function AppLayout() {
         />
         <ReaderSelectorSheet visible={readerSelectorVisible} onClose={closeReaderSelector} />
       </View>
-    </>
   );
 }
 const styles = StyleSheet.create({

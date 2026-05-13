@@ -34,7 +34,7 @@ export const Colors = {
   // Text
   textPrimary: '#1E1B4B',   // deep purple-blue — matches web
   textSecondary: '#6B7280',
-  textDisabled: '#BDBDBD',
+  textDisabled: '#9CA3AF',
   textOnPrimary: '#FFFFFF',
 
   // Feedback
@@ -110,7 +110,7 @@ export const noiteColors: ColorPalette = {
   surfaceVariant: '#334155',
   textPrimary: '#F1F5F9',
   textSecondary: '#94A3B8',
-  textDisabled: '#475569',
+  textDisabled: '#64748B',
   textOnPrimary: '#FFFFFF',
   success: '#22C55E',
   error: '#F87171',
@@ -151,7 +151,7 @@ export const indigoColors: ColorPalette = {
   surfaceVariant: '#DBEAFE',   // blue-100 — superfícies com tint azul
   textPrimary: '#0F172A',
   textSecondary: '#64748B',
-  textDisabled: '#CBD5E1',
+  textDisabled: '#94A3B8',
   textOnPrimary: '#FFFFFF',
   success: '#22C55E',
   error: '#E53935',

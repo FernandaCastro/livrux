@@ -325,15 +325,24 @@ export default function FriendsScreen() {
     setSearchError(null);
     setSearchResult(null);
     setRequestSent(false);
-    const result = await searchByCode(searchCode);
-    if (!result) {
-      setSearchError(t('friends.codeNotFound'));
-    } else if (result.id === readerId) {
-      setSearchError(t('friends.cannotAddSelf'));
-    } else {
-      setSearchResult(result);
+    try {
+      const result = await searchByCode(searchCode);
+      if (!result) {
+        setSearchError(t('friends.codeNotFound'));
+      } else if (result.id === readerId) {
+        setSearchError(t('friends.cannotAddSelf'));
+      } else {
+        setSearchResult(result);
+      }
+    } catch (err: any) {
+      if (err?.message === 'TOO_MANY_REQUESTS') {
+        setSearchError(t('friends.tooManySearches'));
+      } else {
+        setSearchError(t('common.error'));
+      }
+    } finally {
+      setSearchLoading(false);
     }
-    setSearchLoading(false);
   };
 
   const handleSendRequest = async () => {

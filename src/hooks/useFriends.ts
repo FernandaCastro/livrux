@@ -188,11 +188,16 @@ export function useFriends(readerId: string | null): UseFriendsResult {
   });
 
   const searchByCode = async (code: string): Promise<FriendSearchResult | null> => {
-    const { data: rpcData, error } = await supabase.rpc('search_reader_by_code', {
-      p_code: code.trim().toUpperCase(),
+    const { data: fnData, error } = await supabase.functions.invoke('search-reader', {
+      body: { code: code.trim().toUpperCase() },
     });
-    if (error || !rpcData || rpcData.length === 0) return null;
-    const r = rpcData[0];
+    if (error) {
+      if ((error as any)?.context?.status === 429) throw new Error('TOO_MANY_REQUESTS');
+      throw error;
+    }
+    const rows: any[] = fnData?.data ?? [];
+    if (rows.length === 0) return null;
+    const r = rows[0];
     return {
       id: r.id,
       name: r.name,

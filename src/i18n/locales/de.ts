@@ -238,6 +238,7 @@ const de = {
     sendRequest: 'Anfrage senden',
     requestSentSuccess: 'Anfrage gesendet! Warte auf Bestätigung.',
     codeNotFound: 'Code nicht gefunden. Überprüfe ihn und versuche es erneut.',
+    tooManySearches: 'Zu viele Suchanfragen in kurzer Zeit. Versuche es später erneut.',
     cannotAddSelf: 'Du kannst dich nicht selbst hinzufügen.',
     requestAlreadySent: 'Anfrage wurde bereits an diesen Leser gesendet.',
     unfriend: 'Freundschaft beenden',

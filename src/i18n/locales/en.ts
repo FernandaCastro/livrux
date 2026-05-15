@@ -281,6 +281,7 @@ const en = {
     sendRequest: 'Send request',
     requestSentSuccess: 'Request sent! Waiting for confirmation.',
     codeNotFound: 'Code not found. Check and try again.',
+    tooManySearches: 'Too many searches in a short time. Try again later.',
     cannotAddSelf: 'You cannot add yourself.',
     requestAlreadySent: 'Request already sent to this reader.',
     unfriend: 'Unfriend',

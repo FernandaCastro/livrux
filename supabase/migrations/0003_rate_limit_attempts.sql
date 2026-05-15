@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS public.rate_limit_attempts (
 CREATE INDEX idx_rate_limit_user_action
   ON public.rate_limit_attempts (user_id, action, attempted_at);
 
+-- service_role bypasses RLS but still needs table-level grants.
+GRANT SELECT, INSERT ON public.rate_limit_attempts TO service_role;
+
 -- Weekly cleanup of attempts older than 24 hours (requires pg_cron extension).
 -- Enable in Supabase dashboard: Database → Extensions → pg_cron
 SELECT cron.schedule(

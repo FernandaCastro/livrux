@@ -313,6 +313,7 @@ const pt = {
     sendRequest: 'Pedir amizade',
     requestSentSuccess: 'Pedido enviado! Aguarde a confirmação.',
     codeNotFound: 'Código não encontrado. Verifique e tente novamente.',
+    tooManySearches: 'Muitas buscas em pouco tempo. Tente novamente mais tarde.',
     cannotAddSelf: 'Você não pode adicionar a si mesmo.',
     requestAlreadySent: 'Pedido já enviado para este leitor.',
     unfriend: 'Desfazer amizade',

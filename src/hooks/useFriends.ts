@@ -191,7 +191,10 @@ export function useFriends(readerId: string | null): UseFriendsResult {
     const { data: fnData, error } = await supabase.functions.invoke('search-reader', {
       body: { code: code.trim().toUpperCase() },
     });
-    if (error) throw error;
+    if (error) {
+      if ((error as any)?.context?.status === 429) throw new Error('TOO_MANY_REQUESTS');
+      throw error;
+    }
     const rows: any[] = fnData?.data ?? [];
     if (rows.length === 0) return null;
     const r = rows[0];

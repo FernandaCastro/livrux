@@ -14,6 +14,8 @@ const pt = {
     done: 'Concluído',
     or: 'ou',
     ok: 'OK',
+    errorBoundaryTitle: 'Algo deu errado',
+    errorBoundarySubtitle: 'O app encontrou um erro inesperado. Tente novamente.',
   },
   auth: {
     signIn: 'Entrar',

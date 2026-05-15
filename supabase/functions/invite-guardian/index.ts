@@ -98,7 +98,6 @@ Deno.serve(async (req: Request) => {
     .single();
 
   if (insertError || !invitation) {
-    console.error('[invite-guardian] Insert error:', insertError?.message);
     return json({ error: 'Failed to create invitation' }, 500);
   }
 
@@ -116,7 +115,6 @@ Deno.serve(async (req: Request) => {
   // ── 6. Send email via Resend ───────────────────────────────────────────────
   const resendKey = Deno.env.get('RESEND_API_KEY');
   if (!resendKey) {
-    console.error('[invite-guardian] RESEND_API_KEY not set');
     return json({ error: 'Email service not configured' }, 500);
   }
 
@@ -138,12 +136,9 @@ Deno.serve(async (req: Request) => {
   });
 
   if (!resendRes.ok) {
-    const errText = await resendRes.text();
-    console.error('[invite-guardian] Resend error:', errText);
     return json({ error: 'Failed to send invitation email' }, 500);
   }
 
-  console.log('[invite-guardian] Invitation sent to', email, 'token:', token);
   return json({ success: true }, 200);
 });
 

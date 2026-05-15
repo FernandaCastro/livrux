@@ -14,6 +14,8 @@ const en = {
     done: 'Done',
     or: 'or',
     ok: 'OK',
+    errorBoundaryTitle: 'Something went wrong',
+    errorBoundarySubtitle: 'The app encountered an unexpected error. Please try again.',
   },
   auth: {
     signIn: 'Sign In',

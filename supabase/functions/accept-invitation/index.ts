@@ -51,7 +51,6 @@ Deno.serve(async (req: Request) => {
     // Short code — look up via RPC to safely cast UUID → text in SQL.
     const { data, error: rpcError } = await adminClient
       .rpc('find_invitation_by_short_code', { p_code: rawToken.toLowerCase() });
-    console.log('[accept-invitation] short-code lookup:', JSON.stringify({ data, error: rpcError?.message }));
     invitation = Array.isArray(data) && data.length > 0 ? data[0] : null;
   } else {
     const { data, error: qError } = await adminClient
@@ -60,7 +59,6 @@ Deno.serve(async (req: Request) => {
       .eq('token', rawToken.toLowerCase())
       .eq('status', 'pending')
       .maybeSingle();
-    console.log('[accept-invitation] full-token lookup:', JSON.stringify({ data, error: qError?.message }));
     invitation = data;
   }
 
@@ -103,7 +101,6 @@ Deno.serve(async (req: Request) => {
     .insert({ owner_id: ownerId, guardian_id: user.id });
 
   if (insertError) {
-    console.error('[accept-invitation] Insert error:', insertError.message);
     return json({ error: 'Failed to link account' }, 500);
   }
 
@@ -113,7 +110,6 @@ Deno.serve(async (req: Request) => {
     .update({ status: 'accepted', accepted_at: new Date().toISOString() })
     .eq('id', invitation.id as string);
 
-  console.log('[accept-invitation] User', user.id, 'accepted invitation, linked to owner', ownerId);
   return json({ success: true, owner_id: ownerId }, 200);
 });
 

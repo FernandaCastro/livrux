@@ -7,11 +7,6 @@
     "icon": "./assets/livrux.png",
     "userInterfaceStyle": "light",
     "scheme": "livrux",
-    "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.livrux.app",
-      "buildNumber": "1"
-    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

@@ -137,6 +137,8 @@ echo "  Generate one at: https://supabase.com/dashboard/account/tokens"
 echo
 
 SUPABASE_PAT=$(prompt_secret "SUPABASE_PAT" "Personal Access Token")
+SITE_URL=$(prompt_value     "SITE_URL"     "Public site URL (used in auth email links)"  "https://livrux.fecastro.com")
+REDIRECT_URLS=$(prompt_value "REDIRECT_URLS" "Allowed redirect URLs, comma-separated (deep link + web)" "livrux://,https://livrux.fecastro.com")
 SMTP_HOST=$(prompt_value    "SMTP_HOST"    "SMTP server host"    "smtp.resend.com")
 SMTP_PORT=$(prompt_value    "SMTP_PORT"    "SMTP port"           "465")
 SMTP_USER=$(prompt_value    "SMTP_USER"    "SMTP username"       "resend")
@@ -148,6 +150,8 @@ CONFIRM_TEMPLATE=$(cat "$TEMPLATES_DIR/confirmSignin.html")
 RESET_TEMPLATE=$(cat   "$TEMPLATES_DIR/resetPassword.html")
 
 PAYLOAD=$(jq -n \
+  --arg site_url          "$SITE_URL" \
+  --arg uri_allow_list    "$REDIRECT_URLS" \
   --arg smtp_host         "$SMTP_HOST" \
   --argjson smtp_port     "$SMTP_PORT" \
   --arg smtp_user         "$SMTP_USER" \
@@ -159,6 +163,8 @@ PAYLOAD=$(jq -n \
   --arg recovery_subject  "Reset your password · Redefinição de senha · Passwort zurücksetzen" \
   --arg recovery_content  "$RESET_TEMPLATE" \
   '{
+    site_url:                               $site_url,
+    uri_allow_list:                         $uri_allow_list,
     smtp_host:                              $smtp_host,
     smtp_port:                              $smtp_port,
     smtp_user:                              $smtp_user,

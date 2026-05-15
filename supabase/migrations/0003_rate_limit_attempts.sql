@@ -29,4 +29,7 @@ SELECT cron.schedule(
 
 -- Revoke direct RPC access — search_reader_by_code must now go through
 -- the search-reader Edge Function which enforces the rate limit.
+-- PUBLIC is revoked first because functions are executable by PUBLIC by default,
+-- and authenticated inherits from PUBLIC.
+REVOKE EXECUTE ON FUNCTION public.search_reader_by_code(TEXT) FROM PUBLIC;
 REVOKE EXECUTE ON FUNCTION public.search_reader_by_code(TEXT) FROM authenticated;

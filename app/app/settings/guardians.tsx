@@ -440,11 +440,12 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
   },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    backgroundColor: 'transparent',
     borderRadius: Radius.lg,
     overflow: 'hidden',
     marginBottom: Spacing.lg,
-    ...Shadows.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(124, 58, 237, 0.2)',
   },
   row: {
     flexDirection: 'row',
@@ -510,10 +511,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xl,
     gap: Spacing.sm,
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    backgroundColor: 'transparent',
     borderWidth: 1.5,
     borderColor: Colors.secondary,
-    ...Shadows.sm,
   },
   acceptBtnIcon: { fontSize: 18 },
   acceptBtnText: {

@@ -127,7 +127,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <View style={styles.logoHeader}>
-              <Image source={require('../assets/icon.png')} style={{ width: 50, height: 50, marginBottom: 0, marginLeft: -10 }} />
+              <Image source={require('../assets/livrux.png')} style={{ width: 50, height: 50, marginBottom: 0, marginLeft: -10 }} />
               <Text style={styles.appName}>{t('common.appName')}</Text>
             </View>
             {profile?.display_name && (

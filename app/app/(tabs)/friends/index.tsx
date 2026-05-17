@@ -12,10 +12,9 @@ import {
   RefreshControl,
   AppState,
 } from 'react-native';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import { GestureDetector } from 'react-native-gesture-handler';
-import Animated from 'react-native-reanimated';
-import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
+import { useTabSwipe } from '../../../../src/hooks/useTabSwipe';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -23,17 +22,17 @@ import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect, useRef } from 'react';
 import * as Clipboard from 'expo-clipboard';
 
-import { useFriends } from '../../../src/hooks/useFriends';
-import { useReaderStore } from '../../../src/stores/readerStore';
-import { useParentalStore } from '../../../src/stores/parentalStore';
-import { useDialogStore } from '../../../src/stores/dialogStore';
-import { useTheme } from '../../../src/hooks/useTheme';
-import { FriendCard } from '../../../src/components/friends/FriendCard';
-import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
-import type { FriendSearchResult } from '../../../src/types';
+import { useFriends } from '../../../../src/hooks/useFriends';
+import { useReaderStore } from '../../../../src/stores/readerStore';
+import { useParentalStore } from '../../../../src/stores/parentalStore';
+import { useDialogStore } from '../../../../src/stores/dialogStore';
+import { useTheme } from '../../../../src/hooks/useTheme';
+import { FriendCard } from '../../../../src/components/friends/FriendCard';
+import { MultiavatarView } from '../../../../src/components/reader/MultiavatarView';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../../src/constants/theme';
+import type { FriendSearchResult } from '../../../../src/types';
 
 function createStyles(theme: ColorPalette) {
   const S = createShadows(theme.shadowColor);
@@ -261,11 +260,11 @@ function createStyles(theme: ColorPalette) {
 export default function FriendsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { readerId } = useLocalSearchParams<{ readerId: string }>();
   const { selectedReader } = useReaderStore();
+  const readerId = selectedReader?.id ?? null;
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { gesture: swipeGesture, animatedStyle: swipeStyle } = useTabSwipe('friends');
+  const { gesture: swipeGesture } = useTabSwipe('friends');
 
   const {
     friends,
@@ -368,9 +367,8 @@ export default function FriendsScreen() {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <Animated.View style={[styles.root, swipeStyle]}>
-      <Stack.Screen options={{ animation: 'none' }} />
-      <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
+      <View style={styles.root}>
+<StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
         colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
@@ -481,7 +479,7 @@ export default function FriendsScreen() {
               avatarSeed={item.reader.avatar_seed}
               bookCount={item.reader.book_count}
               xp={item.reader.xp}
-              onPress={() => router.push(`/app/friend/${item.reader.id}?fromReaderId=${readerId}`)}
+              onPress={() => router.push(`/app/friends/${item.reader.id}?fromReaderId=${readerId}`)}
               onReject={
                 canManageFriends
                   ? () => handleUnfriend(item.friendshipId, item.reader.name)
@@ -568,7 +566,7 @@ export default function FriendsScreen() {
 
         <BottomMenu />
       </SafeAreaView>
-      </Animated.View>
+      </View>
     </GestureDetector>
   );
 }

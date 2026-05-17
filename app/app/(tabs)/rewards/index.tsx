@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { GestureDetector } from 'react-native-gesture-handler';
-import Animated from 'react-native-reanimated';
-import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
+import { useTabSwipe } from '../../../../src/hooks/useTabSwipe';
 import {
   View,
   Text,
@@ -20,14 +19,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
 
-import { useLivrux } from '../../../src/hooks/useLivrux';
-import { useReaderStore } from '../../../src/stores/readerStore';
-import { useTheme } from '../../../src/hooks/useTheme';
-import type { LivruxTransaction } from '../../../src/types';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
+import { useLivrux } from '../../../../src/hooks/useLivrux';
+import { useReaderStore } from '../../../../src/stores/readerStore';
+import { useTheme } from '../../../../src/hooks/useTheme';
+import type { LivruxTransaction } from '../../../../src/types';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { MultiavatarView } from '../../../../src/components/reader/MultiavatarView';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../../src/constants/theme';
 
 function createStyles(theme: ColorPalette) {
   const S = createShadows(theme.shadowColor);
@@ -209,7 +208,7 @@ export default function RewardsScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const appStateRef = useRef(AppState.currentState);
-  const { gesture: swipeGesture, animatedStyle: swipeStyle } = useTabSwipe('rewards');
+  const { gesture: swipeGesture } = useTabSwipe('rewards');
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
@@ -223,9 +222,8 @@ export default function RewardsScreen() {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <Animated.View style={[styles.root, swipeStyle]}>
-      <Stack.Screen options={{ animation: 'none' }} />
-      <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
+      <View style={styles.root}>
+<StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
         colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
@@ -304,7 +302,7 @@ export default function RewardsScreen() {
         )}
         <BottomMenu />
       </SafeAreaView>
-      </Animated.View>
+      </View>
     </GestureDetector>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Animated, View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
+import { Animated, PanResponder, View, Text, FlatList, StyleSheet, Pressable, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -34,6 +34,28 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(SHEET_TRANSLATE_Y)).current;
 
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, { dy, dx }) => dy > 8 && Math.abs(dy) > Math.abs(dx),
+      onPanResponderMove: (_, { dy }) => {
+        if (dy > 0) slideAnim.setValue(dy);
+      },
+      onPanResponderRelease: (_, { dy, vy }) => {
+        if (dy > 100 || vy > 0.5) {
+          onClose();
+        } else {
+          Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            damping: 22,
+            stiffness: 220,
+            mass: 0.8,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
   useEffect(() => {
     if (visible) {
       setMounted(true);
@@ -62,14 +84,14 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
   const handleSelectReader = (reader: Reader) => {
     requireReaderPin(reader, () => {
       setSelectedReader(reader);
-      router.push(`/app/reader/${reader.id}`);
+      router.push('/app/reader');
       onClose();
     });
   };
 
   const handleGoHome = () => {
     setSelectedReader(null);
-    router.replace('/app');
+    router.replace('/');
     onClose();
   };
 
@@ -96,8 +118,10 @@ export function ReaderSelectorSheet({ visible, onClose }: ReaderSelectorSheetPro
           end={{ x: 1, y: 1 }}
           style={styles.sheet}
         >
-          {/* Handle */}
-          <View style={styles.handle} />
+          {/* Handle — drag area to close */}
+          <View style={styles.handleArea} {...panResponder.panHandlers}>
+            <View style={styles.handle} />
+          </View>
 
           {/* Home row */}
           <Pressable style={styles.homeRow} onPress={handleGoHome} android_ripple={{ color: Colors.secondaryLight }}>
@@ -162,14 +186,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...Shadows.lg,
   },
+  handleArea: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.lg,
+  },
   handle: {
-    alignSelf: 'center',
     width: 40,
     height: 4,
     borderRadius: 2,
     backgroundColor: Colors.secondaryLight,
-    marginTop: Spacing.md,
-    marginBottom: Spacing.lg,
   },
   homeRow: {
     flexDirection: 'row',

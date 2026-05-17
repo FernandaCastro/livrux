@@ -55,7 +55,7 @@ export default function HomeScreen() {
   const handleSelectReader = (reader: Reader) => {
     requireReaderPin(reader, () => {
       setSelectedReader(reader);
-      router.push(`/app/reader/${reader.id}`);
+      router.push('/app/reader');
     });
   };
 

@@ -16,17 +16,17 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { supabase } from '../../../src/lib/supabase';
-import { hashPin } from '../../../src/lib/pinHash';
-import { useAuthStore } from '../../../src/stores/authStore';
-import { useParentalStore } from '../../../src/stores/parentalStore';
-import { useDialogStore } from '../../../src/stores/dialogStore';
-import { useReaders } from '../../../src/hooks/useReaders';
-import { PinModal } from '../../../src/components/PinModal';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
-import type { Reader } from '../../../src/types';
+import { supabase } from '../../../../src/lib/supabase';
+import { hashPin } from '../../../../src/lib/pinHash';
+import { useAuthStore } from '../../../../src/stores/authStore';
+import { useParentalStore } from '../../../../src/stores/parentalStore';
+import { useDialogStore } from '../../../../src/stores/dialogStore';
+import { useReaders } from '../../../../src/hooks/useReaders';
+import { PinModal } from '../../../../src/components/PinModal';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
+import type { Reader } from '../../../../src/types';
 
 // ─── PinCaptureModal ──────────────────────────────────────────────────────────
 
@@ -253,16 +253,11 @@ export default function ParentalControlsScreen() {
         />
 
         <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.headerRow}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.backText}>←</Text>
-            </TouchableOpacity>
-            <Text style={styles.screenTitle}>{t('parental.title')}</Text>
-            <View style={{ width: 32 }} />
-          </View>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backRow}>
+            <Text style={styles.backChevron}>‹</Text>
+            <Text style={styles.backLabel}>{t('settings.title')}</Text>
+          </TouchableOpacity>
+          <Text style={styles.screenTitle}>{t('parental.title')}</Text>
 
           {saving && <ActivityIndicator color={Colors.secondary} style={styles.saving} />}
 
@@ -426,22 +421,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
-  headerRow: {
+  backRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: Spacing.lg,
-    marginBottom: Spacing.xl,
+    paddingTop: Spacing.md,
+    marginBottom: Spacing.xs,
   },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
+  backChevron: {
+    fontSize: 28,
+    color: Colors.secondary,
+    marginRight: 4,
+    lineHeight: 32,
+  },
+  backLabel: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.md,
     color: Colors.secondary,
   },
   screenTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
     color: Colors.textPrimary,
+    marginBottom: Spacing.xl,
   },
   saving: { marginBottom: Spacing.md },
   sectionLabel: {

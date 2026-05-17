@@ -16,34 +16,33 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { supabase } from '../../../src/lib/supabase';
-import { useToastStore } from '../../../src/stores/toastStore';
-import { Button } from '../../../src/components/ui/Button';
-import { TextInput } from '../../../src/components/ui/TextInput';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing } from '../../../src/constants/theme';
+import { supabase } from '../../../../src/lib/supabase';
+import { useAuthStore } from '../../../../src/stores/authStore';
+import { useToastStore } from '../../../../src/stores/toastStore';
+import { Button } from '../../../../src/components/ui/Button';
+import { TextInput } from '../../../../src/components/ui/TextInput';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { Colors, Fonts, FontSizes, Spacing } from '../../../../src/constants/theme';
 
-const MIN_PASSWORD_LENGTH = 8;
+const MAX_NAME_LENGTH = 50;
 
 function useSchema() {
   const { t } = useTranslation();
-  return z
-    .object({
-      password: z.string().min(MIN_PASSWORD_LENGTH, t('auth.errors.passwordTooShort')),
-      confirm: z.string(),
-    })
-    .refine((d) => d.password === d.confirm, {
-      message: t('auth.errors.passwordMismatch'),
-      path: ['confirm'],
-    });
+  return z.object({
+    displayName: z
+      .string()
+      .min(1, t('settings.displayNameRequired'))
+      .max(MAX_NAME_LENGTH, t('settings.displayNameTooLong')),
+  });
 }
 
-type FormData = { password: string; confirm: string };
+type FormData = { displayName: string };
 
-export default function ChangePasswordScreen() {
+export default function EditNameScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { profile, fetchProfile } = useAuthStore();
   const schema = useSchema();
   const [saving, setSaving] = useState(false);
   const showToast = useToastStore((s) => s.show);
@@ -52,17 +51,30 @@ export default function ChangePasswordScreen() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { displayName: profile?.display_name ?? '' },
+  });
 
   const onSubmit = async (data: FormData) => {
+    const trimmed = data.displayName.trim();
+    if (trimmed === (profile?.display_name ?? '')) {
+      router.back();
+      return;
+    }
+
     setSaving(true);
-    const { error } = await supabase.auth.updateUser({ password: data.password });
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({ display_name: trimmed })
+      .eq('id', profile?.id ?? '');
     setSaving(false);
 
     if (error) {
       showToast({ type: 'error', title: t('common.error'), message: error.message });
     } else {
-      showToast({ type: 'success', title: t('auth.passwordChanged'), message: t('auth.passwordChangedBody') });
+      await fetchProfile();
+      showToast({ type: 'success', title: t('settings.displayNameSaved'), message: t('settings.displayNameSavedBody') });
       router.back();
     }
   };
@@ -90,42 +102,28 @@ export default function ChangePasswordScreen() {
               >
                 <Text style={styles.backText}>←</Text>
               </TouchableOpacity>
-              <Text style={styles.screenTitle}>{t('settings.changePassword')}</Text>
+              <Text style={styles.screenTitle}>{t('settings.displayName')}</Text>
               <View style={{ width: 32 }} />
             </View>
 
             <Controller
               control={control}
-              name="password"
+              name="displayName"
               render={({ field: { onChange, value } }) => (
                 <TextInput
-                  label={t('auth.newPassword')}
+                  label={t('settings.displayName')}
+                  placeholder={t('settings.displayNamePlaceholder')}
                   value={value}
                   onChangeText={onChange}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  error={errors.password?.message}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="confirm"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  label={t('auth.confirmPassword')}
-                  value={value}
-                  onChangeText={onChange}
-                  secureTextEntry
-                  autoCapitalize="none"
-                  error={errors.confirm?.message}
+                  autoCapitalize="words"
+                  autoFocus
+                  error={errors.displayName?.message}
                 />
               )}
             />
 
             <Button
-              label={t('auth.savePassword')}
+              label={t('common.save')}
               onPress={handleSubmit(onSubmit)}
               loading={saving}
               style={styles.button}

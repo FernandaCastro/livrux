@@ -8,18 +8,18 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import i18n, { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../src/i18n';
+import i18n, { SUPPORTED_LANGUAGES, type SupportedLanguage } from '../../../../src/i18n';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useAuthStore } from '../../../src/stores/authStore';
-import { supabase } from '../../../src/lib/supabase';
-import { useToastStore } from '../../../src/stores/toastStore';
-import { useDialogStore } from '../../../src/stores/dialogStore';
-import { PRIVACY_POLICY_URL, TERMS_URL } from '../../../src/constants/legal';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { useAuthStore } from '../../../../src/stores/authStore';
+import { supabase } from '../../../../src/lib/supabase';
+import { useToastStore } from '../../../../src/stores/toastStore';
+import { useDialogStore } from '../../../../src/stores/dialogStore';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '../../../../src/constants/legal';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
 
 interface SettingsRowProps {
   icon: string;

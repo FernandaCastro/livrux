@@ -12,17 +12,17 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { supabase } from '../../../src/lib/supabase';
-import { useAuthStore } from '../../../src/stores/authStore';
-import { useToastStore } from '../../../src/stores/toastStore';
-import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
-import { Button } from '../../../src/components/ui/Button';
-import { TextInput } from '../../../src/components/ui/TextInput';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { FORMULA_PREVIEW_PAGES } from '../../../src/constants/config';
-import type { BonusRule } from '../../../src/types';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { supabase } from '../../../../src/lib/supabase';
+import { useAuthStore } from '../../../../src/stores/authStore';
+import { useToastStore } from '../../../../src/stores/toastStore';
+import { calculateLivrux, getDefaultFormula } from '../../../../src/lib/formula';
+import { Button } from '../../../../src/components/ui/Button';
+import { TextInput } from '../../../../src/components/ui/TextInput';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { FORMULA_PREVIEW_PAGES } from '../../../../src/constants/config';
+import type { BonusRule } from '../../../../src/types';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
 
 export default function FormulaScreen() {
   const { t } = useTranslation();
@@ -130,13 +130,11 @@ export default function FormulaScreen() {
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.backText}>←</Text>
-            </TouchableOpacity>
-            <Text style={styles.screenTitle}>{t('settings.formulaTitle')}</Text>
-            <View style={{ width: 24 }} />
-          </View>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backRow}>
+            <Text style={styles.backChevron}>‹</Text>
+            <Text style={styles.backLabel}>{t('settings.title')}</Text>
+          </TouchableOpacity>
+          <Text style={styles.screenTitle}>{t('settings.formulaTitle')}</Text>
 
           <TextInput
             label={t('settings.baseReward')}
@@ -255,21 +253,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
-  header: {
+  backRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.lg,
+    paddingTop: Spacing.md,
+    marginBottom: Spacing.xs,
   },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
+  backChevron: {
+    fontSize: 28,
+    color: Colors.secondary,
+    marginRight: 4,
+    lineHeight: 32,
+  },
+  backLabel: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.md,
     color: Colors.secondary,
   },
   screenTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
+    marginBottom: Spacing.xl,
   },
   sectionTitle: {
     fontFamily: Fonts.bodyBold,

@@ -14,7 +14,7 @@ export default function AppLayout() {
         styles.container,
         { backgroundColor: background },
       ]}>
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: background } }} />
+        <Stack screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: background } }} />
         <ConfettiOverlay
           visible={!!confettiTrigger}
           prevCount={confettiTrigger?.prev ?? 0}

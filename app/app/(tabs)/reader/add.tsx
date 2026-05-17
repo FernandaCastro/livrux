@@ -14,15 +14,15 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useReaders } from '../../../src/hooks/useReaders';
-import { useReaderStore } from '../../../src/stores/readerStore';
-import { useToastStore } from '../../../src/stores/toastStore';
-import { Button } from '../../../src/components/ui/Button';
-import { TextInput } from '../../../src/components/ui/TextInput';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows, themes, type ThemeId } from '../../../src/constants/theme';
+import { useReaders } from '../../../../src/hooks/useReaders';
+import { useReaderStore } from '../../../../src/stores/readerStore';
+import { useToastStore } from '../../../../src/stores/toastStore';
+import { Button } from '../../../../src/components/ui/Button';
+import { TextInput } from '../../../../src/components/ui/TextInput';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { MultiavatarView } from '../../../../src/components/reader/MultiavatarView';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows, themes, type ThemeId } from '../../../../src/constants/theme';
 
 const AVATAR_DISPLAY_SIZE = 100;
 

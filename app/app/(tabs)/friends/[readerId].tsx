@@ -16,14 +16,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import { supabase } from '../../../src/lib/supabase';
-import { useBooks } from '../../../src/hooks/useBooks';
-import { useTheme } from '../../../src/hooks/useTheme';
-import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
-import { FriendBookCard } from '../../../src/components/book/FriendBookCard';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
+import { supabase } from '../../../../src/lib/supabase';
+import { useBooks } from '../../../../src/hooks/useBooks';
+import { useTheme } from '../../../../src/hooks/useTheme';
+import { MultiavatarView } from '../../../../src/components/reader/MultiavatarView';
+import { FriendBookCard } from '../../../../src/components/book/FriendBookCard';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../../src/constants/theme';
 
 interface FriendReader {
   id: string;
@@ -276,7 +276,7 @@ export default function FriendProfileScreen() {
                 </View>
                 <TouchableOpacity
                   style={styles.badgesBadge}
-                  onPress={() => router.push(`/app/friend/badges/${readerId}?fromReaderId=${fromReaderId}`)}
+                  onPress={() => router.push(`/app/friends/badges/${readerId}?fromReaderId=${fromReaderId}`)}
                   activeOpacity={0.75}
                 >
                   <Text style={styles.badgeIcon}>🏅</Text>

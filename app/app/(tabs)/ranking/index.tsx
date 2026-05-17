@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { GestureDetector } from 'react-native-gesture-handler';
-import Animated from 'react-native-reanimated';
-import { useTabSwipe } from '../../../src/hooks/useTabSwipe';
+import { useTabSwipe } from '../../../../src/hooks/useTabSwipe';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image } from 'react-native';
 import { Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,12 +8,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
 
-import { useReaderStore } from '../../../src/stores/readerStore';
-import { useFriends } from '../../../src/hooks/useFriends';
-import { useTheme } from '../../../src/hooks/useTheme';
-import { MultiavatarView } from '../../../src/components/reader/MultiavatarView';
-import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
+import { useReaderStore } from '../../../../src/stores/readerStore';
+import { useFriends } from '../../../../src/hooks/useFriends';
+import { useTheme } from '../../../../src/hooks/useTheme';
+import { MultiavatarView } from '../../../../src/components/reader/MultiavatarView';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../../src/constants/theme';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
 import { FloatingEmojis } from '@/components/FloatingEmojis';
 
 const ACCENT = '#FF6B35';
@@ -236,7 +235,7 @@ function RankingRow({ entry, position, styles }: { entry: RankingEntry; position
         </View>
         <View style={styles.rowStats}>
           <View style={styles.bookBadge}>
-            <Image source={require('../../../assets/livrux-clean.png')} style={styles.bookIcon} />
+            <Image source={require('../../../../assets/livrux-clean.png')} style={styles.bookIcon} />
             <Text style={styles.bookCount}>{entry.book_count} {t('friends.booksRead')}</Text>
           </View>
           <View style={styles.xpBadge}>
@@ -255,7 +254,7 @@ export default function RankingScreen() {
   const { friends, isLoading } = useFriends(selectedReader?.id ?? null);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { gesture: swipeGesture, animatedStyle: swipeStyle } = useTabSwipe('ranking');
+  const { gesture: swipeGesture } = useTabSwipe('ranking');
 
   const entries = useMemo<RankingEntry[]>(() => {
     if (!selectedReader) return [];
@@ -285,9 +284,8 @@ export default function RankingScreen() {
 
   return (
     <GestureDetector gesture={swipeGesture}>
-      <Animated.View style={[styles.root, swipeStyle]}>
-      <Stack.Screen options={{ animation: 'none' }} />
-      <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
+      <View style={styles.root}>
+<StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       <LinearGradient
         colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
@@ -338,7 +336,7 @@ export default function RankingScreen() {
         />
         <BottomMenu />
       </SafeAreaView>
-      </Animated.View>
+      </View>
     </GestureDetector>
   );
 }

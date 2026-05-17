@@ -79,22 +79,18 @@ export function BottomMenu() {
 
   const isSettings   = pathname.startsWith('/app/settings');
   const isWallet     = pathname.startsWith('/app/rewards');
-  const isFriends    = pathname.startsWith('/app/friends') || pathname.startsWith('/app/friend/');
+  const isFriends    = pathname.startsWith('/app/friends');
   const isRanking    = pathname.startsWith('/app/ranking');
   const isReader     = !isSettings && !isWallet && !isFriends && !isRanking;
 
-  // Already on a tab → replace so the stack doesn't accumulate.
-  // Coming from the reader screen → push to keep the reader in the back stack.
-  const navigate = isReader
-    ? (path: string) => router.push(path as any)
-    : (path: string) => router.replace(path as any);
+  const navigate = (path: string) => router.push(path as any);
 
   if (!selectedReader) {
     return (
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.tab}
-          onPress={() => router.replace('/app')}
+          onPress={() => router.replace('/')}
           activeOpacity={0.7}
         >
           {isReader && <TabIndicator color={theme.secondary} />}
@@ -104,7 +100,7 @@ export function BottomMenu() {
         {showSettingsTab && (
           <TouchableOpacity
             style={styles.tab}
-            onPress={() => router.push('/app/settings')}
+            onPress={() => navigate('/app/settings')}
             activeOpacity={0.7}
           >
             {isSettings && <TabIndicator color={theme.textSecondary} />}
@@ -134,7 +130,7 @@ export function BottomMenu() {
         {/* Rewards — gold */}
         <TouchableOpacity
           style={styles.tab}
-          onPress={() => navigate(`/app/rewards?readerId=${selectedReader.id}`)}
+          onPress={() => navigate('/app/rewards')}
           activeOpacity={0.7}
         >
           {isWallet && <TabIndicator color={theme.primary} />}
@@ -146,7 +142,7 @@ export function BottomMenu() {
         {/* Friends — jade */}
         <TouchableOpacity
           style={styles.tab}
-          onPress={() => navigate(`/app/friends/${selectedReader.id}`)}
+          onPress={() => navigate('/app/friends')}
           activeOpacity={0.7}
         >
           {isFriends && <TabIndicator color={ACCENT_FRIENDS} />}
@@ -171,7 +167,7 @@ export function BottomMenu() {
         {showSettingsTab && (
           <TouchableOpacity
             style={styles.tab}
-            onPress={() => router.push('/app/settings')}
+            onPress={() => navigate('/app/settings')}
             activeOpacity={0.7}
           >
             {isSettings && <TabIndicator color={theme.textSecondary} />}

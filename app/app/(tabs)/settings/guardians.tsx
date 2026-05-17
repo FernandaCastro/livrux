@@ -13,19 +13,19 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useToastStore } from '../../../src/stores/toastStore';
-import { useDialogStore } from '../../../src/stores/dialogStore';
+import { useToastStore } from '../../../../src/stores/toastStore';
+import { useDialogStore } from '../../../../src/stores/dialogStore';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useAuthStore } from '../../../src/stores/authStore';
-import { useGuardians } from '../../../src/hooks/useGuardians';
-import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
-import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
-import type { CoGuardian, GuardianInvitation } from '../../../src/types';
+import { useAuthStore } from '../../../../src/stores/authStore';
+import { useGuardians } from '../../../../src/hooks/useGuardians';
+import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
+import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
+import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
+import type { CoGuardian, GuardianInvitation } from '../../../../src/types';
 
 // ── Invite modal ──────────────────────────────────────────────────────────────
 
@@ -219,7 +219,7 @@ export default function GuardiansScreen() {
       onConfirm: async () => {
         try {
           await leaveFamily();
-          router.replace('/app/settings');
+          router.back();
         } catch (err) {
           showToast({ type: 'error', title: t('common.error'), message: (err as Error).message });
         }

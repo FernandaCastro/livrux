@@ -3,7 +3,7 @@
 # setup-supabase.sh — Bootstrap a Supabase project from scratch.
 #
 # Usage:
-#   ./supabase/scripts/setup-supabase.sh --project-ref <ref>
+#   ./supabase/setup-supabase.sh --project-ref <ref>
 #
 # What it does:
 #   1. Links the Supabase CLI to the target project

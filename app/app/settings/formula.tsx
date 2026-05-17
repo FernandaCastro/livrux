@@ -279,11 +279,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   ruleCard: {
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    backgroundColor: 'transparent',
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md,
-    ...Shadows.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(124, 58, 237, 0.2)',
   },
   ruleHeader: {
     flexDirection: 'row',

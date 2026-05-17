@@ -235,11 +235,12 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
   },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.75)',
+    backgroundColor: 'transparent',
     borderRadius: Radius.lg,
     overflow: 'hidden',
     marginBottom: Spacing.lg,
-    ...Shadows.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(124, 58, 237, 0.2)',
   },
   row: {
     flexDirection: 'row',

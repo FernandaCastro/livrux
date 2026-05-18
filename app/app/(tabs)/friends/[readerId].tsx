@@ -17,7 +17,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { supabase } from '../../../../src/lib/supabase';
-import { useBooks } from '../../../../src/hooks/useBooks';
+import { useBooks, useReadingBooks } from '../../../../src/hooks/useBooks';
 import { useTheme } from '../../../../src/hooks/useTheme';
 import { MultiavatarView } from '../../../../src/components/reader/MultiavatarView';
 import { FriendBookCard } from '../../../../src/components/book/FriendBookCard';
@@ -92,7 +92,7 @@ function createStyles(theme: ColorPalette) {
     },
     statChipText: {
       fontFamily: Fonts.heading,
-      fontSize: FontSizes.xl,
+      fontSize: FontSizes.lg,
       color: theme.textOnPrimary,
     },
     xpBadge: {
@@ -118,12 +118,12 @@ function createStyles(theme: ColorPalette) {
     badgeIcon: { fontSize: 18 },
     badgeCount: {
       fontFamily: Fonts.heading,
-      fontSize: FontSizes.xl,
+      fontSize: FontSizes.lg,
       color: theme.textOnPrimary,
     },
     badgeCountAmber: {
       fontFamily: Fonts.heading,
-      fontSize: FontSizes.xl,
+      fontSize: FontSizes.lg,
       color: '#78350F',
     },
     badgeCurrencyAmber: {
@@ -183,10 +183,8 @@ export default function FriendProfileScreen() {
   const [badgeCount, setBadgeCount] = useState(0);
   const [readerLoading, setReaderLoading] = useState(true);
 
-  const { books, isLoading: booksLoading, refresh: refreshBooks } = useBooks(readerId ?? null);
-
-  const readingNow = books.filter((b) => b.status === 'reading');
-  const completedBooks = books.filter((b) => b.status === 'completed');
+  const { books: completedBooks, isLoading: booksLoading, refresh: refreshBooks } = useBooks(readerId ?? null);
+  const { readingBooks: readingNow, isLoading: readingLoading, refresh: refreshReading } = useReadingBooks(readerId ?? null);
 
   const fetchReader = useCallback(async () => {
     if (!readerId) return;
@@ -214,7 +212,7 @@ export default function FriendProfileScreen() {
     return () => subscription.remove();
   }, []);
 
-  const isLoading = readerLoading || booksLoading;
+  const isLoading = readerLoading || booksLoading || readingLoading;
 
   const bgGradient = (
     <LinearGradient
@@ -287,11 +285,6 @@ export default function FriendProfileScreen() {
                 <View style={styles.statChip}>
                   <Text style={styles.statChipText}>📚 {completedBooks.length}</Text>
                 </View>
-                {readingNow.length > 0 && (
-                  <View style={styles.statChip}>
-                    <Text style={styles.statChipText}>📖 {readingNow.length}</Text>
-                  </View>
-                )}
               </View>
             </>
           )}
@@ -305,7 +298,7 @@ export default function FriendProfileScreen() {
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
-              onRefresh={async () => { await fetchReader(); await refreshBooks(); }}
+              onRefresh={async () => { await fetchReader(); await Promise.all([refreshBooks(), refreshReading()]); }}
               tintColor={theme.secondary}
             />
           }
@@ -331,7 +324,7 @@ export default function FriendProfileScreen() {
             </>
           }
           ListEmptyComponent={
-            !isLoading && books.length === 0 ? (
+            !isLoading && completedBooks.length === 0 && readingNow.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyIcon}>🌱</Text>
                 <Text style={styles.emptyTitle}>{t('reader.noBooks')}</Text>

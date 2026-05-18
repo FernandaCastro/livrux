@@ -101,6 +101,7 @@ export interface Book {
   rating: 'disliked' | 'liked' | 'loved' | null;
   review: string | null;
   created_at: string;
+  current_page?: number; // latest last_page from reading_sessions; undefined if no session recorded yet
 }
 
 export interface ReadingSession {

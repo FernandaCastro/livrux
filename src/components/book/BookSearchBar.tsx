@@ -24,6 +24,8 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GoogleBookResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [startIndex, setStartIndex] = useState(0);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanned, setScanned] = useState(false);
@@ -45,8 +47,9 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       setSearchError(null);
+      setStartIndex(0);
       try {
-        const found = await searchBooks(query);
+        const found = await searchBooks(query, 0);
         setResults(found);
       } catch (e) {
         console.error('[BookSearch]', e);
@@ -67,7 +70,25 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
     setQuery('');
     setResults([]);
     setSearchError(null);
+    setStartIndex(0);
     onSelect(book);
+  };
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !query.trim()) return;
+    const nextIndex = startIndex + 5;
+    setLoadingMore(true);
+    try {
+      const more = await searchBooks(query, nextIndex);
+      if (more.length > 0) {
+        setResults(prev => [...prev, ...more]);
+        setStartIndex(nextIndex);
+      }
+    } catch (e) {
+      console.error('[BookSearch]', e);
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   const openScanner = async () => {
@@ -136,7 +157,8 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
           <FlatList
             data={results}
             keyExtractor={(_, i) => String(i)}
-            scrollEnabled={false}
+            scrollEnabled={true}
+            style={styles.dropdownList}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             renderItem={({ item }) => (
               <TouchableOpacity
@@ -164,6 +186,19 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
                 </View>
               </TouchableOpacity>
             )}
+            ListFooterComponent={
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={handleLoadMore}
+                activeOpacity={0.7}
+                disabled={loadingMore}
+              >
+                {loadingMore
+                  ? <ActivityIndicator size="small" color={Colors.secondary} />
+                  : <Text style={styles.loadMoreText}>{t('book.loadMore')}</Text>
+                }
+              </TouchableOpacity>
+            }
           />
         </View>
       )}
@@ -240,6 +275,21 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
     ...Shadows.md,
     overflow: 'hidden',
+    maxHeight: 360,
+  },
+  dropdownList: {
+    flexGrow: 0,
+  },
+  loadMoreButton: {
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.divider,
+  },
+  loadMoreText: {
+    fontFamily: Fonts.bodySemiBold,
+    fontSize: FontSizes.sm,
+    color: Colors.secondary,
   },
   separator: {
     height: 1,

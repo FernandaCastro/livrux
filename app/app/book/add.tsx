@@ -370,7 +370,7 @@ function createStyles(theme: ColorPalette) {
   /* Status toggle */
   statusToggle: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: theme.surfaceVariant,
     borderRadius: Radius.lg,
     padding: 4,
     marginBottom: Spacing.lg,
@@ -512,7 +512,7 @@ function createStyles(theme: ColorPalette) {
     alignItems: 'center',
     paddingVertical: Spacing.md,
     borderRadius: Radius.lg,
-    backgroundColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: theme.surface,
     borderWidth: 2,
     borderColor: 'transparent',
     gap: 4,

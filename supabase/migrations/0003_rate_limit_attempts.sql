@@ -13,10 +13,13 @@ CREATE TABLE IF NOT EXISTS public.rate_limit_attempts (
   attempted_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-CREATE INDEX idx_rate_limit_user_action
+CREATE INDEX IF NOT EXISTS idx_rate_limit_attempts_user_action_time
   ON public.rate_limit_attempts (user_id, action, attempted_at);
 
--- service_role bypasses RLS but still needs table-level grants.
+-- RLS enabled with no policies = blocked for all roles via Data API.
+-- service_role bypasses RLS by design, so Edge Functions still have full access.
+ALTER TABLE public.rate_limit_attempts ENABLE ROW LEVEL SECURITY;
+
 GRANT SELECT, INSERT ON public.rate_limit_attempts TO service_role;
 
 -- Weekly cleanup of attempts older than 24 hours (requires pg_cron extension).

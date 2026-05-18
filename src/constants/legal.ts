@@ -8,3 +8,4 @@
 
 export const PRIVACY_POLICY_URL = 'https://livrux.fecastro.com/privacy';
 export const TERMS_URL = 'https://livrux.fecastro.com/terms';
+export const MANUAL_URL = 'https://livrux.fecastro.com/manual';

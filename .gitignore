@@ -49,6 +49,7 @@ google-play-service-account.json
 
 #supabase
 /supabase/.temp
+/supabase/*.toml
 
 #idea
 .idea

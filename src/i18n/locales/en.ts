@@ -208,6 +208,7 @@ const en = {
     deleteAccountFinalBody: 'Are you absolutely sure? All books, Livrux, and history will be lost forever.',
     signOut: 'Sign out',
     legal: 'Legal',
+    manual: 'User Manual',
     privacyPolicy: 'Privacy Policy',
     termsOfUse: 'Terms of Use',
     bonusRules: 'Bonus rules',

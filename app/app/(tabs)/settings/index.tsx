@@ -16,7 +16,7 @@ import { useAuthStore } from '../../../../src/stores/authStore';
 import { supabase } from '../../../../src/lib/supabase';
 import { useToastStore } from '../../../../src/stores/toastStore';
 import { useDialogStore } from '../../../../src/stores/dialogStore';
-import { PRIVACY_POLICY_URL, TERMS_URL } from '../../../../src/constants/legal';
+import { MANUAL_URL, PRIVACY_POLICY_URL, TERMS_URL } from '../../../../src/constants/legal';
 import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
@@ -175,6 +175,12 @@ export default function SettingsScreen() {
 
           <Text style={styles.sectionLabel}>{t('settings.legal')}</Text>
           <View style={styles.card}>
+            <SettingsRow
+              icon="📖"
+              label={t('settings.manual')}
+              onPress={() => Linking.openURL(MANUAL_URL)}
+            />
+            <View style={styles.divider} />
             <SettingsRow
               icon="📄"
               label={t('settings.privacyPolicy')}

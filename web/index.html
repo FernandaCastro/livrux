@@ -394,12 +394,31 @@
       color: #fff;
       padding: 5rem 1.5rem;
       text-align: center;
-      clip-path: polygon(0 5%, 100% 0%, 100% 95%, 0 100%);
       margin: 2rem 0;
     }
 
     .how .section-title {
       color: #fff;
+    }
+
+    .how-manual-link {
+      display: inline-block;
+      margin-top: 2.5rem;
+      padding: .55rem 1.4rem;
+      border: 2px solid rgba(255,255,255,.55);
+      border-radius: 2rem;
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-size: .92rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: .02em;
+      transition: background .2s, border-color .2s;
+    }
+
+    .how-manual-link:hover {
+      background: rgba(255,255,255,.15);
+      border-color: rgba(255,255,255,.9);
     }
 
     .steps {
@@ -705,6 +724,7 @@
             good.</p>
         </div>
       </div>
+      <a href="manual.html" class="how-manual-link" data-i18n="how.manual">📖 Read the full manual →</a>
     </section>
 
     <!-- CTA -->
@@ -723,6 +743,9 @@
   <footer>
     <p>Made with ❤️ for young readers &nbsp;·&nbsp; <strong>Livrux</strong> &nbsp;·&nbsp; <span id="year"></span></p>
     <p style="margin-top:.5rem;">
+      <a href="manual.html" style="color:var(--muted);text-decoration:none;"
+        onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--muted)'">Manual</a>
+      &nbsp;·&nbsp;
       <a href="privacy.html" style="color:var(--muted);text-decoration:none;"
         onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
       &nbsp;·&nbsp;
@@ -793,6 +816,7 @@
           'how.step2.desc': 'Add a book anytime — even mid-read. Coins land in the wallet once the book is marked as finished.',
           'how.step3.title': 'Spend & celebrate',
           'how.step3.desc': 'Choose a real reward together and log the spend. Reading has never felt this good.',
+          'how.manual': '📖 Read the full manual →',
           'cta.title': 'Ready to start reading?',
           'cta.subtitle': 'Join families already turning books into adventures with Livrux.',
           'cta.btn': 'Open Livrux',
@@ -834,6 +858,7 @@
           'how.step2.desc': 'Adicione um livro a qualquer momento — mesmo no meio da leitura. As moedas chegam na carteira quando o livro for marcado como concluído.',
           'how.step3.title': 'Gaste e comemore',
           'how.step3.desc': 'Escolham juntos uma recompensa e registrem o gasto. Ler nunca foi tão gostoso.',
+          'how.manual': '📖 Leia o manual completo →',
           'cta.title': 'Pronto para começar a ler?',
           'cta.subtitle': 'Junte-se às famílias que já transformam livros em aventuras com o Livrux.',
           'cta.btn': 'Abrir o Livrux',
@@ -875,6 +900,7 @@
           'how.step2.desc': 'Füge ein Buch jederzeit hinzu — auch mitten beim Lesen. Die Münzen landen im Guthaben, sobald das Buch als abgeschlossen markiert wird.',
           'how.step3.title': 'Ausgeben & feiern',
           'how.step3.desc': 'Wählt gemeinsam eine echte Belohnung aus und erfasst die Ausgabe. Lesen hat noch nie so viel Spaß gemacht.',
+          'how.manual': '📖 Das vollständige Handbuch lesen →',
           'cta.title': 'Bereit zum Lesen?',
           'cta.subtitle': 'Schließe dich Familien an, die mit Livrux Bücher in Abenteuer verwandeln.',
           'cta.btn': 'Livrux öffnen',

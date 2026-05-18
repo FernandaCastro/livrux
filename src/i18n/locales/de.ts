@@ -208,6 +208,7 @@ const de = {
     deleteAccountFinalBody: 'Bist du absolut sicher? Alle Bücher, Livrux und der Verlauf gehen für immer verloren.',
     signOut: 'Abmelden',
     legal: 'Rechtliches',
+    manual: 'Benutzerhandbuch',
     privacyPolicy: 'Datenschutzerklärung',
     termsOfUse: 'Nutzungsbedingungen',
     bonusRules: 'Bonusregeln',

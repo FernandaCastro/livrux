@@ -208,6 +208,7 @@ const pt = {
     deleteAccountFinalBody: 'Tem certeza absoluta? Todos os livros, Livrux e histórico serão perdidos para sempre.',
     signOut: 'Sair',
     legal: 'Legal',
+    manual: 'Manual do Usuário',
     privacyPolicy: 'Política de Privacidade',
     termsOfUse: 'Termos de Uso',
     bonusRules: 'Regras de bônus',

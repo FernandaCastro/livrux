@@ -110,6 +110,7 @@ const de = {
     badgesRevokedBody: 'Du hast folgende Erfolge verloren: {{names}}.',
     searchPlaceholder: 'Nach Titel oder Autor suchen…',
     fillManually: 'manuell ausfüllen',
+    loadMore: 'Mehr Ergebnisse laden',
     pagesCount: '{{count}} Seiten',
     scanHint: 'Auf den Buchbarcode zeigen',
     foreignLanguage: 'Buch in Fremdsprache',

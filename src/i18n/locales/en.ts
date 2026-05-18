@@ -110,6 +110,7 @@ const en = {
     badgesRevokedBody: 'You lost the achievements: {{names}}.',
     searchPlaceholder: 'Search by title or author…',
     fillManually: 'fill in manually',
+    loadMore: 'Load more results',
     pagesCount: '{{count}} pages',
     scanHint: 'Point at the book barcode',
     foreignLanguage: 'Foreign language book',

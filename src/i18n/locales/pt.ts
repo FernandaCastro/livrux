@@ -110,6 +110,7 @@ const pt = {
     badgesRevokedBody: 'Você perdeu as conquistas: {{names}}.',
     searchPlaceholder: 'Buscar por título ou autor…',
     fillManually: 'preencher manualmente',
+    loadMore: 'Carregar mais resultados',
     pagesCount: '{{count}} páginas',
     scanHint: 'Aponte para o código de barras do livro',
     foreignLanguage: 'Livro em língua estrangeira',

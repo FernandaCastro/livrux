@@ -72,10 +72,10 @@ async function fetchWithRetry(url: string): Promise<Response> {
   throw new GoogleBooksError(lastStatus, 'Service temporarily unavailable.');
 }
 
-export async function searchBooks(query: string): Promise<GoogleBookResult[]> {
+export async function searchBooks(query: string, startIndex = 0): Promise<GoogleBookResult[]> {
   if (!query.trim()) return [];
 
-  const url = buildUrl({ q: query, maxResults: '5' });
+  const url = buildUrl({ q: query, maxResults: '5', startIndex: String(startIndex) });
   const response = await fetchWithRetry(url);
   const data = await response.json();
   return (data.items ?? []).map(mapVolume);
@@ -86,5 +86,13 @@ export async function fetchByIsbn(isbn: string): Promise<GoogleBookResult | null
   const response = await fetchWithRetry(url);
   const data = await response.json();
   if (!data.items?.length) return null;
-  return mapVolume(data.items[0]);
+  const book = mapVolume(data.items[0]);
+
+  if (!book.coverUrl && book.title) {
+    const query = [book.title, book.author].filter(Boolean).join(' ');
+    const fallback = await searchBooks(query);
+    book.coverUrl = fallback[0]?.coverUrl ?? null;
+  }
+
+  return book;
 }

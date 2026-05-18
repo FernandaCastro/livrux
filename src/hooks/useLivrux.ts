@@ -72,6 +72,24 @@ export async function deleteBookRpc(bookId: string): Promise<{ revokedBadges: Re
   return { revokedBadges: result?.revoked_badges ?? [] };
 }
 
+export async function checkDuplicateBook(readerId: string, title: string, author: string | null): Promise<boolean> {
+  let query = supabase
+    .from('books')
+    .select('id', { count: 'exact', head: true })
+    .eq('reader_id', readerId)
+    .ilike('title', title.trim());
+
+  if (author?.trim()) {
+    query = query.ilike('author', author.trim());
+  } else {
+    query = query.is('author', null);
+  }
+
+  const { count, error } = await query;
+  if (error) throw error;
+  return (count ?? 0) > 0;
+}
+
 // Calls the atomic log_book RPC which inserts the book, creates a transaction,
 // and updates the reader balance in a single database transaction.
 // When status = 'reading', dateCompleted should be null and livruxEarned = 0.

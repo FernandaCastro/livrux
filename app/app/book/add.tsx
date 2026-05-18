@@ -17,12 +17,13 @@ import { format } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { logBookRpc } from '../../../src/hooks/useLivrux';
+import { logBookRpc, checkDuplicateBook } from '../../../src/hooks/useLivrux';
 import { BadgeUnlockToast } from '../../../src/components/BadgeUnlockToast';
 import type { AwardedBadge } from '../../../src/hooks/useLivrux';
 import { useAuthStore } from '../../../src/stores/authStore';
 import { useReaderStore } from '../../../src/stores/readerStore';
 import { useToastStore } from '../../../src/stores/toastStore';
+import { useDialogStore } from '../../../src/stores/dialogStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
@@ -60,6 +61,7 @@ export default function AddBookScreen() {
   const { user, formula } = useAuthStore();
   const { updateBalance } = useReaderStore();
   const showToast = useToastStore((s) => s.show);
+  const showDialog = useDialogStore((s) => s.show);
 
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [searchKey, setSearchKey] = useState(0);
@@ -105,7 +107,7 @@ export default function AddBookScreen() {
     if (book.coverUrl) setCoverUri(book.coverUrl);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const doLogBook = async (data: FormData) => {
     if (!user || !readerId) return;
 
     const pages = Number(data.totalPages);
@@ -155,6 +157,27 @@ export default function AddBookScreen() {
       }
       showToast({ type: 'error', title: t('common.error') });
     }
+  };
+
+  const onSubmit = async (data: FormData) => {
+    if (!user || !readerId) return;
+
+    try {
+      const isDuplicate = await checkDuplicateBook(readerId, data.title, data.author || null);
+      if (isDuplicate) {
+        showDialog({
+          title: t('book.duplicateTitle'),
+          message: t('book.duplicateMessage'),
+          confirmLabel: t('book.duplicateConfirm'),
+          onConfirm: () => doLogBook(data),
+        });
+        return;
+      }
+    } catch {
+      // se a verificação falhar, deixa prosseguir normalmente
+    }
+
+    await doLogBook(data);
   };
 
   return (

@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livrux – Manual / Guia / Handbuch</title>
+  <meta name="description" content="How Livrux works — track reading, earn coins, and reward your kids." />
+  <link rel="icon" href="./assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --orange: #F5A623;
+      --orange2: #FF7F3E;
+      --purple: #7C3AED;
+      --purple2: #A855F7;
+      --green: #22C55E;
+      --yellow: #FCD34D;
+      --pink: #F472B6;
+      --blue: #38BDF8;
+      --bg: #FAFAF7;
+      --card: #FFFFFF;
+      --text: #1E1B4B;
+      --muted: #6B7280;
+      --radius: 1.5rem;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 2rem;
+      background: rgba(250, 250, 247, 0.90);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 0, 0, .06);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.6rem;
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    .lang-switcher {
+      display: flex;
+      gap: .4rem;
+    }
+
+    .lang-btn {
+      padding: .35rem .7rem;
+      border: 2px solid transparent;
+      border-radius: 2rem;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .lang-btn:hover {
+      color: var(--purple);
+      border-color: var(--purple2);
+    }
+
+    .lang-btn.active {
+      background: var(--purple);
+      color: #fff;
+      border-color: var(--purple);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      background: linear-gradient(160deg, #f0e6ff 0%, #fff7ed 60%, #fafaf7 100%);
+      padding: 3.5rem 1.5rem 2.5rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--purple);
+      margin-bottom: .5rem;
+    }
+
+    .page-header p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── CONTENT WRAPPER ── */
+    .content {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── TOC ── */
+    .toc {
+      background: var(--card);
+      border: 1.5px solid rgba(124, 58, 237, .12);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 2px 12px rgba(124, 58, 237, .07);
+    }
+
+    .toc-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: var(--purple);
+      margin-bottom: 1rem;
+    }
+
+    .toc ol {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .4rem .5rem;
+    }
+
+    .toc ol li a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .92rem;
+      font-weight: 600;
+      transition: color .2s;
+    }
+
+    .toc ol li a:hover {
+      color: var(--purple);
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 3.5rem;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 2rem 2rem 1.75rem;
+      box-shadow: 0 2px 12px rgba(124, 58, 237, .07);
+      border: 1.5px solid rgba(124, 58, 237, .08);
+      position: relative;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .section-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .section h2 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.45rem;
+      color: var(--purple);
+    }
+
+    .section-illus {
+      float: right;
+      width: 7rem;
+      height: 7rem;
+      margin: -2rem 0 0.75rem 1.5rem;
+      object-fit: contain;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* illustration group: image + emoji row (used in XP section) */
+    .section-illus-group {
+      float: right;
+      margin: -2rem 0 0.75rem 1.5rem;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-illus-group img {
+      width: 6.5rem;
+      height: 6.5rem;
+      object-fit: contain;
+      display: block;
+    }
+
+    .section-illus-group .illus-emojis {
+      font-size: 1.3rem;
+      margin-top: .3rem;
+      letter-spacing: .15rem;
+    }
+
+    .section p {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: .75rem;
+      font-size: .97rem;
+    }
+
+    .section p:last-child {
+      margin-bottom: 0;
+    }
+
+    .section ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: .75rem;
+    }
+
+    .section ul li {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: .97rem;
+      padding-left: 1.6rem;
+      position: relative;
+      margin-bottom: .2rem;
+    }
+
+    .section ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--purple);
+      font-weight: 700;
+    }
+
+    /* ── STEP LIST ── */
+    .steps {
+      list-style: none;
+      padding: 0;
+      counter-reset: step;
+      margin-bottom: .75rem;
+    }
+
+    .steps li {
+      position: relative;
+      padding: .6rem .75rem .6rem 2.8rem;
+      margin-bottom: .5rem;
+      background: #f8f5ff;
+      border-radius: .75rem;
+      font-size: .95rem;
+      color: var(--text);
+      font-weight: 600;
+      counter-increment: step;
+    }
+
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: .75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--purple);
+      color: #fff;
+      font-family: 'Fredoka One', cursive;
+      font-size: .85rem;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .steps li .sub {
+      display: block;
+      font-weight: 400;
+      font-size: .88rem;
+      color: var(--muted);
+      margin-top: .1rem;
+    }
+
+    /* ── HIGHLIGHT BOX ── */
+    .highlight-box {
+      background: #fff7ed;
+      border-left: 4px solid var(--orange);
+      border-radius: .5rem;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0 1.25rem;
+    }
+
+    .highlight-box p {
+      color: var(--text);
+      margin-bottom: 0;
+      font-size: .95rem;
+    }
+
+    /* ── BADGE CHIPS ── */
+    .badge-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-top: .75rem;
+    }
+
+    .badge-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .3rem .8rem;
+      border-radius: 2rem;
+      font-size: .82rem;
+      font-weight: 700;
+      background: #ede9fe;
+      color: var(--purple);
+    }
+
+    /* ── FORMULA BOX ── */
+    .formula-box {
+      background: linear-gradient(135deg, #f0e6ff 0%, #fff7ed 100%);
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+
+    .formula {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: var(--purple);
+      line-height: 1.6;
+    }
+
+    .formula .coin {
+      color: var(--orange);
+    }
+
+    .formula .plus {
+      color: var(--muted);
+      margin: 0 .3rem;
+    }
+
+    .generic-box {
+      margin: 1rem 0;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid rgba(0, 0, 0, .06);
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a {
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      nav {
+        padding: .9rem 1.2rem;
+      }
+
+      .nav-logo {
+        font-size: 1.3rem;
+      }
+
+      .toc ol {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        padding: 1.5rem 1.25rem;
+      }
+
+      .section-illus {
+        width: 4.5rem;
+        height: 4.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <img src="./assets/livrux.png" alt="Livrux Logo" style="width:60px;height:60px;">
+      Livrux
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="pt">PT</button>
+      <button class="lang-btn" data-lang="de">DE</button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1 data-i18n="header.title">📖 How Livrux Works</h1>
+    <p data-i18n="header.subtitle">Everything you need to know to start tracking reading and rewarding your kids.</p>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- TOC -->
+    <div class="toc">
+      <div class="toc-title" data-i18n="toc.title">Contents</div>
+      <ol>
+        <li><a href="#what" data-i18n="toc.what">🌟 What is Livrux?</a></li>
+        <li><a href="#start" data-i18n="toc.start">🚀 Getting started</a></li>
+        <li><a href="#books" data-i18n="toc.books">📚 Adding books</a></li>
+        <li><a href="#rewards" data-i18n="toc.rewards">🪙 Rewards</a></li>
+        <li><a href="#xp" data-i18n="toc.xp">⚡ XP, Streaks &amp; Badges</a></li>
+        <li><a href="#friends" data-i18n="toc.friends">🤝 Friends &amp; Ranking</a></li>
+        <li><a href="#guardians" data-i18n="toc.guardians">👨‍👩‍👧 Co-guardians</a></li>
+        <li><a href="#readers" data-i18n="toc.readers">👧 Multiple readers</a></li>
+        <li><a href="#settings" data-i18n="toc.settings">⚙️ Settings &amp; privacy</a></li>
+      </ol>
+    </div>
+
+    <!-- 1. What is Livrux -->
+    <div class="section" id="what">
+      <div class="section-header">
+        <span class="section-icon">🌟</span>
+        <h2 data-i18n="what.title">What is Livrux?</h2>
+      </div>
+      <img src="./assets/livrux.png" class="section-illus" alt="">
+      <p data-i18n-html="what.p1">Livrux is a family reading tracker that turns books into rewards. Kids earn virtual
+        coins — called <strong>Livrux</strong> — every time they finish a book, based on how many pages it has. Parents
+        set the reward formula and decide what those coins are worth in the real world.</p>
+      <p data-i18n="what.p2">The goal is simple: make reading fun, visible, and worth celebrating.</p>
+    </div>
+
+    <!-- 2. Getting started -->
+    <div class="section" id="start">
+      <div class="section-header">
+        <span class="section-icon">🚀</span>
+        <h2 data-i18n="start.title">Getting started</h2>
+      </div>
+      <ol class="steps" data-i18n-html="start.steps">
+        <li>Create a free account with your email or via Google / Apple Sign-In.</li>
+        <li>Add a reader profile for each child — name, avatar, and an optional PIN.<span class="sub">The PIN protects
+            the reader's settings from curious little fingers.</span></li>
+        <li>Set your reward formula in Settings → Reward Formula.<span class="sub">You can always change it later — it
+            only affects future completions.</span></li>
+        <li>Start adding books and let the reading begin!</li>
+      </ol>
+    </div>
+
+    <!-- 3. Adding books -->
+    <div class="section" id="books">
+      <div class="section-header">
+        <span class="section-icon">📚</span>
+        <h2 data-i18n="books.title">Adding books</h2>
+      </div>
+      <img src="./assets/stack-of-books.png" class="section-illus" alt="">
+      <p data-i18n="books.intro">There are three ways to add a book to a reader's library:</p>
+      <ul data-i18n-html="books.ways">
+        <li><strong>Search</strong> — type the title or author and pick from Google Books results.</li>
+        <li><strong>Scan</strong> — use the camera to scan the ISBN barcode on the back cover.</li>
+        <li><strong>Manual entry</strong> — type the details yourself if the book isn't in the database.</li>
+      </ul>
+      <p data-i18n="books.status.intro">When adding a book you choose its status:</p>
+      <ul data-i18n-html="books.status">
+        <li><strong>Currently reading</strong> — the book appears in progress; no coins yet.</li>
+        <li><strong>Completed</strong> — coins are awarded immediately based on the page count and your formula.</li>
+      </ul>
+      <div class="highlight-box">
+        <p data-i18n="books.tip">💡 You can see a live coin preview as you enter the page count — so you know exactly
+          what the reward will be before saving.</p>
+      </div>
+      <p data-i18n="books.rating">After completing a book, the child can give it a rating (👎 disliked · 👍 liked · ❤️
+        loved) and write a short review.</p>
+    </div>
+
+    <!-- 4. Rewards -->
+    <div class="section" id="rewards">
+      <div class="section-header">
+        <span class="section-icon">🪙</span>
+        <h2 data-i18n="rewards.title">Rewards</h2>
+      </div>
+      <img src="./assets/coin.png" class="section-illus" alt="">
+      <p data-i18n-html="rewards.intro">The reward formula calculates how many Livrux coins a completed book is worth.
+        You can configure it in <strong>Settings → Reward Formula</strong>.</p>
+      <div class="formula-box">
+        <div class="formula">
+          <span class="coin" data-i18n="rewards.formula.coins">🪙 Coins</span>
+          <span class="plus">=</span>
+          <span data-i18n="rewards.formula.base">Base reward</span>
+          <span class="plus">+</span>
+          <span data-i18n="rewards.formula.pages">(Pages × per-page rate)</span>
+          <span class="plus">+</span>
+          <span data-i18n="rewards.formula.bonus">Bonus</span>
+        </div>
+      </div>
+      <ul data-i18n-html="rewards.items">
+        <li><strong>Base reward</strong> — a fixed amount for every completed book.</li>
+        <li><strong>Per-page rate</strong> — extra coins for each page read.</li>
+        <li><strong>Minimum pages bonus</strong> — an extra bonus if the book is at least N pages long.</li>
+        <li><strong>Foreign language bonus</strong> — extra coins when the book is read in a language other than the
+          reader's native tongue.</li>
+      </ul>
+      <p data-i18n-html="rewards.wallet">The <strong>Wallet</strong> tab shows the full transaction history — every book
+        completed and every reward spent.</p>
+      <p data-i18n="rewards.spend">When the child wants to redeem coins for a real-world treat, you record the spend in
+        the Wallet. Coins have no monetary value and exist only within the app.</p>
+    </div>
+
+    <!-- 5. XP, Streaks & Badges -->
+    <div class="section" id="xp">
+      <div class="section-header">
+        <span class="section-icon">⚡</span>
+        <h2 data-i18n="xp.title">XP, Streaks &amp; Badges</h2>
+      </div>
+      <div class="section-illus-group">
+        <img src="./assets/ancient-scroll.png" alt="">
+        <div class="illus-emojis">⚡ 🔥 🏅</div>
+      </div>
+      <p data-i18n-html="xp.p1"><strong>XP (experience points)</strong> are earned alongside coins for every completed
+        book. XP determines the reader's position in the global ranking and cannot be spent — it's a measure of reading
+        accomplishment.</p>
+      <p data-i18n-html="xp.p2"><strong>Reading streaks</strong> track how many days in a row a reader completes a book.
+        The current streak and all-time record are shown on the reader's profile.</p>
+      <p data-i18n-html="xp.p3"><strong>Badges</strong> are achievements unlocked automatically when certain milestones
+        are reached:</p>
+      <div class="badge-grid" data-i18n-html="xp.badges">
+        <span class="badge-chip">📖 First book</span>
+        <span class="badge-chip">🪱 Bookworm</span>
+        <span class="badge-chip">🌍 Polyglot</span>
+        <span class="badge-chip">🔥 On a streak</span>
+        <span class="badge-chip">🏆 Top reader</span>
+        <span class="badge-chip">⭐ Super reader</span>
+        <span class="badge-chip">📚 Library</span>
+        <span class="badge-chip">🌙 Night owl</span>
+        <span class="badge-chip">❤️ Book lover</span>
+        <span class="badge-chip">🚀 Speed reader</span>
+      </div>
+      <div class="highlight-box" style="margin-top:1rem;">
+        <p data-i18n="xp.tip">💡 Badges are automatically revoked if the qualifying books are deleted, keeping the
+          profile honest.</p>
+      </div>
+    </div>
+
+    <!-- 6. Friends & Ranking -->
+    <div class="section" id="friends">
+      <div class="section-header">
+        <span class="section-icon">🤝</span>
+        <h2 data-i18n="friends.title">Friends &amp; Ranking</h2>
+      </div>
+      <img src="./assets/friends.png" class="section-illus" alt="">
+      <p data-i18n="friends.intro">Readers can connect with friends to share progress and compete on the global XP
+        leaderboard.</p>
+      <div class="generic-box">
+        <ol class="steps" data-i18n-html="friends.steps">
+          <li>Each reader has a unique 6-character friend code — share it with friends.</li>
+          <li>Enter a friend's code in the Friends tab to send a request.</li>
+          <li>The other reader accepts (or rejects) the request.</li>
+          <li>Once connected, you can see each other's books, badges, and XP rank.</li>
+        </ol>
+        <p data-i18n-html="friends.parental">Parents can control whether their child can manage friendships
+          independently or requires parental approval — this is configurable in <strong>Settings → Parental
+            Controls</strong>.</p>
+      </div>
+    </div>
+
+    <!-- 7. Co-guardians -->
+    <div class="section" id="guardians">
+      <div class="section-header">
+        <span class="section-icon">👨‍👩‍👧</span>
+        <h2 data-i18n="guardians.title">Co-guardians</h2>
+      </div>
+      <img src="./assets/family.png" class="section-illus" alt="">
+      <p data-i18n="guardians.intro">Co-guardians are additional adults — a partner, grandparent, or co-parent — who can
+        view and manage the same readers on their own device, without sharing your login.</p>
+      <div class="generic-box">
+        <ol class="steps" data-i18n-html="guardians.steps">
+          <li>Go to <strong>Settings → Co-guardians</strong>.</li>
+          <li>Tap <em>Invite</em> and enter the other person's email address.</li>
+          <li>They receive an invitation link and create (or log into) their own Livrux account.</li>
+          <li>Once accepted, they have the same access to your reader profiles.</li>
+        </ol>
+        <p data-i18n="guardians.remove">You can remove a co-guardian at any time from the same settings screen.</p>
+      </div>
+    </div>
+
+    <!-- 8. Multiple readers -->
+    <div class="section" id="readers">
+      <div class="section-header">
+        <span class="section-icon">👧</span>
+        <h2 data-i18n="readers.title">Multiple readers</h2>
+      </div>
+      <img src="./assets/ranking.png" class="section-illus" alt="">
+      <p data-i18n="readers.intro">One Livrux account can hold as many reader profiles as you need — one per child (or
+        even one for yourself).</p>
+      <div class="generic-box">
+        <ul data-i18n-html="readers.items">
+          <li>The home screen shows all your readers as a grid of avatars.</li>
+          <li>Tap a reader to enter their space; each reader has their own books, wallet, streaks, and badges.</li>
+          <li>Each reader can have an individual PIN and a different visual theme.</li>
+          <li>The parental account PIN locks access to sensitive settings across all readers.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 9. Settings & privacy -->
+    <div class="section" id="settings">
+      <div class="section-header">
+        <span class="section-icon">⚙️</span>
+        <h2 data-i18n="settings.title">Settings &amp; privacy</h2>
+      </div>
+      <ul data-i18n-html="settings.items">
+        <li><strong>Language</strong> — English, Portuguese, and German; auto-detected from your device and switchable
+          at any time.</li>
+        <li><strong>Theme</strong> — each reader has a personal colour theme (Classic, Night, Indigo, Ruby).</li>
+        <li><strong>Parental controls</strong> — set a PIN to protect account settings and configure per-reader PINs.
+        </li>
+        <li><strong>Data &amp; privacy</strong> — Livrux is GDPR / LGPD compliant. You can delete your account and all
+          associated data at any time via <em>Settings → Delete account</em>.</li>
+      </ul>
+      <p data-i18n-html="settings.contact">Questions? Reach us at <a
+          href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>.</p>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- FOOTER -->
+  <footer>
+    <p>
+      <a href="index.html">← Livrux</a>
+      &nbsp;·&nbsp;
+      <a href="privacy.html">Privacy Policy</a>
+      &nbsp;·&nbsp;
+      <a href="terms.html">Terms of Use</a>
+      &nbsp;·&nbsp;
+      <span id="year"></span>
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ─── TRANSLATIONS ─── */
+      const i18n = {
+        en: {
+          'header.title': '📖 How Livrux Works',
+          'header.subtitle': 'Everything you need to know to start tracking reading and rewarding your kids.',
+
+          'toc.title': 'Contents',
+          'toc.what': '🌟 What is Livrux?',
+          'toc.start': '🚀 Getting started',
+          'toc.books': '📚 Adding books',
+          'toc.rewards': '🪙 Rewards',
+          'toc.xp': '⚡ XP, Streaks & Badges',
+          'toc.friends': '🤝 Friends & Ranking',
+          'toc.guardians': '👨‍👩‍👧 Co-guardians',
+          'toc.readers': '👧 Multiple readers',
+          'toc.settings': '⚙️ Settings & privacy',
+
+          'what.title': 'What is Livrux?',
+          'what.p1': 'Livrux is a family reading tracker that turns books into rewards. Kids earn virtual coins — called <strong>Livrux</strong> — every time they finish a book, based on how many pages it has. Parents set the reward formula and decide what those coins are worth in the real world.',
+          'what.p2': 'The goal is simple: make reading fun, visible, and worth celebrating.',
+
+          'start.title': 'Getting started',
+          'start.steps': `
+            <li>Create a free account with your email or via Google / Apple Sign-In.</li>
+            <li>Add a reader profile for each child — name, avatar, and an optional PIN.<span class="sub">The PIN protects the reader's settings from curious little fingers.</span></li>
+            <li>Set your reward formula in Settings → Reward Formula.<span class="sub">You can always change it later — it only affects future completions.</span></li>
+            <li>Start adding books and let the reading begin!</li>
+          `,
+
+          'books.title': 'Adding books',
+          'books.intro': 'There are three ways to add a book to a reader\'s library:',
+          'books.ways': `
+            <li><strong>Search</strong> — type the title or author and pick from Google Books results.</li>
+            <li><strong>Scan</strong> — use the camera to scan the ISBN barcode on the back cover.</li>
+            <li><strong>Manual entry</strong> — type the details yourself if the book isn't in the database.</li>
+          `,
+          'books.status.intro': 'When adding a book you choose its status:',
+          'books.status': `
+            <li><strong>Currently reading</strong> — the book appears in progress; no coins yet.</li>
+            <li><strong>Completed</strong> — coins are awarded immediately based on the page count and your formula.</li>
+          `,
+          'books.tip': '💡 You can see a live coin preview as you enter the page count — so you know exactly what the reward will be before saving.',
+          'books.rating': 'After completing a book, the child can give it a rating (👎 disliked · 👍 liked · ❤️ loved) and write a short review.',
+
+          'rewards.title': 'Rewards',
+          'rewards.intro': 'The reward formula calculates how many Livrux coins a completed book is worth. You can configure it in <strong>Settings → Reward Formula</strong>.',
+          'rewards.formula.coins': '🪙 Coins',
+          'rewards.formula.base': 'Base reward',
+          'rewards.formula.pages': '(Pages × per-page rate)',
+          'rewards.formula.bonus': 'Bonus',
+          'rewards.items': `
+            <li><strong>Base reward</strong> — a fixed amount for every completed book.</li>
+            <li><strong>Per-page rate</strong> — extra coins for each page read.</li>
+            <li><strong>Minimum pages bonus</strong> — an extra bonus if the book is at least N pages long.</li>
+            <li><strong>Foreign language bonus</strong> — extra coins when the book is read in a language other than the reader's native tongue.</li>
+          `,
+          'rewards.wallet': 'The <strong>Wallet</strong> tab shows the full transaction history — every book completed and every reward spent.',
+          'rewards.spend': 'When the child wants to redeem coins for a real-world treat, you record the spend in the Wallet. Coins have no monetary value and exist only within the app.',
+
+          'xp.title': 'XP, Streaks & Badges',
+          'xp.p1': '<strong>XP (experience points)</strong> are earned alongside coins for every completed book. XP determines the reader\'s position in the global ranking and cannot be spent — it\'s a measure of reading accomplishment.',
+          'xp.p2': '<strong>Reading streaks</strong> track how many days in a row a reader completes a book. The current streak and all-time record are shown on the reader\'s profile.',
+          'xp.p3': '<strong>Badges</strong> are achievements unlocked automatically when certain milestones are reached:',
+          'xp.badges': `
+            <span class="badge-chip">📖 First book</span>
+            <span class="badge-chip">🪱 Bookworm</span>
+            <span class="badge-chip">🌍 Polyglot</span>
+            <span class="badge-chip">🔥 On a streak</span>
+            <span class="badge-chip">🏆 Top reader</span>
+            <span class="badge-chip">⭐ Super reader</span>
+            <span class="badge-chip">📚 Library</span>
+            <span class="badge-chip">🌙 Night owl</span>
+            <span class="badge-chip">❤️ Book lover</span>
+            <span class="badge-chip">🚀 Speed reader</span>
+          `,
+          'xp.tip': '💡 Badges are automatically revoked if the qualifying books are deleted, keeping the profile honest.',
+
+          'friends.title': 'Friends & Ranking',
+          'friends.intro': 'Readers can connect with friends to share progress and compete on the global XP leaderboard.',
+          'friends.steps': `
+            <li>Each reader has a unique 6-character friend code — share it with friends.</li>
+            <li>Enter a friend's code in the Friends tab to send a request.</li>
+            <li>The other reader accepts (or rejects) the request.</li>
+            <li>Once connected, you can see each other's books, badges, and XP rank.</li>
+          `,
+          'friends.parental': 'Parents can control whether their child can manage friendships independently or requires parental approval — this is configurable in <strong>Settings → Parental Controls</strong>.',
+
+          'guardians.title': 'Co-guardians',
+          'guardians.intro': 'Co-guardians are additional adults — a partner, grandparent, or co-parent — who can view and manage the same readers on their own device, without sharing your login.',
+          'guardians.steps': `
+            <li>Go to <strong>Settings → Co-guardians</strong>.</li>
+            <li>Tap <em>Invite</em> and enter the other person's email address.</li>
+            <li>They receive an invitation link and create (or log into) their own Livrux account.</li>
+            <li>Once accepted, they have the same access to your reader profiles.</li>
+          `,
+          'guardians.remove': 'You can remove a co-guardian at any time from the same settings screen.',
+
+          'readers.title': 'Multiple readers',
+          'readers.intro': 'One Livrux account can hold as many reader profiles as you need — one per child (or even one for yourself).',
+          'readers.items': `
+            <li>The home screen shows all your readers as a grid of avatars.</li>
+            <li>Tap a reader to enter their space; each reader has their own books, wallet, streaks, and badges.</li>
+            <li>Each reader can have an individual PIN and a different visual theme.</li>
+            <li>The parental account PIN locks access to sensitive settings across all readers.</li>
+          `,
+
+          'settings.title': 'Settings & privacy',
+          'settings.items': `
+            <li><strong>Language</strong> — English, Portuguese, and German; auto-detected from your device and switchable at any time.</li>
+            <li><strong>Theme</strong> — each reader has a personal colour theme (Classic, Night, Indigo, Ruby).</li>
+            <li><strong>Parental controls</strong> — set a PIN to protect account settings and configure per-reader PINs.</li>
+            <li><strong>Data &amp; privacy</strong> — Livrux is GDPR / LGPD compliant. You can delete your account and all associated data at any time via <em>Settings → Delete account</em>.</li>
+          `,
+          'settings.contact': 'Questions? Reach us at <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>.',
+        },
+
+        pt: {
+          'header.title': '📖 Como o Livrux Funciona',
+          'header.subtitle': 'Tudo o que você precisa saber para começar a acompanhar a leitura e recompensar seus filhos.',
+
+          'toc.title': 'Conteúdo',
+          'toc.what': '🌟 O que é o Livrux?',
+          'toc.start': '🚀 Primeiros passos',
+          'toc.books': '📚 Adicionando livros',
+          'toc.rewards': '🪙 Recompensas',
+          'toc.xp': '⚡ XP, Streaks & Conquistas',
+          'toc.friends': '🤝 Amigos & Ranking',
+          'toc.guardians': '👨‍👩‍👧 Co-guardiões',
+          'toc.readers': '👧 Múltiplos leitores',
+          'toc.settings': '⚙️ Configurações & privacidade',
+
+          'what.title': 'O que é o Livrux?',
+          'what.p1': 'O Livrux é um app de acompanhamento de leitura familiar que transforma livros em recompensas. As crianças ganham moedas virtuais — chamadas <strong>Livrux</strong> — sempre que terminam um livro, com base no número de páginas. Os responsáveis configuram a fórmula de recompensa e decidem o que essas moedas valem na vida real.',
+          'what.p2': 'O objetivo é simples: tornar a leitura divertida, visível e digna de celebração.',
+
+          'start.title': 'Primeiros passos',
+          'start.steps': `
+            <li>Crie uma conta gratuita com seu e-mail ou via Google / Apple Sign-In.</li>
+            <li>Adicione um perfil de leitor para cada filho — nome, avatar e um PIN opcional.<span class="sub">O PIN protege as configurações do leitor de dedinhos curiosos.</span></li>
+            <li>Configure a fórmula de recompensa em Configurações → Fórmula de Recompensa.<span class="sub">Você pode alterar a qualquer momento — só afeta conclusões futuras.</span></li>
+            <li>Comece a adicionar livros e que a leitura comece!</li>
+          `,
+
+          'books.title': 'Adicionando livros',
+          'books.intro': 'Há três formas de adicionar um livro à biblioteca do leitor:',
+          'books.ways': `
+            <li><strong>Busca</strong> — digite o título ou autor e escolha nos resultados do Google Books.</li>
+            <li><strong>Escaneamento</strong> — use a câmera para escanear o código de barras ISBN na contracapa.</li>
+            <li><strong>Entrada manual</strong> — preencha os dados você mesmo caso o livro não esteja no banco de dados.</li>
+          `,
+          'books.status.intro': 'Ao adicionar um livro, você escolhe o status:',
+          'books.status': `
+            <li><strong>Lendo</strong> — o livro aparece em andamento; nenhuma moeda ainda.</li>
+            <li><strong>Concluído</strong> — as moedas são concedidas imediatamente com base no número de páginas e na sua fórmula.</li>
+          `,
+          'books.tip': '💡 Você vê uma prévia das moedas em tempo real enquanto digita o número de páginas — assim sabe exatamente qual será a recompensa antes de salvar.',
+          'books.rating': 'Após concluir um livro, a criança pode dar uma avaliação (👎 não gostei · 👍 gostei · ❤️ amei) e escrever uma resenha curta.',
+
+          'rewards.title': 'Recompensas',
+          'rewards.intro': 'A fórmula de recompensa calcula quantas moedas Livrux um livro concluído vale. Você pode configurá-la em <strong>Configurações → Fórmula de Recompensa</strong>.',
+          'rewards.formula.coins': '🪙 Moedas',
+          'rewards.formula.base': 'Recompensa base',
+          'rewards.formula.pages': '(Páginas × taxa por página)',
+          'rewards.formula.bonus': 'Bônus',
+          'rewards.items': `
+            <li><strong>Recompensa base</strong> — valor fixo por livro concluído.</li>
+            <li><strong>Taxa por página</strong> — moedas extras para cada página lida.</li>
+            <li><strong>Bônus de mínimo de páginas</strong> — bônus extra se o livro tiver pelo menos N páginas.</li>
+            <li><strong>Bônus de língua estrangeira</strong> — moedas extras quando o livro é lido em um idioma diferente do idioma nativo do leitor.</li>
+          `,
+          'rewards.wallet': 'A aba <strong>Carteira</strong> mostra o histórico completo de transações — cada livro concluído e cada recompensa gasta.',
+          'rewards.spend': 'Quando a criança quiser trocar as moedas por um prêmio real, você registra o gasto na Carteira. As moedas não têm valor monetário e existem somente dentro do app.',
+
+          'xp.title': 'XP, Streaks e Conquistas',
+          'xp.p1': '<strong>XP (pontos de experiência)</strong> são ganhos junto com as moedas a cada livro concluído. O XP determina a posição do leitor no ranking global e não pode ser gasto — é uma medida de desempenho de leitura.',
+          'xp.p2': '<strong>Streaks de leitura</strong> registram quantos dias seguidos o leitor conclui um livro. O streak atual e o recorde pessoal ficam visíveis no perfil do leitor.',
+          'xp.p3': '<strong>Conquistas</strong> são desbloqueadas automaticamente ao atingir determinados marcos:',
+          'xp.badges': `
+            <span class="badge-chip">📖 Primeiro livro</span>
+            <span class="badge-chip">🪱 Devorador de livros</span>
+            <span class="badge-chip">🌍 Poliglota</span>
+            <span class="badge-chip">🔥 Em sequência</span>
+            <span class="badge-chip">🏆 Leitor top</span>
+            <span class="badge-chip">⭐ Super leitor</span>
+            <span class="badge-chip">📚 Biblioteca</span>
+            <span class="badge-chip">🌙 Coruja noturna</span>
+            <span class="badge-chip">❤️ Amante de livros</span>
+            <span class="badge-chip">🚀 Leitor veloz</span>
+          `,
+          'xp.tip': '💡 As conquistas são automaticamente revogadas se os livros qualificadores forem excluídos, mantendo o perfil honesto.',
+
+          'friends.title': 'Amigos e Ranking',
+          'friends.intro': 'Os leitores podem se conectar com amigos para compartilhar o progresso e competir no ranking global de XP.',
+          'friends.steps': `
+            <li>Cada leitor tem um código de amigo único de 6 caracteres — compartilhe com amigos.</li>
+            <li>Digite o código de um amigo na aba Amigos para enviar uma solicitação.</li>
+            <li>O outro leitor aceita (ou recusa) a solicitação.</li>
+            <li>Uma vez conectados, vocês podem ver os livros, conquistas e posição no ranking um do outro.</li>
+          `,
+          'friends.parental': 'Os responsáveis podem controlar se a criança pode gerenciar amizades de forma independente ou precisa de aprovação — configurável em <strong>Configurações → Controles Parentais</strong>.',
+
+          'guardians.title': 'Co-guardiões',
+          'guardians.intro': 'Co-guardiões são adultos adicionais — parceiro(a), avós ou co-responsáveis — que podem visualizar e gerenciar os mesmos leitores no próprio dispositivo, sem compartilhar seu login.',
+          'guardians.steps': `
+            <li>Vá em <strong>Configurações → Co-guardiões</strong>.</li>
+            <li>Toque em <em>Convidar</em> e insira o endereço de e-mail da outra pessoa.</li>
+            <li>Ela recebe um link de convite e cria (ou faz login em) sua própria conta Livrux.</li>
+            <li>Após aceitar, ela terá o mesmo acesso aos seus perfis de leitores.</li>
+          `,
+          'guardians.remove': 'Você pode remover um co-guardião a qualquer momento na mesma tela de configurações.',
+
+          'readers.title': 'Múltiplos leitores',
+          'readers.intro': 'Uma conta Livrux pode ter quantos perfis de leitores você precisar — um por filho (ou até um para você mesmo).',
+          'readers.items': `
+            <li>A tela inicial mostra todos os seus leitores em um grid de avatares.</li>
+            <li>Toque em um leitor para entrar no espaço dele; cada leitor tem seus próprios livros, carteira, streaks e conquistas.</li>
+            <li>Cada leitor pode ter um PIN individual e um tema visual diferente.</li>
+            <li>O PIN da conta parental protege o acesso às configurações sensíveis de todos os leitores.</li>
+          `,
+
+          'settings.title': 'Configurações e privacidade',
+          'settings.items': `
+            <li><strong>Idioma</strong> — Português, Inglês e Alemão; detectado automaticamente pelo dispositivo e alterável a qualquer momento.</li>
+            <li><strong>Tema</strong> — cada leitor tem um tema de cores pessoal (Clássico, Noite, Índigo, Rubi).</li>
+            <li><strong>Controles parentais</strong> — defina um PIN para proteger as configurações da conta e configure PINs individuais por leitor.</li>
+            <li><strong>Dados e privacidade</strong> — o Livrux está em conformidade com a LGPD / GDPR. Você pode excluir sua conta e todos os dados associados a qualquer momento em <em>Configurações → Excluir conta</em>.</li>
+          `,
+          'settings.contact': 'Dúvidas? Entre em contato: <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>.',
+        },
+
+        de: {
+          'header.title': '📖 So funktioniert Livrux',
+          'header.subtitle': 'Alles, was du wissen musst, um mit dem Lesetracking zu beginnen und deine Kinder zu belohnen.',
+
+          'toc.title': 'Inhalt',
+          'toc.what': '🌟 Was ist Livrux?',
+          'toc.start': '🚀 Erste Schritte',
+          'toc.books': '📚 Bücher hinzufügen',
+          'toc.rewards': '🪙 Belohnungen',
+          'toc.xp': '⚡ XP, Streaks & Errungenschaften',
+          'toc.friends': '🤝 Freunde & Rangliste',
+          'toc.guardians': '👨‍👩‍👧 Mitbetreuende',
+          'toc.readers': '👧 Mehrere Leser',
+          'toc.settings': '⚙️ Einstellungen & Datenschutz',
+
+          'what.title': 'Was ist Livrux?',
+          'what.p1': 'Livrux ist ein familiärer Lese-Tracker, der Bücher in Belohnungen verwandelt. Kinder verdienen virtuelle Münzen — sogenannte <strong>Livrux</strong> — jedes Mal, wenn sie ein Buch beenden, basierend auf der Seitenanzahl. Eltern legen die Belohnungsformel fest und entscheiden, was diese Münzen im echten Leben wert sind.',
+          'what.p2': 'Das Ziel ist einfach: Lesen macht Spaß, ist sichtbar und es lohnt sich, es zu feiern.',
+
+          'start.title': 'Erste Schritte',
+          'start.steps': `
+            <li>Erstelle ein kostenloses Konto mit deiner E-Mail-Adresse oder über Google / Apple Sign-In.</li>
+            <li>Füge ein Leserprofil für jedes Kind hinzu — Name, Avatar und optionaler PIN.<span class="sub">Der PIN schützt die Einstellungen des Lesers vor neugierigen kleinen Fingern.</span></li>
+            <li>Richte deine Belohnungsformel unter Einstellungen → Belohnungsformel ein.<span class="sub">Du kannst sie jederzeit ändern — sie gilt nur für zukünftige Abschlüsse.</span></li>
+            <li>Fang an, Bücher hinzuzufügen, und lass das Lesen beginnen!</li>
+          `,
+
+          'books.title': 'Bücher hinzufügen',
+          'books.intro': 'Es gibt drei Möglichkeiten, ein Buch zur Bibliothek eines Lesers hinzuzufügen:',
+          'books.ways': `
+            <li><strong>Suche</strong> — gib Titel oder Autor ein und wähle aus den Google-Books-Ergebnissen.</li>
+            <li><strong>Scannen</strong> — nutze die Kamera, um den ISBN-Barcode auf der Rückseite zu scannen.</li>
+            <li><strong>Manuelle Eingabe</strong> — trag die Daten selbst ein, wenn das Buch nicht in der Datenbank ist.</li>
+          `,
+          'books.status.intro': 'Beim Hinzufügen eines Buches wählst du den Status:',
+          'books.status': `
+            <li><strong>Wird gerade gelesen</strong> — das Buch erscheint als laufend; noch keine Münzen.</li>
+            <li><strong>Abgeschlossen</strong> — Münzen werden sofort basierend auf der Seitenanzahl und deiner Formel vergeben.</li>
+          `,
+          'books.tip': '💡 Du siehst eine Live-Münzvorschau, während du die Seitenanzahl eingibst — so weißt du genau, wie hoch die Belohnung sein wird, bevor du speicherst.',
+          'books.rating': 'Nach dem Abschluss eines Buches kann das Kind eine Bewertung abgeben (👎 nicht gemocht · 👍 gemocht · ❤️ geliebt) und eine kurze Rezension schreiben.',
+
+          'rewards.title': 'Belohnungen',
+          'rewards.intro': 'Die Belohnungsformel berechnet, wie viele Livrux-Münzen ein abgeschlossenes Buch wert ist. Du kannst sie unter <strong>Einstellungen → Belohnungsformel</strong> konfigurieren.',
+          'rewards.formula.coins': '🪙 Münzen',
+          'rewards.formula.base': 'Basisbelohnung',
+          'rewards.formula.pages': '(Seiten × Seitenrate)',
+          'rewards.formula.bonus': 'Bonus',
+          'rewards.items': `
+            <li><strong>Basisbelohnung</strong> — ein fester Betrag für jedes abgeschlossene Buch.</li>
+            <li><strong>Seitenrate</strong> — extra Münzen für jede gelesene Seite.</li>
+            <li><strong>Mindestseitenbonus</strong> — ein zusätzlicher Bonus, wenn das Buch mindestens N Seiten hat.</li>
+            <li><strong>Fremdsprachenbonus</strong> — extra Münzen, wenn das Buch in einer anderen Sprache als der Muttersprache des Lesers gelesen wird.</li>
+          `,
+          'rewards.wallet': 'Der <strong>Geldbeutel</strong>-Tab zeigt den vollständigen Transaktionsverlauf — jedes abgeschlossene Buch und jede ausgegebene Belohnung.',
+          'rewards.spend': 'Wenn das Kind Münzen gegen einen echten Preis einlösen möchte, trägst du die Ausgabe im Geldbeutel ein. Münzen haben keinen Geldwert und existieren nur innerhalb der App.',
+
+          'xp.title': 'XP, Streaks & Errungenschaften',
+          'xp.p1': '<strong>XP (Erfahrungspunkte)</strong> werden zusammen mit den Münzen für jedes abgeschlossene Buch verdient. XP bestimmt die Position des Lesers in der globalen Rangliste und kann nicht ausgegeben werden — es ist ein Maß für die Leseleistung.',
+          'xp.p2': '<strong>Lese-Streaks</strong> verfolgen, wie viele Tage in Folge ein Leser ein Buch abschließt. Der aktuelle Streak und der persönliche Rekord sind im Leserprofil sichtbar.',
+          'xp.p3': '<strong>Errungenschaften</strong> werden automatisch freigeschaltet, wenn bestimmte Meilensteine erreicht werden:',
+          'xp.badges': `
+            <span class="badge-chip">📖 Erstes Buch</span>
+            <span class="badge-chip">🪱 Bücherwurm</span>
+            <span class="badge-chip">🌍 Polyglott</span>
+            <span class="badge-chip">🔥 Auf Streak</span>
+            <span class="badge-chip">🏆 Top-Leser</span>
+            <span class="badge-chip">⭐ Super-Leser</span>
+            <span class="badge-chip">📚 Bibliothek</span>
+            <span class="badge-chip">🌙 Nachteule</span>
+            <span class="badge-chip">❤️ Bücherliebhaber</span>
+            <span class="badge-chip">🚀 Schnellleser</span>
+          `,
+          'xp.tip': '💡 Errungenschaften werden automatisch entzogen, wenn die qualifizierenden Bücher gelöscht werden, damit das Profil ehrlich bleibt.',
+
+          'friends.title': 'Freunde & Rangliste',
+          'friends.intro': 'Leser können sich mit Freunden verbinden, um Fortschritte zu teilen und in der globalen XP-Rangliste zu konkurrieren.',
+          'friends.steps': `
+            <li>Jeder Leser hat einen eindeutigen 6-stelligen Freundescode — teile ihn mit Freunden.</li>
+            <li>Gib den Code eines Freundes im Freunde-Tab ein, um eine Anfrage zu senden.</li>
+            <li>Der andere Leser nimmt die Anfrage an (oder lehnt sie ab).</li>
+            <li>Einmal verbunden, könnt ihr gegenseitig Bücher, Errungenschaften und XP-Rang sehen.</li>
+          `,
+          'friends.parental': 'Eltern können steuern, ob ihr Kind Freundschaften eigenständig verwalten darf oder eine elterliche Genehmigung benötigt — konfigurierbar unter <strong>Einstellungen → Kindersicherung</strong>.',
+
+          'guardians.title': 'Mitbetreuende',
+          'guardians.intro': 'Mitbetreuende sind weitere Erwachsene — ein Partner, Großeltern oder Miterzieher — die dieselben Leser auf ihrem eigenen Gerät anzeigen und verwalten können, ohne dein Login zu teilen.',
+          'guardians.steps': `
+            <li>Gehe zu <strong>Einstellungen → Mitbetreuende</strong>.</li>
+            <li>Tippe auf <em>Einladen</em> und gib die E-Mail-Adresse der anderen Person ein.</li>
+            <li>Diese Person erhält einen Einladungslink und erstellt (oder meldet sich bei) ihrem eigenen Livrux-Konto an.</li>
+            <li>Nach Annahme hat sie denselben Zugriff auf deine Leserprofile.</li>
+          `,
+          'guardians.remove': 'Du kannst einen Mitbetreuenden jederzeit über denselben Einstellungsbildschirm entfernen.',
+
+          'readers.title': 'Mehrere Leser',
+          'readers.intro': 'Ein Livrux-Konto kann so viele Leserprofile umfassen, wie du benötigst — eines pro Kind (oder sogar eines für dich selbst).',
+          'readers.items': `
+            <li>Der Startbildschirm zeigt alle deine Leser als Avatar-Raster.</li>
+            <li>Tippe auf einen Leser, um dessen Bereich zu betreten; jeder Leser hat eigene Bücher, Geldbeutel, Streaks und Errungenschaften.</li>
+            <li>Jeder Leser kann einen individuellen PIN und ein anderes Farbthema haben.</li>
+            <li>Der elterliche Konto-PIN schützt den Zugriff auf sensible Einstellungen aller Leser.</li>
+          `,
+
+          'settings.title': 'Einstellungen & Datenschutz',
+          'settings.items': `
+            <li><strong>Sprache</strong> — Deutsch, Englisch und Portugiesisch; automatisch vom Gerät erkannt und jederzeit umstellbar.</li>
+            <li><strong>Theme</strong> — jeder Leser hat ein persönliches Farbthema (Klassisch, Nacht, Indigo, Rubin).</li>
+            <li><strong>Kindersicherung</strong> — lege einen PIN fest, um die Kontoeinstellungen zu schützen, und konfiguriere individuelle PINs pro Leser.</li>
+            <li><strong>Daten &amp; Datenschutz</strong> — Livrux ist DSGVO / LGPD-konform. Du kannst dein Konto und alle zugehörigen Daten jederzeit unter <em>Einstellungen → Konto löschen</em> löschen.</li>
+          `,
+          'settings.contact': 'Fragen? Schreib uns: <a href="mailto:livrux@fecastro.com">livrux@fecastro.com</a>.',
+        },
+      };
+
+      /* ─── LANGUAGE DETECTION ─── */
+      function detectLang() {
+        const stored = localStorage.getItem('livrux_lang');
+        if (stored && i18n[stored]) return stored;
+        const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        return i18n[browser] ? browser : 'en';
+      }
+
+      /* ─── APPLY LANGUAGE ─── */
+      function applyLang(lang) {
+        localStorage.setItem('livrux_lang', lang);
+        document.documentElement.lang = lang;
+        const dict = i18n[lang];
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (dict[key] !== undefined) el.textContent = dict[key];
+        });
+
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+          const key = el.getAttribute('data-i18n-html');
+          if (dict[key] !== undefined) el.innerHTML = dict[key];
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+      }
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+      });
+
+      applyLang(detectLang());
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+  </script>
+
+</body>
+
+</html>

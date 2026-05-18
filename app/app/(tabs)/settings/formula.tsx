@@ -23,6 +23,7 @@ import { FORMULA_PREVIEW_PAGES } from '../../../../src/constants/config';
 import type { BonusRule } from '../../../../src/types';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
+import { BackButton } from '../../../../src/components/BackButton';
 
 export default function FormulaScreen() {
   const { t } = useTranslation();
@@ -130,10 +131,7 @@ export default function FormulaScreen() {
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <TouchableOpacity onPress={() => router.back()} style={styles.backRow}>
-            <Text style={styles.backChevron}>‹</Text>
-            <Text style={styles.backLabel}>{t('settings.title')}</Text>
-          </TouchableOpacity>
+          <BackButton />
           <Text style={styles.screenTitle}>{t('settings.formulaTitle')}</Text>
 
           <TextInput
@@ -252,23 +250,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
-  },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: Spacing.md,
-    marginBottom: Spacing.xs,
-  },
-  backChevron: {
-    fontSize: 28,
-    color: Colors.secondary,
-    marginRight: 4,
-    lineHeight: 32,
-  },
-  backLabel: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
-    color: Colors.secondary,
   },
   screenTitle: {
     fontFamily: Fonts.heading,

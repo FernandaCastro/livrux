@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   AppState,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,23 +21,13 @@ import { FloatingEmojis } from '../../../../../src/components/FloatingEmojis';
 import { BadgeCard } from '../../../../../src/components/BadgeCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../../src/components/BottomMenu';
 import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../../../src/constants/theme';
+import { BackButton } from '../../../../../src/components/BackButton';
 
 function createStyles(theme: ColorPalette) {
   const S = createShadows(theme.shadowColor);
   return StyleSheet.create({
     root: { flex: 1 },
     safe: { flex: 1, backgroundColor: 'transparent' },
-    backBtn: {
-      alignSelf: 'flex-start',
-      marginHorizontal: Spacing.xl,
-      marginTop: Spacing.xs,
-      marginBottom: Spacing.xs,
-    },
-    backText: {
-      fontFamily: Fonts.bodySemiBold,
-      fontSize: FontSizes.sm,
-      color: '#0A6E48',
-    },
     heroBanner: {
       borderRadius: Radius.xl,
       marginHorizontal: Spacing.md,
@@ -97,7 +87,6 @@ function createStyles(theme: ColorPalette) {
 
 export default function FriendBadgesScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
   const { readerId } = useLocalSearchParams<{ readerId: string; fromReaderId: string }>();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -141,9 +130,7 @@ export default function FriendBadgesScreen() {
       {bgGradient}
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={styles.backText}>← {t('common.back')}</Text>
-        </TouchableOpacity>
+        <BackButton style={{ paddingHorizontal: Spacing.xl }} />
 
         {/* Jade hero — fixed friends accent */}
         <LinearGradient

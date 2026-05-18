@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { useBook } from '../../../src/hooks/useBooks';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -29,7 +29,9 @@ import { useAuthStore } from '../../../src/stores/authStore';
 import { calculateLivrux, getDefaultFormula } from '../../../src/lib/formula';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+import { BackButton } from '../../../src/components/BackButton';
+import { useTheme } from '../../../src/hooks/useTheme';
 import { STREAK_THRESHOLDS } from '../../../src/constants/config';
 
 const RATING_BG: Record<string, string> = {
@@ -44,6 +46,8 @@ const RATING_FG: Record<string, string> = {
 };
 
 export default function BookDetailScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -72,14 +76,14 @@ export default function BookDetailScreen() {
     return (
       <View style={styles.root}>
         <LinearGradient
-          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          colors={theme.backgroundGradient}
           locations={[0, 0.6, 1]}
           start={{ x: 0.15, y: 0 }}
           end={{ x: 0.85, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
         <SafeAreaView style={styles.safe}>
-          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+          <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
         </SafeAreaView>
       </View>
     );
@@ -89,14 +93,14 @@ export default function BookDetailScreen() {
     return (
       <View style={styles.root}>
         <LinearGradient
-          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          colors={theme.backgroundGradient}
           locations={[0, 0.6, 1]}
           start={{ x: 0.15, y: 0 }}
           end={{ x: 0.85, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
         <SafeAreaView style={styles.safe}>
-          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+          <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
           <BadgeRevokedModal badges={revokedBadges} onClose={() => { setRevokedBadges([]); handleBack(); }} />
         </SafeAreaView>
       </View>
@@ -126,7 +130,7 @@ export default function BookDetailScreen() {
   return (
     <View style={styles.root}>
       <LinearGradient
-        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
         start={{ x: 0.15, y: 0 }}
         end={{ x: 0.85, y: 1 }}
@@ -137,6 +141,7 @@ export default function BookDetailScreen() {
         <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
           {/* Header */}
           <View style={styles.header}>
+            <BackButton onPress={handleBack} />
             <View style={styles.headerActions}>
               <TouchableOpacity onPress={() => router.push(`/app/book/edit?bookId=${book.id}`)}>
                 <Text style={styles.editText}>{t('book.editBook')}</Text>
@@ -169,14 +174,14 @@ export default function BookDetailScreen() {
               <Text style={styles.detailText}>{book.total_pages} p.</Text>
             </View>
             <View style={styles.detailChip}>
-              <Text style={styles.detailIcon}>🌱</Text>
+              <Text style={styles.detailIcon}>🥚</Text>
               <Text style={styles.detailText}>
                 {format(new Date(book.date_start), 'dd/MM/yyyy')}
               </Text>
             </View>
             {book.date_completed && (
               <View style={styles.detailChip}>
-                <Text style={styles.detailIcon}>✅</Text>
+                <Text style={[{fontSize: 18}]}>🐣</Text>
                 <Text style={styles.detailText}>
                   {format(new Date(book.date_completed), 'dd/MM/yyyy')}
                 </Text>
@@ -271,7 +276,7 @@ export default function BookDetailScreen() {
                 </View>
               )}
               <LinearGradient
-                colors={['#FEFBFF', '#FFFAF4']}
+                colors={theme.cardGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[styles.reviewCard, !!book.rating && styles.reviewCardWithPill]}
@@ -285,7 +290,7 @@ export default function BookDetailScreen() {
           {/* Notes */}
           {book.notes && (
             <LinearGradient
-              colors={['#FEFBFF', '#FFFAF4']}
+              colors={theme.cardGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.notesCard}
@@ -439,7 +444,8 @@ export default function BookDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(theme: ColorPalette) {
+  return StyleSheet.create({
   root: { flex: 1 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
@@ -450,7 +456,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
     paddingVertical: Spacing.lg,
@@ -463,12 +469,12 @@ const styles = StyleSheet.create({
   editText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.secondary,
+    color: theme.secondary,
   },
   deleteText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.error,
+    color: theme.error,
   },
   coverContainer: { marginBottom: Spacing.xl },
   cover: {
@@ -481,7 +487,7 @@ const styles = StyleSheet.create({
     width: 140,
     height: 210,
     borderRadius: Radius.md,
-    backgroundColor: Colors.secondaryLight,
+    backgroundColor: theme.secondaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.md,
@@ -490,14 +496,14 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
   author: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
     marginBottom: Spacing.lg,
   },
   detailsRow: {
@@ -515,7 +521,7 @@ const styles = StyleSheet.create({
   detailChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.secondaryLight,
+    backgroundColor: theme.secondaryLight,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
@@ -525,7 +531,7 @@ const styles = StyleSheet.create({
   detailText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.secondaryDark,
+    color: theme.secondaryDark,
   },
   earnedCard: {
     width: '100%',
@@ -550,7 +556,7 @@ const styles = StyleSheet.create({
   earnedAmount: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['3xl'],
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
   },
   earnedCurrency: {
     fontFamily: Fonts.bodyBold,
@@ -608,7 +614,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
     lineHeight: 22,
     fontStyle: 'italic',
   },
@@ -623,7 +629,7 @@ const styles = StyleSheet.create({
   },
   completeBtn: {
     width: '100%',
-    backgroundColor: Colors.success,
+    backgroundColor: theme.success,
     borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
     alignItems: 'center',
@@ -633,12 +639,12 @@ const styles = StyleSheet.create({
   completeBtnText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
   },
   ratingModalLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
     marginBottom: Spacing.sm,
   },
   ratingModalRow: {
@@ -651,17 +657,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.sm,
     borderRadius: Radius.md,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: theme.surfaceVariant,
     borderWidth: 2,
     borderColor: 'transparent',
   },
   ratingModalOptionSelected: {
-    borderColor: Colors.secondary,
-    backgroundColor: Colors.surface,
+    borderColor: theme.secondary,
+    backgroundColor: theme.surface,
   },
   sessionBtn: {
     width: '100%',
-    backgroundColor: Colors.secondary,
+    backgroundColor: theme.secondary,
     borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
     alignItems: 'center',
@@ -671,7 +677,7 @@ const styles = StyleSheet.create({
   sessionBtnText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
   },
   sessionBtnSub: {
     fontFamily: Fonts.body,
@@ -688,7 +694,7 @@ const styles = StyleSheet.create({
   },
   modalCard: {
     width: '100%',
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.surface,
     borderRadius: Radius.xl,
     padding: Spacing.xl,
     ...Shadows.lg,
@@ -696,34 +702,34 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
     marginBottom: Spacing.sm,
   },
   modalHint: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
     marginBottom: Spacing.md,
   },
   modalError: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.sm,
-    color: Colors.error,
+    color: theme.error,
     marginTop: -Spacing.sm,
     marginBottom: Spacing.sm,
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: Colors.surfaceVariant,
+    borderColor: theme.surfaceVariant,
     borderRadius: Radius.md,
     padding: Spacing.md,
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
     marginBottom: Spacing.sm,
   },
   modalInputError: {
-    borderColor: Colors.error,
+    borderColor: theme.error,
   },
   modalActions: {
     flexDirection: 'row',
@@ -734,31 +740,32 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     alignItems: 'center',
     borderRadius: Radius.md,
-    backgroundColor: Colors.surfaceVariant,
+    backgroundColor: theme.surfaceVariant,
   },
   modalCancelText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
   },
   modalConfirm: {
     flex: 1,
     padding: Spacing.md,
     alignItems: 'center',
     borderRadius: Radius.md,
-    backgroundColor: Colors.secondary,
+    backgroundColor: theme.secondary,
   },
   modalConfirmText: {
     fontFamily: Fonts.bodyBold,
     fontSize: FontSizes.md,
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
   },
   notesLabel: { fontSize: 18 },
   notesText: {
     flex: 1,
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
     lineHeight: 22,
   },
-});
+  });
+}

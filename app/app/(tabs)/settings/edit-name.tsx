@@ -24,6 +24,7 @@ import { TextInput } from '../../../../src/components/ui/TextInput';
 import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing } from '../../../../src/constants/theme';
+import { BackButton } from '../../../../src/components/BackButton';
 
 const MAX_NAME_LENGTH = 50;
 
@@ -95,16 +96,8 @@ export default function EditNameScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-            <View style={styles.headerRow}>
-              <TouchableOpacity
-                onPress={() => router.back()}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Text style={styles.backText}>←</Text>
-              </TouchableOpacity>
-              <Text style={styles.screenTitle}>{t('settings.displayName')}</Text>
-              <View style={{ width: 32 }} />
-            </View>
+            <BackButton />
+            <Text style={styles.screenTitle}>{t('settings.displayName')}</Text>
 
             <Controller
               control={control}
@@ -145,22 +138,11 @@ const styles = StyleSheet.create({
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
     gap: Spacing.md,
   },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: Spacing.lg,
-    marginBottom: Spacing.lg,
-  },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: Colors.secondary,
-  },
   screenTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['2xl'],
     color: Colors.textPrimary,
+    marginBottom: Spacing.xl,
   },
   button: {
     marginTop: Spacing.md,

@@ -24,6 +24,7 @@ import { FriendBookCard } from '../../../../src/components/book/FriendBookCard';
 import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
 import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../../src/constants/theme';
+import { BackButton } from '../../../../src/components/BackButton';
 
 interface FriendReader {
   id: string;
@@ -243,6 +244,7 @@ export default function FriendProfileScreen() {
       {bgGradient}
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
+        <BackButton style={{ paddingHorizontal: Spacing.xl }} />
         {/* Jade hero — fixed friends accent */}
         <LinearGradient
           colors={['#3ECA8C', '#0A6E48']}

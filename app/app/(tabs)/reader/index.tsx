@@ -318,10 +318,11 @@ export default function ReaderDashboardScreen() {
 
   const reader = selectedReader;
 
-  if (!reader) {
-    router.replace('/');
-    return null;
-  }
+  useEffect(() => {
+    if (!reader) router.replace('/');
+  }, [reader]);
+
+  if (!reader) return null;
 
   const handleDelete = () => {
     showDialog({

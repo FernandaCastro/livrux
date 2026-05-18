@@ -25,6 +25,7 @@ import { useGuardians } from '../../../../src/hooks/useGuardians';
 import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
+import { BackButton } from '../../../../src/components/BackButton';
 import type { CoGuardian, GuardianInvitation } from '../../../../src/types';
 
 // ── Invite modal ──────────────────────────────────────────────────────────────
@@ -261,10 +262,7 @@ export default function GuardiansScreen() {
           }
         >
           {/* Header */}
-          <TouchableOpacity onPress={() => router.back()} style={styles.backRow}>
-            <Text style={styles.backChevron}>‹</Text>
-            <Text style={styles.backLabel}>{t('settings.title')}</Text>
-          </TouchableOpacity>
+          <BackButton />
           <Text style={styles.screenTitle}>{t('guardians.title')}</Text>
           <Text style={styles.screenSubtitle}>{t('guardians.subtitle')}</Text>
 
@@ -399,23 +397,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
-  },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: Spacing.md,
-    marginBottom: Spacing.xs,
-  },
-  backChevron: {
-    fontSize: 28,
-    color: Colors.secondary,
-    marginRight: 4,
-    lineHeight: 32,
-  },
-  backLabel: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
-    color: Colors.secondary,
   },
   screenTitle: {
     fontFamily: Fonts.heading,

@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,6 +25,7 @@ import { PinModal } from '../../../../src/components/PinModal';
 import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/BottomMenu';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../../src/constants/theme';
+import { BackButton } from '../../../../src/components/BackButton';
 import type { Reader } from '../../../../src/types';
 
 // ─── PinCaptureModal ──────────────────────────────────────────────────────────
@@ -111,7 +111,6 @@ const IDLE: FlowState = { step: 'idle', action: 'set', context: 'parental', pend
 
 export default function ParentalControlsScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
   const { profile, fetchProfile } = useAuthStore();
   const { unlockParent } = useParentalStore();
   const { readers, refresh: refreshReaders } = useReaders();
@@ -253,10 +252,7 @@ export default function ParentalControlsScreen() {
         />
 
         <ScrollView contentContainerStyle={styles.container}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backRow}>
-            <Text style={styles.backChevron}>‹</Text>
-            <Text style={styles.backLabel}>{t('settings.title')}</Text>
-          </TouchableOpacity>
+          <BackButton />
           <Text style={styles.screenTitle}>{t('parental.title')}</Text>
 
           {saving && <ActivityIndicator color={Colors.secondary} style={styles.saving} />}
@@ -420,23 +416,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
-  },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: Spacing.md,
-    marginBottom: Spacing.xs,
-  },
-  backChevron: {
-    fontSize: 28,
-    color: Colors.secondary,
-    marginRight: 4,
-    lineHeight: 32,
-  },
-  backLabel: {
-    fontFamily: Fonts.body,
-    fontSize: FontSizes.md,
-    color: Colors.secondary,
   },
   screenTitle: {
     fontFamily: Fonts.heading,

@@ -23,6 +23,7 @@ import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../../src/components/Botto
 import { MultiavatarView } from '../../../../src/components/reader/MultiavatarView';
 import { FloatingEmojis } from '../../../../src/components/FloatingEmojis';
 import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows, themes, type ThemeId } from '../../../../src/constants/theme';
+import { BackButton } from '../../../../src/components/BackButton';
 
 const AVATAR_DISPLAY_SIZE = 100;
 
@@ -141,16 +142,10 @@ export default function AddReaderScreen() {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.backText}>←</Text>
-            </TouchableOpacity>
-            <Text style={styles.title}>
-              {isEditing ? t('reader.editReader') : t('reader.newReader')}
-            </Text>
-            <View style={{ width: 24 }} />
-          </View>
+          <BackButton />
+          <Text style={styles.title}>
+            {isEditing ? t('reader.editReader') : t('reader.newReader')}
+          </Text>
 
           {/* Avatar picker */}
           <View style={styles.avatarSection}>
@@ -258,17 +253,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.lg,
-  },
-  backText: {
-    fontFamily: Fonts.bodyBold,
-    fontSize: FontSizes.xl,
-    color: Colors.secondary,
   },
   title: {
     fontFamily: Fonts.heading,

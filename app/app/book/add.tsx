@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -30,7 +30,9 @@ import { BookSearchBar } from '../../../src/components/book/BookSearchBar';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import type { GoogleBookResult } from '../../../src/lib/googleBooks';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+import { BackButton } from '../../../src/components/BackButton';
+import { useTheme } from '../../../src/hooks/useTheme';
 
 function useBookSchema() {
   const { t } = useTranslation();
@@ -48,6 +50,8 @@ function useBookSchema() {
 type FormData = { title: string; author?: string; totalPages: string; notes?: string };
 
 export default function AddBookScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const router = useRouter();
   const { readerId, bookCount } = useLocalSearchParams<{ readerId: string; bookCount: string }>();
@@ -156,7 +160,7 @@ export default function AddBookScreen() {
   return (
     <View style={styles.root}>
       <LinearGradient
-        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
         start={{ x: 0.15, y: 0 }}
         end={{ x: 0.85, y: 1 }}
@@ -170,10 +174,8 @@ export default function AddBookScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.screenTitle}>{t('book.logBook')}</Text>
-          </View>
+          <BackButton />
+          <Text style={styles.screenTitle}>{t('book.logBook')}</Text>
 
           {/* Status toggle */}
           <View style={styles.statusToggle}>
@@ -325,7 +327,7 @@ export default function AddBookScreen() {
                 value={review}
                 onChangeText={setReview}
                 placeholder={t('book.reviewPlaceholder')}
-                placeholderTextColor={Colors.textDisabled}
+                placeholderTextColor={theme.textDisabled}
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
@@ -349,7 +351,8 @@ export default function AddBookScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(theme: ColorPalette) {
+  return StyleSheet.create({
   root: { flex: 1 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
@@ -357,16 +360,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.lg,
-  },
   screenTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.xl,
-    color: Colors.textPrimary,
+    marginBottom: Spacing.xl,
+    color: theme.textPrimary,
   },
 
   /* Status toggle */
@@ -385,16 +383,16 @@ const styles = StyleSheet.create({
     borderRadius: Radius.md,
   },
   statusOptionActive: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: theme.secondary,
     ...Shadows.sm,
   },
   statusOptionText: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
   },
   statusOptionTextActive: {
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
     fontFamily: Fonts.bodyBold,
   },
 
@@ -408,12 +406,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.divider,
+    backgroundColor: theme.divider,
   },
   dividerText: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
   },
 
   /* Cover */
@@ -440,23 +438,23 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: Radius.sm,
     borderWidth: 2,
-    borderColor: Colors.secondary,
+    borderColor: theme.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: Colors.secondary,
-    borderColor: Colors.secondary,
+    backgroundColor: theme.secondary,
+    borderColor: theme.secondary,
   },
   checkmark: {
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
     fontSize: 13,
     fontFamily: Fonts.bodyBold,
   },
   checkboxLabel: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
   },
 
   /* Livrux preview card */
@@ -466,7 +464,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.lg,
     overflow: 'hidden',
-    shadowColor: Colors.primaryDark,
+    shadowColor: theme.primaryDark,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 12,
@@ -487,7 +485,7 @@ const styles = StyleSheet.create({
   previewAmount: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['3xl'],
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
   },
   previewCurrency: {
     fontFamily: Fonts.bodyBold,
@@ -501,7 +499,7 @@ const styles = StyleSheet.create({
   ratingLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
     marginBottom: Spacing.sm,
   },
   ratingRow: {
@@ -520,19 +518,19 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   ratingOptionSelected: {
-    borderColor: Colors.secondary,
-    backgroundColor: Colors.surface,
+    borderColor: theme.secondary,
+    backgroundColor: theme.surface,
     ...Shadows.sm,
   },
   ratingEmoji: { fontSize: 28 },
   ratingOptionLabel: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
   },
   ratingOptionLabelSelected: {
     fontFamily: Fonts.bodyBold,
-    color: Colors.secondary,
+    color: theme.secondary,
   },
 
   /* Review */
@@ -542,22 +540,23 @@ const styles = StyleSheet.create({
   reviewFieldLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
     marginBottom: Spacing.sm,
   },
   reviewInput: {
-    backgroundColor: Colors.surface,
+    backgroundColor: theme.surface,
     borderRadius: Radius.md,
     borderWidth: 1.5,
-    borderColor: Colors.border,
+    borderColor: theme.border,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
     minHeight: 80,
     ...Shadows.sm,
   },
 
   saveButton: { marginTop: Spacing.md },
-});
+  });
+}

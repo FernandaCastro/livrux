@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -27,7 +27,9 @@ import { Button } from '../../../src/components/ui/Button';
 import { TextInput } from '../../../src/components/ui/TextInput';
 import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
-import { Colors, Fonts, FontSizes, Spacing, Radius, Shadows } from '../../../src/constants/theme';
+import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '../../../src/constants/theme';
+import { BackButton } from '../../../src/components/BackButton';
+import { useTheme } from '../../../src/hooks/useTheme';
 
 function useBookSchema() {
   const { t } = useTranslation();
@@ -56,6 +58,8 @@ type FormData = {
 };
 
 export default function EditBookScreen() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { t } = useTranslation();
   const router = useRouter();
   const { bookId } = useLocalSearchParams<{ bookId: string }>();
@@ -151,14 +155,14 @@ export default function EditBookScreen() {
     return (
       <View style={styles.root}>
         <LinearGradient
-          colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+          colors={theme.backgroundGradient}
           locations={[0, 0.6, 1]}
           start={{ x: 0.15, y: 0 }}
           end={{ x: 0.85, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
         <SafeAreaView style={styles.safe}>
-          <ActivityIndicator color={Colors.secondary} style={{ flex: 1 }} />
+          <ActivityIndicator color={theme.secondary} style={{ flex: 1 }} />
         </SafeAreaView>
       </View>
     );
@@ -167,7 +171,7 @@ export default function EditBookScreen() {
   return (
     <View style={styles.root}>
       <LinearGradient
-        colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
+        colors={theme.backgroundGradient}
         locations={[0, 0.6, 1]}
         start={{ x: 0.15, y: 0 }}
         end={{ x: 0.85, y: 1 }}
@@ -180,9 +184,8 @@ export default function EditBookScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
-            <Text style={styles.screenTitle}>{t('book.editBook')}</Text>
-          </View>
+          <BackButton />
+          <Text style={styles.screenTitle}>{t('book.editBook')}</Text>
 
           {coverUri && (
             <View style={styles.coverContainer}>
@@ -313,7 +316,7 @@ export default function EditBookScreen() {
               value={review}
               onChangeText={setReview}
               placeholder={t('book.reviewPlaceholder')}
-              placeholderTextColor={Colors.textDisabled}
+              placeholderTextColor={theme.textDisabled}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
@@ -334,7 +337,8 @@ export default function EditBookScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(theme: ColorPalette) {
+  return StyleSheet.create({
   root: { flex: 1 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   container: {
@@ -342,16 +346,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingBottom: BOTTOM_MENU_HEIGHT + Spacing['2xl'],
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.lg,
-  },
   screenTitle: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes.xl,
-    color: Colors.textPrimary,
+    marginBottom: Spacing.xl,
+    color: theme.textPrimary,
   },
   coverContainer: {
     alignSelf: 'center',
@@ -374,22 +373,22 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: Radius.sm,
     borderWidth: 2,
-    borderColor: Colors.secondary,
+    borderColor: theme.secondary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkboxChecked: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: theme.secondary,
   },
   checkmark: {
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
     fontSize: 13,
     fontFamily: Fonts.bodyBold,
   },
   checkboxLabel: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
   },
   previewCard: {
     borderRadius: Radius.lg,
@@ -413,7 +412,7 @@ const styles = StyleSheet.create({
   previewAmount: {
     fontFamily: Fonts.heading,
     fontSize: FontSizes['3xl'],
-    color: Colors.textOnPrimary,
+    color: theme.textOnPrimary,
   },
   previewCurrency: {
     fontFamily: Fonts.bodyBold,
@@ -436,7 +435,7 @@ const styles = StyleSheet.create({
   ratingLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
     marginBottom: Spacing.sm,
   },
   ratingRow: {
@@ -455,18 +454,18 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   ratingOptionSelected: {
-    borderColor: Colors.secondary,
-    backgroundColor: Colors.surface,
+    borderColor: theme.secondary,
+    backgroundColor: theme.surface,
   },
   ratingEmoji: { fontSize: 28 },
   ratingOptionLabel: {
     fontFamily: Fonts.body,
     fontSize: FontSizes.xs,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
   },
   ratingOptionLabelSelected: {
     fontFamily: Fonts.bodyBold,
-    color: Colors.secondary,
+    color: theme.secondary,
   },
   reviewContainer: {
     marginBottom: Spacing.lg,
@@ -474,20 +473,21 @@ const styles = StyleSheet.create({
   reviewFieldLabel: {
     fontFamily: Fonts.bodySemiBold,
     fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+    color: theme.textSecondary,
     marginBottom: Spacing.sm,
   },
   reviewInput: {
     backgroundColor: 'rgba(255,255,255,0.75)',
     borderRadius: Radius.md,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.border,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontFamily: Fonts.body,
     fontSize: FontSizes.md,
-    color: Colors.textPrimary,
+    color: theme.textPrimary,
     minHeight: 80,
   },
   saveButton: { marginTop: Spacing.md },
-});
+  });
+}

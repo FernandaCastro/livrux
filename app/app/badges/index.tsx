@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, AppState } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, AppState, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,6 +14,7 @@ import { FloatingEmojis } from '../../../src/components/FloatingEmojis';
 import { BadgeCard } from '../../../src/components/BadgeCard';
 import { BottomMenu, BOTTOM_MENU_HEIGHT } from '../../../src/components/BottomMenu';
 import { Fonts, FontSizes, Spacing, Radius, Shadows, createShadows, type ColorPalette } from '../../../src/constants/theme';
+import { BackButton } from '../../../src/components/BackButton';
 
 function createStyles(theme: ColorPalette) {
   const S = createShadows(theme.shadowColor);
@@ -174,6 +175,7 @@ export default function BadgesScreen() {
       {bgGradient}
       <FloatingEmojis />
       <SafeAreaView style={styles.safe}>
+        <BackButton style={{ paddingHorizontal: Spacing.xl }} />
         {/* Orange/bronze hero — fixed badge accent */}
         <LinearGradient
           colors={['#FF7F3E', '#C2410C']}

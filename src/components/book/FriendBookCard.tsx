@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
+import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Book } from '../../types';
@@ -57,15 +58,6 @@ function createStyles(theme: ColorPalette) {
       height: COVER_HEIGHT,
       borderRadius: Radius.sm,
     },
-    coverPlaceholder: {
-      width: COVER_WIDTH,
-      height: COVER_HEIGHT,
-      borderRadius: Radius.sm,
-      backgroundColor: theme.surfaceVariant,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    coverIcon: { fontSize: 32 },
     info: {
       flex: 1,
       paddingVertical: Spacing.md,
@@ -98,6 +90,29 @@ function createStyles(theme: ColorPalette) {
       fontFamily: Fonts.body,
       fontSize: FontSizes.xs,
       color: theme.textDisabled,
+    },
+    progressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      marginTop: Spacing.xs,
+    },
+    progressBar: {
+      flex: 1,
+      height: 4,
+      borderRadius: Radius.full,
+      backgroundColor: theme.surfaceVariant,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      borderRadius: Radius.full,
+      backgroundColor: theme.friendEmerald,
+    },
+    progressText: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.xs,
+      color: theme.textSecondary,
     },
     author: {
       fontFamily: Fonts.body,
@@ -160,9 +175,7 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
         {book.cover_url ? (
           <Image source={{ uri: book.cover_url }} style={styles.cover} resizeMode="cover" />
         ) : (
-          <View style={styles.coverPlaceholder}>
-            <Text style={styles.coverIcon}>📕</Text>
-          </View>
+          <BookCoverPlaceholder width={COVER_WIDTH} height={COVER_HEIGHT} />
         )}
       </View>
 
@@ -177,6 +190,22 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
 
         {book.author && (
           <Text style={styles.author} numberOfLines={1}>{book.author}</Text>
+        )}
+
+        {book.status === 'reading' && (
+          <View style={styles.progressRow}>
+            <View style={styles.progressBar}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${Math.min(((book.current_page ?? 0) / book.total_pages) * 100, 100)}%` },
+                ]}
+              />
+            </View>
+            <Text style={styles.progressText}>
+              {book.current_page ?? 0}/{book.total_pages}
+            </Text>
+          </View>
         )}
 
         {book.is_foreign_language && (

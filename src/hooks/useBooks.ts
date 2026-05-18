@@ -170,21 +170,45 @@ export function useBook(bookId: string | null) {
   };
 }
 
-// Lightweight non-paginated query for books currently being read.
+// Lightweight non-paginated query for books currently being read, with latest page from reading_sessions.
 export function useReadingBooks(readerId: string | null) {
   const key = readerId ? READING_BOOKS_KEY(readerId) : null;
 
   const { data: readingBooks = [], isLoading, error, refetch } = useQuery({
     queryKey: key ?? ['reading_books', null],
     queryFn: async () => {
-      const { data, error: dbError } = await supabase
+      const { data: books, error: booksError } = await supabase
         .from('books')
         .select('*')
         .eq('reader_id', readerId!)
         .eq('status', 'reading')
         .order('created_at', { ascending: false });
-      if (dbError) throw dbError;
-      return (data ?? []) as Book[];
+      if (booksError) throw booksError;
+      if (!books || books.length === 0) return [];
+
+      const bookIds = books.map((b) => b.id);
+      const sessionResults = await Promise.all(
+        bookIds.map((bookId) =>
+          supabase
+            .from('reading_sessions')
+            .select('book_id, last_page')
+            .eq('reader_id', readerId!)
+            .eq('book_id', bookId)
+            .order('session_date', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        )
+      );
+
+      const latestPageByBook: Record<string, number> = {};
+      for (const { data } of sessionResults) {
+        if (data) latestPageByBook[data.book_id] = data.last_page;
+      }
+
+      return books.map((b) => ({
+        ...b,
+        current_page: latestPageByBook[b.id],
+      })) as Book[];
     },
     enabled: !!readerId,
   });

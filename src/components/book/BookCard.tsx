@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
@@ -51,15 +52,6 @@ function createStyles(theme: ColorPalette) {
       height: COVER_HEIGHT,
       borderRadius: Radius.sm,
     },
-    coverPlaceholder: {
-      width: COVER_WIDTH,
-      height: COVER_HEIGHT,
-      borderRadius: Radius.sm,
-      backgroundColor: theme.secondaryLight,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    coverIcon: { fontSize: 30 },
     ratingBadge: {
       position: 'absolute',
       bottom: -6,
@@ -166,9 +158,7 @@ export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
           {book.cover_url ? (
             <Image source={{ uri: book.cover_url }} style={styles.cover} resizeMode="cover" />
           ) : (
-            <View style={styles.coverPlaceholder}>
-              <Text style={styles.coverIcon}>📕</Text>
-            </View>
+            <BookCoverPlaceholder width={COVER_WIDTH} height={COVER_HEIGHT} />
           )}
           {book.rating && (
             <View style={styles.ratingBadge}>

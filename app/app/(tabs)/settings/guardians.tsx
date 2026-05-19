@@ -174,6 +174,8 @@ export default function GuardiansScreen() {
   const router = useRouter();
 
   const swipeBack = Gesture.Pan()
+    .activeOffsetX([-30, 30])
+    .failOffsetY([-10, 10])
     .runOnJS(true)
     .onEnd((e) => {
       if (e.translationX > 80 && Math.abs(e.translationX) > Math.abs(e.translationY) * 2) {

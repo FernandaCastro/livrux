@@ -124,6 +124,8 @@ export default function BadgesScreen() {
   const appStateRef = useRef(AppState.currentState);
 
   const swipeNav = Gesture.Pan()
+    .activeOffsetX([-30, 30])
+    .failOffsetY([-10, 10])
     .runOnJS(true)
     .onEnd((e) => {
       const isHorizontal = Math.abs(e.translationX) > Math.abs(e.translationY) * 2;

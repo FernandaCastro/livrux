@@ -5,7 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 import { useBadges } from '../../../src/hooks/useBadges';
 import { useReaderStore } from '../../../src/stores/readerStore';
@@ -115,11 +116,24 @@ function createStyles(theme: ColorPalette) {
 
 export default function BadgesScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { selectedReader } = useReaderStore();
   const { earnedBadges, pendingBadges, isLoading, error, refresh } = useBadges(selectedReader?.id ?? null);
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const appStateRef = useRef(AppState.currentState);
+
+  const swipeNav = Gesture.Pan()
+    .runOnJS(true)
+    .onEnd((e) => {
+      const isHorizontal = Math.abs(e.translationX) > Math.abs(e.translationY) * 2;
+      if (!isHorizontal) return;
+      if (e.translationX > 80) {
+        router.back();
+      } else if (e.translationX < -80) {
+        router.push('/app/rewards');
+      }
+    });
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
@@ -169,6 +183,7 @@ export default function BadgesScreen() {
   }
 
   return (
+    <GestureDetector gesture={swipeNav}>
     <View style={styles.root}>
       <Stack.Screen options={{ animation: 'none' }} />
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
@@ -238,5 +253,6 @@ export default function BadgesScreen() {
         <BottomMenu />
       </SafeAreaView>
     </View>
+    </GestureDetector>
   );
 }

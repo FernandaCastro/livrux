@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   Animated,
   Modal,
@@ -111,12 +113,21 @@ const IDLE: FlowState = { step: 'idle', action: 'set', context: 'parental', pend
 
 export default function ParentalControlsScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { profile, fetchProfile } = useAuthStore();
   const { unlockParent } = useParentalStore();
   const { readers, refresh: refreshReaders } = useReaders();
 
   const [saving, setSaving] = useState(false);
   const [flow, setFlow] = useState<FlowState>(IDLE);
+
+  const swipeBack = Gesture.Pan()
+    .runOnJS(true)
+    .onEnd((e) => {
+      if (e.translationX > 80 && Math.abs(e.translationX) > Math.abs(e.translationY) * 2) {
+        router.back();
+      }
+    });
   const showDialog = useDialogStore((s) => s.show);
 
   const hasParentalPin = !!profile?.parental_pin;
@@ -210,6 +221,7 @@ export default function ParentalControlsScreen() {
   };
 
   return (
+    <GestureDetector gesture={swipeBack}>
     <View style={styles.root}>
       <LinearGradient
         colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
@@ -317,6 +329,7 @@ export default function ParentalControlsScreen() {
         <BottomMenu />
       </SafeAreaView>
     </View>
+    </GestureDetector>
   );
 }
 

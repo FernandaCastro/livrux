@@ -6,5 +6,5 @@ import { themes } from '../../../../src/constants/theme';
 export default function FriendsTabLayout() {
   const { currentThemeId } = useReaderStore();
   const background = themes[currentThemeId].flashFrameBackground;
-  return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: background } }} />;
+  return <Stack screenOptions={{ headerShown: false, animation: 'fade', contentStyle: { backgroundColor: background } }} />;
 }

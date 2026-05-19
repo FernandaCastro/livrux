@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   View,
   Text,
@@ -28,6 +29,14 @@ import { BackButton } from '../../../../src/components/BackButton';
 export default function FormulaScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+
+  const swipeBack = Gesture.Pan()
+    .runOnJS(true)
+    .onEnd((e) => {
+      if (e.translationX > 80 && Math.abs(e.translationX) > Math.abs(e.translationY) * 2) {
+        router.back();
+      }
+    });
   const { user, ownerId, formula, fetchFormula } = useAuthStore();
 
   const active = formula ?? getDefaultFormula();
@@ -120,6 +129,7 @@ export default function FormulaScreen() {
   };
 
   return (
+    <GestureDetector gesture={swipeBack}>
     <View style={styles.root}>
       <LinearGradient
         colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
@@ -240,6 +250,7 @@ export default function FormulaScreen() {
         <BottomMenu />
       </SafeAreaView>
     </View>
+    </GestureDetector>
   );
 }
 

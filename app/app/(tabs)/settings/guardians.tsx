@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import {
   View,
   Text,
@@ -171,6 +172,14 @@ function AcceptModal({ visible, onClose, onAccept, isAccepting }: AcceptModalPro
 export default function GuardiansScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+
+  const swipeBack = Gesture.Pan()
+    .runOnJS(true)
+    .onEnd((e) => {
+      if (e.translationX > 80 && Math.abs(e.translationX) > Math.abs(e.translationY) * 2) {
+        router.back();
+      }
+    });
   const { user } = useAuthStore();
   const showToast = useToastStore((s) => s.show);
   const showDialog = useDialogStore((s) => s.show);
@@ -239,6 +248,7 @@ export default function GuardiansScreen() {
   };
 
   return (
+    <GestureDetector gesture={swipeBack}>
     <View style={styles.root}>
       <LinearGradient
         colors={['#f0e6ff', '#fff7ed', '#fafaf7']}
@@ -387,6 +397,7 @@ export default function GuardiansScreen() {
         isAccepting={isAccepting}
       />
     </View>
+    </GestureDetector>
   );
 }
 

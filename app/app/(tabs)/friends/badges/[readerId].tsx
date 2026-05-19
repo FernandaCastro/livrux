@@ -8,7 +8,8 @@ import {
   ActivityIndicator,
   AppState,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -87,9 +88,24 @@ function createStyles(theme: ColorPalette) {
 
 export default function FriendBadgesScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { readerId } = useLocalSearchParams<{ readerId: string; fromReaderId: string }>();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const swipeNav = Gesture.Pan()
+    .activeOffsetX([-30, 30])
+    .failOffsetY([-10, 10])
+    .runOnJS(true)
+    .onEnd((e) => {
+      const isHorizontal = Math.abs(e.translationX) > Math.abs(e.translationY) * 2;
+      if (!isHorizontal) return;
+      if (e.translationX > 80) {
+        router.back();
+      } else if (e.translationX < -80) {
+        router.push('/app/ranking');
+      }
+    });
 
   const { earnedBadges, isLoading, refresh } = useBadges(readerId ?? null);
   const appStateRef = useRef(AppState.currentState);
@@ -125,6 +141,7 @@ export default function FriendBadgesScreen() {
   }
 
   return (
+    <GestureDetector gesture={swipeNav}>
     <View style={styles.root}>
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       {bgGradient}
@@ -170,5 +187,6 @@ export default function FriendBadgesScreen() {
         <BottomMenu />
       </SafeAreaView>
     </View>
+    </GestureDetector>
   );
 }

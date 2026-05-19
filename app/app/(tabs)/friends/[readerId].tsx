@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   FlatList,
   ActivityIndicator,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   AppState,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -90,6 +92,11 @@ function createStyles(theme: ColorPalette) {
       paddingVertical: Spacing.sm,
       ...S.sm,
     },
+    statChipIcon: {
+      width: FontSizes['3xl'],
+      height: FontSizes['3xl'],
+      resizeMode: 'contain',
+    },
     statChipText: {
       fontFamily: Fonts.heading,
       fontSize: FontSizes.lg,
@@ -120,6 +127,12 @@ function createStyles(theme: ColorPalette) {
       fontFamily: Fonts.heading,
       fontSize: FontSizes.lg,
       color: theme.textOnPrimary,
+    },
+    badgeChevron: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.xl,
+      color: 'rgba(255,255,255,0.7)',
+      marginLeft: Spacing.xs,
     },
     badgeCountAmber: {
       fontFamily: Fonts.heading,
@@ -214,6 +227,20 @@ export default function FriendProfileScreen() {
 
   const isLoading = readerLoading || booksLoading || readingLoading;
 
+  const swipeBack = Gesture.Pan()
+    .activeOffsetX([-30, 30])
+    .failOffsetY([-10, 10])
+    .runOnJS(true)
+    .onEnd((e) => {
+      const isHorizontal = Math.abs(e.translationX) > Math.abs(e.translationY) * 2;
+      if (!isHorizontal) return;
+      if (e.translationX > 80) {
+        router.back();
+      } else if (e.translationX < -80) {
+        router.push('/app/ranking');
+      }
+    });
+
   const bgGradient = (
     <LinearGradient
       colors={theme.backgroundGradient}
@@ -237,6 +264,7 @@ export default function FriendProfileScreen() {
   }
 
   return (
+    <GestureDetector gesture={swipeBack}>
     <View style={styles.root}>
       <StatusBar style={theme.statusBarStyle} backgroundColor={theme.background} />
       {bgGradient}
@@ -281,9 +309,11 @@ export default function FriendProfileScreen() {
                 >
                   <Text style={styles.badgeIcon}>🏅</Text>
                   <Text style={styles.badgeCount}>{badgeCount}</Text>
+                  <Text style={styles.badgeChevron}>›</Text>
                 </TouchableOpacity>
                 <View style={styles.statChip}>
-                  <Text style={styles.statChipText}>📚 {completedBooks.length}</Text>
+                  <Image source={require('../../../../assets/livrux-clean.png')} style={styles.statChipIcon} />
+                  <Text style={styles.statChipText}>{completedBooks.length}</Text>
                 </View>
               </View>
             </>
@@ -338,5 +368,6 @@ export default function FriendProfileScreen() {
         <BottomMenu />
       </SafeAreaView>
     </View>
+    </GestureDetector>
   );
 }

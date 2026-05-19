@@ -144,6 +144,12 @@ function createStyles(theme: ColorPalette) {
       ...S.sm,
     },
     badgeIcon: { fontSize: 18 },
+    badgeChevron: {
+      fontFamily: Fonts.heading,
+      fontSize: FontSizes.xl,
+      color: 'rgba(255,255,255,0.7)',
+      marginLeft: Spacing.xs,
+    },
     booksCount: {
       marginTop: 3,
       fontFamily: Fonts.heading,
@@ -409,6 +415,7 @@ export default function ReaderDashboardScreen() {
               >
                 <Text style={styles.badgeIcon}>🏅</Text>
                 <Text style={styles.booksCount}>{earnedBadges.length}</Text>
+                <Text style={styles.badgeChevron}>›</Text>
               </TouchableOpacity>
             </View>
 

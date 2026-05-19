@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import type { Book } from '../../types';
@@ -57,6 +56,16 @@ function createStyles(theme: ColorPalette) {
       width: COVER_WIDTH,
       height: COVER_HEIGHT,
       borderRadius: Radius.sm,
+    },
+    coverPlaceholder: {
+      width: COVER_WIDTH,
+      height: COVER_HEIGHT,
+      borderRadius: Radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    coverPlaceholderEmoji: {
+      fontSize: COVER_HEIGHT * 0.55,
     },
     info: {
       flex: 1,
@@ -175,7 +184,7 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
         {book.cover_url ? (
           <Image source={{ uri: book.cover_url }} style={styles.cover} resizeMode="cover" />
         ) : (
-          <BookCoverPlaceholder width={COVER_WIDTH} height={COVER_HEIGHT} />
+          <View style={styles.coverPlaceholder}><Text style={styles.coverPlaceholderEmoji}>📕</Text></View>
         )}
       </View>
 

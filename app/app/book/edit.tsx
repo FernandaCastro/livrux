@@ -94,7 +94,7 @@ export default function EditBookScreen() {
         title: book.title,
         author: book.author ?? '',
         totalPages: String(book.total_pages),
-        dateCompleted: format(new Date(book.date_completed ?? ''), 'dd/MM/yyyy'),
+        dateCompleted: format(new Date(book.date_completed ?? Date.now()), 'dd/MM/yyyy'),
       });
       setCoverUri(book.cover_url);
       setIsForeignLanguage(book.is_foreign_language);
@@ -119,7 +119,7 @@ export default function EditBookScreen() {
       const pages = Number(data.totalPages);
       const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
       const newDate = parse(data.dateCompleted, 'dd/MM/yyyy', new Date());
-      const originalDateTime = new Date(book.date_completed ?? '');
+      const originalDateTime = new Date(book.date_completed ?? Date.now());
       newDate.setHours(
         originalDateTime.getHours(),
         originalDateTime.getMinutes(),

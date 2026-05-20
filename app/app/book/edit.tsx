@@ -38,7 +38,7 @@ import { Fonts, FontSizes, Spacing, Radius, Shadows, type ColorPalette } from '.
 import { BackButton } from '../../../src/components/BackButton';
 import { useTheme } from '../../../src/hooks/useTheme';
 
-function useBookSchema() {
+function useBookSchema(isReading: boolean) {
   const { t } = useTranslation();
   return z.object({
     title: z.string().min(1, t('book.errors.titleRequired')),
@@ -47,13 +47,15 @@ function useBookSchema() {
       .string()
       .min(1, t('book.errors.pagesRequired'))
       .refine((v) => Number(v) > 0, t('book.errors.pagesInvalid')),
-    dateCompleted: z
-      .string()
-      .min(1, t('book.errors.dateRequired'))
-      .refine((v) => {
-        const parsed = parse(v, 'dd/MM/yyyy', new Date());
-        return isValid(parsed);
-      }, t('book.errors.dateInvalid')),
+    dateCompleted: isReading
+      ? z.string().optional()
+      : z
+          .string()
+          .min(1, t('book.errors.dateRequired'))
+          .refine((v) => {
+            const parsed = parse(v, 'dd/MM/yyyy', new Date());
+            return isValid(parsed);
+          }, t('book.errors.dateInvalid')),
   });
 }
 
@@ -82,7 +84,8 @@ export default function EditBookScreen() {
 
   const activeFormula = formula ?? getDefaultFormula();
   const hasForeignLanguageBonus = activeFormula.bonus_rules.some(r => r.type === 'foreign_language');
-  const schema = useBookSchema();
+  const isReading = book?.status === 'reading';
+  const schema = useBookSchema(isReading);
 
   const [coverUri, setCoverUri] = useState<string | null>(null);
   const [isForeignLanguage, setIsForeignLanguage] = useState(false);
@@ -97,16 +100,19 @@ export default function EditBookScreen() {
 
   useEffect(() => {
     if (book && !initialised) {
+      const reading = book.status === 'reading';
       reset({
         title: book.title,
         author: book.author ?? '',
         totalPages: String(book.total_pages),
-        dateCompleted: format(new Date(book.date_completed ?? Date.now()), 'dd/MM/yyyy'),
+        dateCompleted: reading
+          ? ''
+          : format(new Date(book.date_completed ?? Date.now()), 'dd/MM/yyyy'),
       });
       setCoverUri(book.cover_url);
       setIsForeignLanguage(book.is_foreign_language);
-      setRating(book.rating ?? null);
-      setReview(book.review ?? '');
+      setRating(reading ? null : (book.rating ?? null));
+      setReview(reading ? '' : (book.review ?? ''));
       setInitialised(true);
     }
   }, [book, initialised, reset]);
@@ -252,21 +258,23 @@ export default function EditBookScreen() {
             )}
           />
 
-          <Controller
-            control={control}
-            name="dateCompleted"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                label={t('book.dateCompleted')}
-                placeholder="DD/MM/YYYY"
-                value={value}
-                onChangeText={(v) => onChange(maskDate(v))}
-                onBlur={onBlur}
-                keyboardType="number-pad"
-                error={errors.dateCompleted?.message}
-              />
-            )}
-          />
+          {!isReading && (
+            <Controller
+              control={control}
+              name="dateCompleted"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  label={t('book.dateCompleted')}
+                  placeholder="DD/MM/YYYY"
+                  value={value}
+                  onChangeText={(v) => onChange(maskDate(v))}
+                  onBlur={onBlur}
+                  keyboardType="number-pad"
+                  error={errors.dateCompleted?.message}
+                />
+              )}
+            />
+          )}
 
           {hasForeignLanguageBonus && (
             <TouchableOpacity
@@ -302,40 +310,44 @@ export default function EditBookScreen() {
             </LinearGradient>
           )}
 
-          <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>
-          <View style={styles.ratingRow}>
-            {([
-              { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
-              { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
-              { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
-            ] as const).map((opt) => (
-              <TouchableOpacity
-                key={opt.value}
-                style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
-                onPress={() => setRating(rating === opt.value ? null : opt.value)}
-                activeOpacity={0.75}
-              >
-                <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
-                <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          {!isReading && (
+            <>
+              <Text style={styles.ratingLabel}>{t('book.ratingLabel')}</Text>
+              <View style={styles.ratingRow}>
+                {([
+                  { value: 'disliked', emoji: '😕', label: t('book.ratingDisliked') },
+                  { value: 'liked',    emoji: '😊', label: t('book.ratingLiked') },
+                  { value: 'loved',    emoji: '😍', label: t('book.ratingLoved') },
+                ] as const).map((opt) => (
+                  <TouchableOpacity
+                    key={opt.value}
+                    style={[styles.ratingOption, rating === opt.value && styles.ratingOptionSelected]}
+                    onPress={() => setRating(rating === opt.value ? null : opt.value)}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={styles.ratingEmoji}>{opt.emoji}</Text>
+                    <Text style={[styles.ratingOptionLabel, rating === opt.value && styles.ratingOptionLabelSelected]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-          <View style={styles.reviewContainer}>
-            <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
-            <RNTextInput
-              style={styles.reviewInput}
-              value={review}
-              onChangeText={setReview}
-              placeholder={t('book.reviewPlaceholder')}
-              placeholderTextColor={theme.textDisabled}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
+              <View style={styles.reviewContainer}>
+                <Text style={styles.reviewFieldLabel}>{t('book.reviewLabel')}</Text>
+                <RNTextInput
+                  style={styles.reviewInput}
+                  value={review}
+                  onChangeText={setReview}
+                  placeholder={t('book.reviewPlaceholder')}
+                  placeholderTextColor={theme.textDisabled}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              </View>
+            </>
+          )}
 
           <Button
             label={t('common.save')}

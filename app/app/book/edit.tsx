@@ -119,7 +119,7 @@ export default function EditBookScreen() {
 
   const pagesValue = watch('totalPages');
   const previewPages = Number(pagesValue) || 0;
-  const newLivrux = book?.status === 'completed' && previewPages > 0
+  const newLivrux = previewPages > 0
     ? calculateLivrux(previewPages, activeFormula, { isForeignLanguage })
     : 0;
   const oldLivrux = book?.livrux_earned ?? 0;
@@ -302,7 +302,7 @@ export default function EditBookScreen() {
                 <Text style={styles.previewAmount}>{newLivrux.toFixed(2)}</Text>
                 <Text style={styles.previewCurrency}>Livrux</Text>
               </View>
-              {delta !== 0 && (
+              {!isReading && delta !== 0 && (
                 <Text style={[styles.deltaText, delta > 0 ? styles.deltaPositive : styles.deltaNegative]}>
                   {delta > 0 ? '+' : ''}{delta.toFixed(2)} vs original
                 </Text>

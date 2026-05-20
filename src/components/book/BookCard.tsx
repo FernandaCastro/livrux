@@ -116,6 +116,29 @@ function createStyles(theme: ColorPalette) {
       fontSize: FontSizes.xs,
       color: theme.secondaryDark,
     },
+    progressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: Spacing.xs,
+      marginBottom: Spacing.xs,
+    },
+    progressBar: {
+      flex: 1,
+      height: 4,
+      borderRadius: Radius.full,
+      backgroundColor: theme.surfaceVariant,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      borderRadius: Radius.full,
+      backgroundColor: theme.secondary,
+    },
+    progressText: {
+      fontFamily: Fonts.bodySemiBold,
+      fontSize: FontSizes.xs,
+      color: theme.textSecondary,
+    },
     footer: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -194,12 +217,31 @@ export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
             )}
           </View>
 
+          {/* Progress bar for reading books */}
+          {book.status === 'reading' && (
+            <View style={styles.progressRow}>
+              <View style={styles.progressBar}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${Math.min(((book.current_page ?? 0) / book.total_pages) * 100, 100)}%` },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressText}>
+                {book.current_page ?? 0}/{book.total_pages}
+              </Text>
+            </View>
+          )}
+
           {/* Footer: coins + date */}
           <View style={styles.footer}>
-            <View style={styles.coinBadge}>
-              <Text style={styles.coinEmoji}>🪙</Text>
-              <Text style={styles.coinAmount}>+{book.livrux_earned}</Text>
-            </View>
+            {book.status !== 'reading' && (
+              <View style={styles.coinBadge}>
+                <Text style={styles.coinEmoji}>🪙</Text>
+                <Text style={styles.coinAmount}>+{book.livrux_earned}</Text>
+              </View>
+            )}
             <Text style={styles.date}>
               {format(new Date(book.date_completed ?? book.date_start), 'dd/MM/yy')}
             </Text>

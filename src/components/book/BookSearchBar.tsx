@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Modal,
   Image,
+  ScrollView,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTranslation } from 'react-i18next';
@@ -153,6 +154,7 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
 
       {results.length > 0 && (
         <View style={styles.dropdown}>
+          <ScrollView keyboardShouldPersistTaps="handled">
           {results.map((item, i) => (
             <View key={String(i)}>
               {i > 0 && <View style={styles.separator} />}
@@ -193,6 +195,7 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
               : <Text style={styles.loadMoreText}>{t('book.loadMore')}</Text>
             }
           </TouchableOpacity>
+          </ScrollView>
         </View>
       )}
 

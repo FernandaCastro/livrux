@@ -113,7 +113,7 @@ export default function EditBookScreen() {
 
   const pagesValue = watch('totalPages');
   const previewPages = Number(pagesValue) || 0;
-  const newLivrux = previewPages > 0
+  const newLivrux = book?.status === 'completed' && previewPages > 0
     ? calculateLivrux(previewPages, activeFormula, { isForeignLanguage })
     : 0;
   const oldLivrux = book?.livrux_earned ?? 0;
@@ -124,16 +124,23 @@ export default function EditBookScreen() {
 
     try {
       const pages = Number(data.totalPages);
-      const livruxEarned = calculateLivrux(pages, activeFormula, { isForeignLanguage });
-      const newDate = parse(data.dateCompleted, 'dd/MM/yyyy', new Date());
-      const originalDateTime = new Date(book.date_completed ?? Date.now());
-      newDate.setHours(
-        originalDateTime.getHours(),
-        originalDateTime.getMinutes(),
-        originalDateTime.getSeconds(),
-        originalDateTime.getMilliseconds(),
-      );
-      const dateCompleted = newDate.toISOString();
+      const isCompleted = book.status === 'completed';
+      const livruxEarned = isCompleted
+        ? calculateLivrux(pages, activeFormula, { isForeignLanguage })
+        : 0;
+
+      let dateCompleted = book.date_completed;
+      if (isCompleted) {
+        const newDate = parse(data.dateCompleted, 'dd/MM/yyyy', new Date());
+        const originalDateTime = new Date(book.date_completed ?? Date.now());
+        newDate.setHours(
+          originalDateTime.getHours(),
+          originalDateTime.getMinutes(),
+          originalDateTime.getSeconds(),
+          originalDateTime.getMilliseconds(),
+        );
+        dateCompleted = newDate.toISOString();
+      }
 
       await updateBook({
         bookId: book.id,

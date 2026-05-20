@@ -243,7 +243,7 @@ export function BookCard({ book, onPress, onLongPress }: BookCardProps) {
               </View>
             )}
             <Text style={styles.date}>
-              {format(new Date(book.date_completed ?? book.date_start), 'dd/MM/yy')}
+              {book.status === 'reading' ? '🥚' : '🐣'} {format(new Date(book.date_completed ?? book.date_start), 'dd/MM/yy')}
             </Text>
           </View>
         </View>

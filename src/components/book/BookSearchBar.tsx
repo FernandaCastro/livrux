@@ -3,11 +3,11 @@ import {
   View,
   Text,
   TouchableOpacity,
-  FlatList,
   StyleSheet,
   ActivityIndicator,
   Modal,
   Image,
+  ScrollView,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useTranslation } from 'react-i18next';
@@ -154,13 +154,10 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
 
       {results.length > 0 && (
         <View style={styles.dropdown}>
-          <FlatList
-            data={results}
-            keyExtractor={(_, i) => String(i)}
-            scrollEnabled={true}
-            style={styles.dropdownList}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            renderItem={({ item }) => (
+          <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled={true}>
+          {results.map((item, i) => (
+            <View key={String(i)}>
+              {i > 0 && <View style={styles.separator} />}
               <TouchableOpacity
                 style={styles.resultItem}
                 onPress={() => handleSelect(item)}
@@ -185,21 +182,20 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
                   )}
                 </View>
               </TouchableOpacity>
-            )}
-            ListFooterComponent={
-              <TouchableOpacity
-                style={styles.loadMoreButton}
-                onPress={handleLoadMore}
-                activeOpacity={0.7}
-                disabled={loadingMore}
-              >
-                {loadingMore
-                  ? <ActivityIndicator size="small" color={Colors.secondary} />
-                  : <Text style={styles.loadMoreText}>{t('book.loadMore')}</Text>
-                }
-              </TouchableOpacity>
+            </View>
+          ))}
+          <TouchableOpacity
+            style={styles.loadMoreButton}
+            onPress={handleLoadMore}
+            activeOpacity={0.7}
+            disabled={loadingMore}
+          >
+            {loadingMore
+              ? <ActivityIndicator size="small" color={Colors.secondary} />
+              : <Text style={styles.loadMoreText}>{t('book.loadMore')}</Text>
             }
-          />
+          </TouchableOpacity>
+          </ScrollView>
         </View>
       )}
 

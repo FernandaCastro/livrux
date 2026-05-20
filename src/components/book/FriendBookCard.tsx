@@ -161,13 +161,6 @@ function createStyles(theme: ColorPalette) {
       fontFamily: Fonts.bodyBold,
       fontSize: FontSizes.xs,
     },
-    review: {
-      fontFamily: Fonts.body,
-      fontSize: FontSizes.xs,
-      color: theme.textSecondary,
-      fontStyle: 'italic',
-      lineHeight: 17,
-    },
   });
 }
 
@@ -238,9 +231,6 @@ export function FriendBookCard({ book }: FriendBookCardProps) {
           </View>
         )}
 
-        {book.review && (
-          <Text style={styles.review} numberOfLines={2}>💬 {book.review}</Text>
-        )}
       </View>
     </View>
   );

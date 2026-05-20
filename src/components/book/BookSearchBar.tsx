@@ -154,7 +154,7 @@ export function BookSearchBar({ onSelect }: BookSearchBarProps) {
 
       {results.length > 0 && (
         <View style={styles.dropdown}>
-          <ScrollView keyboardShouldPersistTaps="handled">
+          <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled={true}>
           {results.map((item, i) => (
             <View key={String(i)}>
               {i > 0 && <View style={styles.separator} />}

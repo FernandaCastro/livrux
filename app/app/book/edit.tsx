@@ -15,6 +15,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { parse, format, isValid } from 'date-fns';
+
+function maskDate(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -246,7 +253,7 @@ export default function EditBookScreen() {
                 label={t('book.dateCompleted')}
                 placeholder="DD/MM/YYYY"
                 value={value}
-                onChangeText={onChange}
+                onChangeText={(v) => onChange(maskDate(v))}
                 onBlur={onBlur}
                 keyboardType="number-pad"
                 error={errors.dateCompleted?.message}

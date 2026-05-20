@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "build:preview": "eas build --profile preview --platform android",
     "build:production": "eas build --profile production --platform android",
+    "build:local": "export $(grep -v '^#' .env | xargs) && eas build --profile production --platform android --local",
     "submit:production": "eas submit --profile production --platform android"
   },
   "dependencies": {

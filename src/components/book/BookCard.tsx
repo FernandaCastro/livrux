@@ -163,6 +163,7 @@ function createStyles(theme: ColorPalette) {
       fontFamily: Fonts.body,
       fontSize: FontSizes.xs,
       color: theme.textDisabled,
+      marginLeft: 'auto',
     },
   });
 }

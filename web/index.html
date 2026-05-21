@@ -257,6 +257,53 @@
       background: #f3f0ff;
     }
 
+    /* ───── TEST NOTICE ───── */
+    .hero-test-notice {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .35rem .9rem;
+      border-radius: 2rem;
+      background: rgba(34, 197, 94, .12);
+      border: 1.5px solid rgba(34, 197, 94, .35);
+      color: #16a34a;
+      font-size: .85rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      animation: slideUp .7s .25s both;
+    }
+
+    /* ───── TESTER SECTION ───── */
+    .tester {
+      padding: 5rem 1.5rem;
+      text-align: center;
+      background: linear-gradient(160deg, #ecfdf5 0%, #f0fdf4 100%);
+    }
+
+    .tester > p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto 1rem;
+      line-height: 1.6;
+    }
+
+    .tester-email-link {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--purple);
+      text-decoration: none;
+      border-bottom: 2px solid var(--purple2);
+      margin-bottom: 2rem;
+      transition: color .2s, border-color .2s;
+    }
+
+    .tester-email-link:hover {
+      color: var(--orange2);
+      border-color: var(--orange2);
+    }
+
     /* Floating emojis */
     .floaters {
       position: absolute;
@@ -629,14 +676,18 @@
           rewards.</span></h1>
       <p class="hero-sub" data-i18n="hero.subtitle">Livrux is the app that turns every book your child reads into coins
         they can spend on real-life treats. No screen time — pure reading magic.</p>
+      <div class="hero-test-notice">
+        <span>🤖</span>
+        <span data-i18n="hero.testNotice">Android only · Closed testing</span>
+      </div>
       <div class="hero-actions">
-        <a href="livrux://" class="btn btn-primary">
-          <span>🚀</span>
-          <span data-i18n="hero.cta">Get the app</span>
+        <a href="https://play.google.com/store/apps/details?id=com.livrux.app" class="btn btn-primary" target="_blank" rel="noopener">
+          <span>🤖</span>
+          <span data-i18n="hero.cta">Are you a tester? Download here</span>
         </a>
-        <a href="#features" class="btn btn-outline">
-          <span>✨</span>
-          <span data-i18n="hero.learnMore">Learn more</span>
+        <a href="#tester-section" class="btn btn-outline">
+          <span>✉️</span>
+          <span data-i18n="hero.joinTest">Join the test</span>
         </a>
       </div>
     </div>
@@ -727,13 +778,25 @@
       <a href="manual.html" class="how-manual-link" data-i18n="how.manual">📖 Read the full manual →</a>
     </section>
 
+    <!-- TESTER -->
+    <section id="tester-section" class="tester">
+      <h2 class="section-title" data-i18n="tester.title">Want to join the test?</h2>
+      <p data-i18n="tester.desc">Livrux is currently in closed testing for Android. To request access, send your name and the email linked to your Google account to:</p>
+      <a href="mailto:livrux@fecastro.com?subject=Livrux%20Tester%20Request&body=Name%3A%20%0AGoogle%20email%3A%20" class="tester-email-link">livrux@fecastro.com</a>
+      <br>
+      <a href="mailto:livrux@fecastro.com?subject=Livrux%20Tester%20Request&body=Name%3A%20%0AGoogle%20email%3A%20" class="btn btn-primary" style="margin-top:1.5rem;">
+        <span>✉️</span>
+        <span data-i18n="tester.btn">Request tester access</span>
+      </a>
+    </section>
+
     <!-- CTA -->
     <section class="cta">
       <h2 data-i18n="cta.title">Ready to start reading?</h2>
-      <p data-i18n="cta.subtitle">Join families already turning books into adventures with Livrux.</p>
-      <a href="livrux://" class="btn btn-primary" style="font-size:1.15rem;padding:1rem 2.2rem;">
+      <p data-i18n="cta.subtitle">Livrux is in closed testing for Android. Download the app and help us build the best reading experience for families.</p>
+      <a href="https://play.google.com/store/apps/details?id=com.livrux.app" class="btn btn-primary" style="font-size:1.15rem;padding:1rem 2.2rem;" target="_blank" rel="noopener">
         <img src="../assets/livrux.png" alt="Livrux Logo" style="width:40px;height:40px;">
-        <span data-i18n="cta.btn">Open Livrux</span>
+        <span data-i18n="cta.btn">Download on Android</span>
       </a>
     </section>
 
@@ -788,7 +851,9 @@
           'hero.title1': 'Books into',
           'hero.title2': 'real rewards.',
           'hero.subtitle': 'Livrux is the app that turns every book your child reads into coins they can spend on real-life treats. No screen time — pure reading magic.',
-          'hero.cta': 'Get the app',
+          'hero.testNotice': 'Android only · Closed testing',
+          'hero.cta': 'Are you a tester? Download here',
+          'hero.joinTest': 'Join the test',
           'hero.learnMore': 'Learn more',
           'features.title': 'Why kids love Livrux',
           'features.track.title': 'Log every book',
@@ -817,9 +882,12 @@
           'how.step3.title': 'Spend & celebrate',
           'how.step3.desc': 'Choose a real reward together and log the spend. Reading has never felt this good.',
           'how.manual': '📖 Read the full manual →',
+          'tester.title': 'Want to join the test?',
+          'tester.desc': 'Livrux is currently in closed testing for Android. To request access, send your name and the email linked to your Google account to:',
+          'tester.btn': 'Request tester access',
           'cta.title': 'Ready to start reading?',
-          'cta.subtitle': 'Join families already turning books into adventures with Livrux.',
-          'cta.btn': 'Open Livrux',
+          'cta.subtitle': 'Livrux is in closed testing for Android. Download the app and help us build the best reading experience for families.',
+          'cta.btn': 'Download on Android',
         },
         pt: {
           'welcome.title': 'E-mail confirmado! 🎉',
@@ -830,7 +898,9 @@
           'hero.title1': 'Livros viram',
           'hero.title2': 'recompensas reais.',
           'hero.subtitle': 'O Livrux transforma cada livro lido em moedas que as crianças podem gastar em recompensas do mundo real. Sem tempo de tela — pura magia da leitura.',
-          'hero.cta': 'Baixar o app',
+          'hero.testNotice': 'Somente Android · Teste fechado',
+          'hero.cta': 'É um testador? Baixe o app aqui',
+          'hero.joinTest': 'Quero testar',
           'hero.learnMore': 'Saiba mais',
           'features.title': 'Por que as crianças adoram o Livrux',
           'features.track.title': 'Registre cada livro',
@@ -859,9 +929,12 @@
           'how.step3.title': 'Gaste e comemore',
           'how.step3.desc': 'Escolham juntos uma recompensa e registrem o gasto. Ler nunca foi tão gostoso.',
           'how.manual': '📖 Leia o manual completo →',
+          'tester.title': 'Quer participar do teste?',
+          'tester.desc': 'O Livrux está em fase de testes fechado para Android. Para solicitar acesso, envie seu nome e o e-mail vinculado à sua conta Google para:',
+          'tester.btn': 'Solicitar acesso como testador',
           'cta.title': 'Pronto para começar a ler?',
-          'cta.subtitle': 'Junte-se às famílias que já transformam livros em aventuras com o Livrux.',
-          'cta.btn': 'Abrir o Livrux',
+          'cta.subtitle': 'O Livrux está em teste fechado para Android. Baixe o app e ajude a construir a melhor experiência de leitura para famílias.',
+          'cta.btn': 'Baixar no Android',
         },
         de: {
           'welcome.title': 'E-Mail bestätigt! 🎉',
@@ -872,7 +945,9 @@
           'hero.title1': 'Bücher werden zu',
           'hero.title2': 'echten Belohnungen.',
           'hero.subtitle': 'Livrux verwandelt jedes gelesene Buch in Münzen, die Kinder für echte Belohnungen ausgeben können. Keine Bildschirmzeit — nur pure Lesefreude.',
-          'hero.cta': 'App herunterladen',
+          'hero.testNotice': 'Nur Android · Geschlossener Test',
+          'hero.cta': 'Bist du ein Tester? Hier herunterladen',
+          'hero.joinTest': 'Am Test teilnehmen',
           'hero.learnMore': 'Mehr erfahren',
           'features.title': 'Warum Kinder Livrux lieben',
           'features.track.title': 'Jedes Buch erfassen',
@@ -901,9 +976,12 @@
           'how.step3.title': 'Ausgeben & feiern',
           'how.step3.desc': 'Wählt gemeinsam eine echte Belohnung aus und erfasst die Ausgabe. Lesen hat noch nie so viel Spaß gemacht.',
           'how.manual': '📖 Das vollständige Handbuch lesen →',
+          'tester.title': 'Möchtest du am Test teilnehmen?',
+          'tester.desc': 'Livrux befindet sich derzeit im geschlossenen Test für Android. Um Zugang anzufragen, sende deinen Namen und die mit deinem Google-Konto verknüpfte E-Mail-Adresse an:',
+          'tester.btn': 'Tester-Zugang anfragen',
           'cta.title': 'Bereit zum Lesen?',
-          'cta.subtitle': 'Schließe dich Familien an, die mit Livrux Bücher in Abenteuer verwandeln.',
-          'cta.btn': 'Livrux öffnen',
+          'cta.subtitle': 'Livrux befindet sich im geschlossenen Test für Android. Lade die App herunter und hilf uns, die beste Leseerfahrung für Familien zu gestalten.',
+          'cta.btn': 'Für Android herunterladen',
         },
       };
 

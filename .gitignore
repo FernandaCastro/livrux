@@ -53,3 +53,10 @@ google-play-service-account.json
 
 #idea
 .idea
+
+.notes
+
+#builds
+*.aab
+*.apk
+*.apks

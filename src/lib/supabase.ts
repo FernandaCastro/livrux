@@ -3,13 +3,14 @@ import { secureStoreAdapter } from './secureStoreAdapter';
 
 // These env vars are injected by Expo at build time.
 // Never commit real credentials — use a .env file (git-ignored).
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    '[Supabase] EXPO_PUBLIC_SUPABASE_URL or EXPO_PUBLIC_SUPABASE_ANON_KEY is not set. ' +
-      'Create a .env file at the project root with these values.'
+  throw new Error(
+    'Missing Supabase credentials. ' +
+      'Make sure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY are set in your .env file ' +
+      'and that you ran: export $(grep -v "^#" .env | xargs) before building.'
   );
 }
 
